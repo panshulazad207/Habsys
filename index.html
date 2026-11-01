@@ -1,0 +1,745 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Habsys</title>
+<meta name="theme-color" content="#030816">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Habsys">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" type="image/png" href="icon-192.png">
+<style>
+:root{
+  --bg0:#030816; --bg1:#071433;
+  --blue:#2f8bff; --blue2:#5cc8ff; --blue3:#1b4fd6;
+  --white:#f3f8ff; --muted:#8fa8d8; --dim:#4a5f8f;
+  --line:rgba(88,166,255,.55);
+  --panel-a:rgba(16,40,104,.55); --panel-b:rgba(8,20,58,.62);
+  --warn:#ff8da1;
+  --head:"Avenir Next Condensed","Avenir Next","SF Pro Display",system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --body:system-ui,-apple-system,"SF Pro Text","Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{background:var(--bg0)}
+body{
+  margin:0;min-height:100vh;color:var(--white);font-family:var(--body);font-size:16px;line-height:1.35;
+  background:
+    radial-gradient(1100px 560px at 50% -8%,rgba(47,139,255,.30),transparent 62%),
+    linear-gradient(180deg,#050d26 0%,#030816 65%);
+  background-attachment:fixed;
+  -webkit-user-select:none;user-select:none;-webkit-touch-callout:none;
+  overscroll-behavior-y:none;
+}
+body::before{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:linear-gradient(rgba(88,166,255,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(88,166,255,.07) 1px,transparent 1px);
+  background-size:44px 44px;
+  -webkit-mask-image:linear-gradient(180deg,#000,transparent 80%);mask-image:linear-gradient(180deg,#000,transparent 80%);
+}
+button,input,textarea{font:inherit;color:inherit;touch-action:manipulation}
+button{cursor:pointer;border:0;background:none;padding:0}
+input,textarea{-webkit-user-select:text;user-select:text}
+
+#app{position:relative;z-index:1;max-width:760px;margin:0 auto;padding:calc(env(safe-area-inset-top) + 14px) 16px calc(env(safe-area-inset-bottom) + 104px)}
+
+/* header */
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:4px 2px 18px}
+.brand{display:flex;align-items:center;gap:12px}
+.brand svg{width:38px;height:38px;filter:drop-shadow(0 0 8px rgba(92,200,255,.7))}
+.brand b{font-family:var(--head);font-weight:800;font-size:28px;letter-spacing:.32em;text-transform:uppercase;text-shadow:0 0 14px rgba(92,200,255,.65)}
+.top .date{font-family:var(--mono);font-size:12px;letter-spacing:.12em;color:var(--blue2);text-transform:uppercase;text-align:right}
+
+/* panels */
+.panel{
+  position:relative;border:1px solid var(--line);border-radius:6px;
+  background:linear-gradient(180deg,var(--panel-a),var(--panel-b));
+  box-shadow:0 0 0 1px rgba(47,139,255,.10) inset,0 0 24px rgba(47,139,255,.20);
+  padding:16px;
+}
+.panel::before,.panel::after{content:"";position:absolute;width:14px;height:14px;pointer-events:none}
+.panel::before{top:-2px;left:-2px;border-top:2px solid var(--white);border-left:2px solid var(--white)}
+.panel::after{bottom:-2px;right:-2px;border-bottom:2px solid var(--white);border-right:2px solid var(--white)}
+.tag{font-family:var(--mono);font-size:11px;letter-spacing:.22em;color:var(--blue2);text-transform:uppercase}
+h2.sec{font-family:var(--head);font-size:15px;letter-spacing:.3em;text-transform:uppercase;color:var(--blue2);margin:26px 2px 10px;font-weight:700;display:flex;align-items:center;gap:10px}
+h2.sec::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,var(--line),transparent)}
+
+/* player */
+.player{display:flex;align-items:center;gap:16px;margin-bottom:16px}
+.rank{width:64px;height:72px;flex:none;display:grid;place-items:center;
+  clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);
+  background:linear-gradient(160deg,var(--blue2),var(--blue3));
+  font-family:var(--head);font-weight:800;font-size:34px;text-shadow:0 0 10px rgba(255,255,255,.7)}
+.p-info{flex:1;min-width:0}
+.p-name{font-family:var(--head);font-weight:800;font-size:24px;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.p-sub{font-family:var(--mono);font-size:12px;letter-spacing:.14em;color:var(--muted);text-transform:uppercase;margin:2px 0 8px}
+.bar{height:10px;border:1px solid var(--line);background:rgba(3,8,22,.8);border-radius:2px;overflow:hidden}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--blue3),var(--blue2));box-shadow:0 0 12px var(--blue2);transition:width .5s ease}
+.xp-txt{font-family:var(--mono);font-size:11px;letter-spacing:.1em;color:var(--muted);margin-top:5px}
+.p-lv{text-align:center;flex:none}
+.p-lv small{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.2em;color:var(--blue2)}
+.p-lv b{font-family:var(--head);font-weight:800;font-size:40px;line-height:1;text-shadow:0 0 14px rgba(92,200,255,.7)}
+
+/* banner */
+.banner{display:flex;align-items:center;gap:12px;margin-bottom:16px;padding:12px 14px}
+.banner p{margin:0;flex:1;font-size:14px;color:var(--white)}
+
+/* habits */
+.habits{display:grid;gap:16px;grid-template-columns:minmax(0,1fr)}
+.panel{min-width:0}
+.h-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px}
+.h-name{font-family:var(--head);font-weight:800;font-size:23px;letter-spacing:.06em;text-transform:uppercase;text-align:left;color:var(--white);min-height:44px;padding:0;display:flex;align-items:center;gap:8px;min-width:0;flex:1}
+.h-name span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.h-name svg{width:15px;height:15px;flex:none;opacity:.55}
+.streak{text-align:right;flex:none}
+.streak small{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.2em;color:var(--blue2)}
+.streak b{font-family:var(--head);font-weight:800;font-size:32px;line-height:1}
+.week{display:grid;grid-template-columns:repeat(7,1fr);gap:8px}
+.col{display:flex;flex-direction:column;align-items:center;gap:6px;min-width:0}
+.dl{font-family:var(--mono);font-size:11px;letter-spacing:.1em;color:var(--muted)}
+.box{
+  width:100%;aspect-ratio:1/1;max-height:84px;display:grid;place-items:center;border-radius:5px;
+  border:1px solid rgba(88,166,255,.35);background:rgba(5,14,40,.75);color:var(--dim);
+  font-family:var(--mono);font-size:13px;transition:transform .12s,box-shadow .2s,background .2s;
+}
+.box.pre{opacity:.35}
+.box.future{border-style:dashed;opacity:.55}
+.box.open{cursor:pointer}
+.box.open:active{transform:scale(.92)}
+.box:not(.open){cursor:default;pointer-events:none}
+.box.today:not(.done){border-color:var(--white);color:var(--white);animation:pulse 2s ease-in-out infinite}
+.box.done{
+  background:linear-gradient(145deg,var(--blue2),var(--blue3));border-color:var(--white);color:var(--white);
+  box-shadow:0 0 14px rgba(92,200,255,.6),inset 0 0 10px rgba(255,255,255,.25);
+}
+.box .ck{width:58%;height:58%;filter:drop-shadow(0 0 4px rgba(255,255,255,.8))}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 rgba(243,248,255,0)}50%{box-shadow:0 0 14px rgba(243,248,255,.55)}}
+
+.quest{margin-top:14px;padding-top:12px;border-top:1px solid rgba(88,166,255,.25)}
+.q-row{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:7px}
+.q-lbl{font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:var(--blue2);text-transform:uppercase}
+.q-val{font-family:var(--mono);font-size:12px;letter-spacing:.08em;color:var(--white)}
+.pips{display:flex;gap:6px;margin-top:9px;align-items:center}
+.pip{width:14px;height:16px;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);background:rgba(88,166,255,.2)}
+.pip.on{background:linear-gradient(160deg,var(--blue2),var(--blue3));box-shadow:0 0 8px var(--blue2)}
+.pips span{font-family:var(--mono);font-size:11px;letter-spacing:.12em;color:var(--muted);margin-left:6px;text-transform:uppercase}
+
+.add{display:grid;place-items:center;min-height:108px;border-style:dashed;text-align:center;width:100%;color:var(--blue2);font-family:var(--head);font-weight:700;font-size:19px;letter-spacing:.2em;text-transform:uppercase}
+.add small{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--muted);margin-top:4px}
+.add.full{color:var(--muted);cursor:default}
+.empty{text-align:center;padding:28px 18px;margin-bottom:16px}
+.empty h3{font-family:var(--head);font-size:22px;letter-spacing:.14em;text-transform:uppercase;margin:6px 0 8px}
+.empty p{margin:0;color:var(--muted);font-size:15px}
+
+/* buttons */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:46px;padding:10px 18px;border-radius:5px;
+  font-family:var(--head);font-weight:800;font-size:16px;letter-spacing:.14em;text-transform:uppercase;
+  border:1px solid var(--blue2);color:var(--white);background:linear-gradient(180deg,rgba(47,139,255,.85),rgba(27,79,214,.9));
+  box-shadow:0 0 16px rgba(47,139,255,.45);
+}
+.btn:active{transform:scale(.97)}
+.btn.ghost{background:rgba(47,139,255,.08);box-shadow:none;border-color:var(--line)}
+.btn.danger{background:transparent;box-shadow:none;border-color:rgba(255,141,161,.6);color:var(--warn)}
+.btn.block{display:flex;width:100%}
+.btn.sm{min-height:38px;padding:6px 12px;font-size:14px}
+.btn.claim{width:100%;margin-top:14px;background:linear-gradient(180deg,#ffffff,#bfe3ff);color:#06205f;border-color:#fff;box-shadow:0 0 22px rgba(255,255,255,.7);animation:glow 1.6s ease-in-out infinite}
+@keyframes glow{0%,100%{box-shadow:0 0 12px rgba(255,255,255,.45)}50%{box-shadow:0 0 28px rgba(255,255,255,.9)}}
+
+/* vault + settings */
+.ladder{display:grid;gap:10px}
+.rung{display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;padding:14px}
+.rung .lv{width:52px;height:58px;display:grid;place-items:center;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);background:linear-gradient(160deg,var(--blue2),var(--blue3));font-family:var(--head);font-weight:800;font-size:22px}
+.rung h4{margin:0;font-family:var(--head);font-size:19px;letter-spacing:.1em;text-transform:uppercase}
+.rung .meta{font-family:var(--mono);font-size:11px;letter-spacing:.12em;color:var(--blue2);text-transform:uppercase;margin:2px 0 4px}
+.rung p{margin:0;font-size:14px;color:var(--muted)}
+.log{display:grid;gap:10px}
+.log-item{padding:14px}
+.log-item .row{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.log-item h4{margin:0;font-family:var(--head);font-size:18px;letter-spacing:.06em;text-transform:uppercase}
+.log-item .meta{font-family:var(--mono);font-size:11px;letter-spacing:.1em;color:var(--blue2);text-transform:uppercase;margin-top:3px}
+.log-item p{margin:8px 0 10px;font-size:15px}
+.enjoyed{color:var(--muted)}
+.note{color:var(--muted);font-size:14px;margin:0 0 12px}
+.field{display:block;margin-bottom:14px}
+.field span{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--blue2);text-transform:uppercase;margin-bottom:6px}
+.input{width:100%;min-height:48px;padding:10px 12px;border-radius:5px;border:1px solid var(--line);background:rgba(3,8,22,.85);color:var(--white);font-size:17px;outline:none}
+.input:focus{border-color:var(--white);box-shadow:0 0 14px rgba(92,200,255,.45)}
+textarea.input{min-height:96px;resize:none}
+.stack{display:grid;gap:10px}
+.kv{display:flex;justify-content:space-between;gap:12px;font-size:14px;padding:8px 0;border-bottom:1px solid rgba(88,166,255,.18)}
+.kv:last-of-type{border-bottom:0}
+.kv b{font-family:var(--mono);font-weight:600;font-size:13px;letter-spacing:.06em;text-align:right}
+
+/* tab bar */
+.tabs{position:fixed;left:0;right:0;bottom:0;z-index:20;padding:8px 12px calc(env(safe-area-inset-bottom) + 8px);background:linear-gradient(180deg,rgba(3,8,22,0),rgba(3,8,22,.92) 35%)}
+.tabs .in{max-width:520px;margin:0 auto;display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:6px;border:1px solid var(--line);border-radius:8px;background:rgba(6,16,46,.92);box-shadow:0 0 22px rgba(47,139,255,.3);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.tab{display:flex;flex-direction:column;align-items:center;gap:3px;padding:7px 4px;border-radius:5px;color:var(--muted);font-family:var(--head);font-weight:700;font-size:12px;letter-spacing:.2em;text-transform:uppercase}
+.tab svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linejoin:round;stroke-linecap:round}
+.tab.on{color:var(--white);background:linear-gradient(180deg,rgba(47,139,255,.35),rgba(47,139,255,.12));box-shadow:0 0 14px rgba(92,200,255,.4) inset}
+.tab.on svg{filter:drop-shadow(0 0 6px var(--blue2))}
+
+/* modal */
+#overlay{position:fixed;inset:0;z-index:50;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(2,6,20,.8);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);overflow-y:auto}
+#overlay.show{display:flex}
+.win{width:100%;max-width:500px;margin:auto;animation:pop .22s ease-out}
+@keyframes pop{from{transform:scale(.94);opacity:0}to{transform:none;opacity:1}}
+.win .wtag{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.win .wtag::before{content:"";width:8px;height:8px;background:var(--blue2);box-shadow:0 0 10px var(--blue2)}
+.win h3{font-family:var(--head);font-weight:800;font-size:28px;letter-spacing:.12em;text-transform:uppercase;margin:0 0 6px;text-shadow:0 0 14px rgba(92,200,255,.6)}
+.win .sub{font-family:var(--mono);font-size:13px;letter-spacing:.12em;color:var(--blue2);text-transform:uppercase;margin:0 0 14px}
+.win p{margin:0 0 14px;color:var(--white);font-size:16px}
+.win .reward{border:1px solid var(--line);background:rgba(47,139,255,.1);padding:12px 14px;border-radius:5px;margin-bottom:16px}
+.win .reward b{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--blue2);text-transform:uppercase;margin-bottom:4px;font-weight:600}
+.win .actions{display:grid;gap:10px}
+.win .actions.two{grid-template-columns:1fr 1fr}
+
+#toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 96px);transform:translateX(-50%) translateY(20px);z-index:60;opacity:0;pointer-events:none;transition:.25s;max-width:calc(100% - 32px)}
+#toast.show{opacity:1;transform:translateX(-50%)}
+#toast div{padding:10px 16px;border:1px solid var(--line);background:rgba(6,16,46,.96);border-radius:5px;font-family:var(--mono);font-size:13px;letter-spacing:.06em;box-shadow:0 0 18px rgba(47,139,255,.45)}
+
+@media (min-width:700px){
+  #app{padding-left:24px;padding-right:24px}
+  .box{font-size:15px}
+  .h-name{font-size:25px}
+}
+@media (min-width:1000px){
+  #app{max-width:1080px}
+  .habits{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .ladder{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .log{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (max-width:420px){
+  .brand b{font-size:23px;letter-spacing:.24em}
+  .week{gap:5px}
+  .rung{grid-template-columns:auto 1fr}
+  .rung .btn{grid-column:1/-1}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div id="app">
+  <header class="top">
+    <div class="brand">
+      <svg viewBox="0 0 40 40" aria-hidden="true"><polygon points="20,3 35,11.5 35,28.5 20,37 5,28.5 5,11.5" fill="rgba(47,139,255,.2)" stroke="#f3f8ff" stroke-width="2"/><path d="M14 12v16M26 12v16M14 20h12" stroke="#f3f8ff" stroke-width="3" stroke-linecap="square" fill="none"/></svg>
+      <b>Habsys</b>
+    </div>
+    <div class="date" id="today-label"></div>
+  </header>
+  <main id="view"></main>
+</div>
+
+<nav class="tabs" aria-label="Main">
+  <div class="in">
+    <button class="tab" data-action="tab" data-tab="habits" aria-label="Habits">
+      <svg viewBox="0 0 24 24"><rect x="3" y="4" width="5" height="5" rx="1"/><rect x="3" y="15" width="5" height="5" rx="1"/><path d="M12 6.5h9M12 17.5h9"/></svg>Habits
+    </button>
+    <button class="tab" data-action="tab" data-tab="vault" aria-label="Rewards vault">
+      <svg viewBox="0 0 24 24"><path d="M12 3l8 6-8 12L4 9z"/><path d="M4 9h16"/></svg>Vault
+    </button>
+    <button class="tab" data-action="tab" data-tab="system" aria-label="System settings">
+      <svg viewBox="0 0 24 24"><path d="M12 2.5l8 4.5v10l-8 4.5-8-4.5V7z"/><circle cx="12" cy="12" r="3"/></svg>System
+    </button>
+  </div>
+</nav>
+
+<div id="overlay" role="dialog" aria-modal="true"></div>
+<div id="toast" role="status"><div></div></div>
+<input type="file" id="restoreFile" accept=".json,application/json" hidden>
+
+<script>
+(() => {
+'use strict';
+
+/* ============ constants ============ */
+const APP_VERSION = '1.0.0';
+const MAX_HABITS = 5;
+const TIERS = [
+  {n:1, days:2,  xp:25,  title:'Awakened',    reward:'A small treat: your favourite drink or snack'},
+  {n:2, days:5,  xp:60,  title:'Disciplined', reward:'30 minutes of guilt-free fun'},
+  {n:3, days:10, xp:120, title:'Resolute',    reward:'A movie night or a meal you love'},
+  {n:4, days:15, xp:200, title:'Elite',       reward:'Buy yourself something small you have been wanting'},
+  {n:5, days:20, xp:300, title:'Sovereign',   reward:'A big reward you have earned: plan something special'}
+];
+const RANKS = [{min:1,l:'E'},{min:3,l:'D'},{min:5,l:'C'},{min:7,l:'B'},{min:9,l:'A'},{min:11,l:'S'}];
+const DAY_LETTERS = 'MTWTFSS';
+const DB_NAME = 'habsys', STORE = 'kv', DB_KEY = 'state', LS_KEY = 'habsys_state_v1';
+const CHECK = '<svg class="ck" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const PENCIL = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20l1-5L16.5 3.5l4 4L9 19z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>';
+
+/* ============ helpers ============ */
+const $ = s => document.querySelector(s);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const pad = n => String(n).padStart(2, '0');
+const dkey = d => d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+const addDays = (d, n) => new Date(d.getFullYear(), d.getMonth(), d.getDate() + n);
+const parseKey = k => { const p = k.split('-').map(Number); return new Date(p[0], p[1] - 1, p[2]); };
+const uid = () => 'h' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+const fmtDate = iso => { try { return new Date(iso).toLocaleDateString(undefined, {day:'numeric', month:'short', year:'numeric'}); } catch (e) { return ''; } };
+function weekDays() {
+  const t = new Date(), dow = (t.getDay() + 6) % 7, mon = addDays(t, -dow);
+  return Array.from({length: 7}, (_, i) => addDays(mon, i));
+}
+
+/* ============ state + storage ============ */
+function defaultState() {
+  return { v:1, player:{name:'Player', xp:0}, habits:[], rewards:[], rewardText:{}, lastBackup:null, updatedAt:0 };
+}
+function validState(s) { return s && typeof s === 'object' && Array.isArray(s.habits); }
+function normalize(raw) {
+  const s = defaultState();
+  if (!validState(raw)) return s;
+  const p = raw.player || {};
+  s.player.name = String(p.name || 'Player').trim().slice(0, 24) || 'Player';
+  s.player.xp = Math.max(0, Math.floor(Number(p.xp) || 0));
+  s.habits = raw.habits.slice(0, MAX_HABITS).map(h => {
+    const done = {};
+    if (h && h.done && typeof h.done === 'object') {
+      for (const k of Object.keys(h.done)) if (/^\d{4}-\d{2}-\d{2}$/.test(k) && h.done[k]) done[k] = 1;
+    }
+    return {
+      id: String((h && h.id) || uid()),
+      name: String((h && h.name) || 'Habit').trim().slice(0, 30) || 'Habit',
+      created: /^\d{4}-\d{2}-\d{2}$/.test(h && h.created) ? h.created : dkey(new Date()),
+      done: done,
+      claimed: Math.min(TIERS.length, Math.max(0, Math.floor(Number(h && h.claimed) || 0)))
+    };
+  });
+  s.rewards = (Array.isArray(raw.rewards) ? raw.rewards : []).slice(0, 500).map(r => ({
+    id: String(r.id || uid()), habitId: String(r.habitId || ''), habitName: String(r.habitName || 'Habit').slice(0, 30),
+    tier: Math.min(TIERS.length, Math.max(1, Math.floor(Number(r.tier) || 1))), title: String(r.title || '').slice(0, 30),
+    xp: Math.max(0, Math.floor(Number(r.xp) || 0)), text: String(r.text || '').slice(0, 160),
+    at: String(r.at || ''), enjoyed: !!r.enjoyed
+  }));
+  const rt = raw.rewardText && typeof raw.rewardText === 'object' ? raw.rewardText : {};
+  for (const t of TIERS) if (typeof rt[t.n] === 'string' && rt[t.n].trim()) s.rewardText[t.n] = rt[t.n].trim().slice(0, 160);
+  s.lastBackup = typeof raw.lastBackup === 'string' ? raw.lastBackup : null;
+  s.updatedAt = Number(raw.updatedAt) || 0;
+  return s;
+}
+
+let S = defaultState();
+let storageNote = '';
+let persistState = 'unknown'; // 'granted' | 'denied' | 'unsupported' | 'unknown'
+let dbPromise = null;
+
+function idb() {
+  if (dbPromise) return dbPromise;
+  dbPromise = new Promise((res, rej) => {
+    if (!window.indexedDB) return rej(new Error('IndexedDB unavailable'));
+    const r = indexedDB.open(DB_NAME, 1);
+    r.onupgradeneeded = () => { r.result.createObjectStore(STORE); };
+    r.onsuccess = () => res(r.result);
+    r.onerror = () => rej(r.error);
+    r.onblocked = () => rej(new Error('IndexedDB blocked'));
+  });
+  dbPromise.catch(() => { dbPromise = null; });
+  return dbPromise;
+}
+async function idbGet(k) {
+  const db = await idb();
+  return new Promise((res, rej) => { const rq = db.transaction(STORE, 'readonly').objectStore(STORE).get(k); rq.onsuccess = () => res(rq.result); rq.onerror = () => rej(rq.error); });
+}
+async function idbSet(k, v) {
+  const db = await idb();
+  return new Promise((res, rej) => { const tx = db.transaction(STORE, 'readwrite'); tx.objectStore(STORE).put(v, k); tx.oncomplete = () => res(); tx.onerror = () => rej(tx.error); tx.onabort = () => rej(tx.error); });
+}
+async function loadState() {
+  let a = null, b = null;
+  try { a = await idbGet(DB_KEY); } catch (e) {}
+  try { const t = localStorage.getItem(LS_KEY); if (t) b = JSON.parse(t); } catch (e) {}
+  const best = [a, b].filter(validState).sort((x, y) => (y.updatedAt || 0) - (x.updatedAt || 0))[0];
+  return best ? normalize(best) : defaultState();
+}
+function save() {
+  S.updatedAt = Date.now();
+  const snap = JSON.parse(JSON.stringify(S));
+  try { localStorage.setItem(LS_KEY, JSON.stringify(snap)); } catch (e) {}
+  idbSet(DB_KEY, snap).then(() => { storageNote = ''; }).catch(() => { storageNote = 'Primary storage unavailable: using backup copy only.'; });
+}
+async function askPersist() {
+  try {
+    if (navigator.storage && navigator.storage.persisted) {
+      if (await navigator.storage.persisted()) { persistState = 'granted'; return; }
+      if (navigator.storage.persist) persistState = (await navigator.storage.persist()) ? 'granted' : 'denied';
+      else persistState = 'unsupported';
+    } else persistState = 'unsupported';
+  } catch (e) { persistState = 'unsupported'; }
+  if (ui.tab === 'system') render();
+}
+
+/* ============ game logic ============ */
+function currentStreak(h) {
+  let d = new Date();
+  if (!h.done[dkey(d)]) d = addDays(d, -1);
+  let n = 0;
+  while (h.done[dkey(d)]) { n++; d = addDays(d, -1); }
+  return n;
+}
+function longestStreak(h) {
+  const ks = Object.keys(h.done).sort();
+  let best = 0, run = 0, prev = null;
+  for (const k of ks) {
+    if (prev && dkey(addDays(prev, 1)) === k) run++; else run = 1;
+    if (run > best) best = run;
+    prev = parseKey(k);
+  }
+  return best;
+}
+function claimableCount(h) {
+  const L = longestStreak(h);
+  return TIERS.filter(t => t.n > h.claimed && L >= t.days).length;
+}
+const levelOf = xp => Math.floor(Math.sqrt(xp / 25)) + 1;
+const lvlStart = L => 25 * (L - 1) * (L - 1);
+const rankOf = L => { let r = 'E'; for (const x of RANKS) if (L >= x.min) r = x.l; return r; };
+const rewardTextFor = t => S.rewardText[t.n] || t.reward;
+const findHabit = id => S.habits.find(h => h.id === id);
+function backupDue() {
+  if (!S.habits.length) return false;
+  let ref;
+  if (S.lastBackup) ref = new Date(S.lastBackup);
+  else ref = parseKey(S.habits.map(h => h.created).sort()[0]);
+  if (isNaN(ref)) return false;
+  return (Date.now() - ref.getTime()) / 86400000 >= 7;
+}
+
+/* ============ UI state + render ============ */
+const ui = { tab: 'habits', day: dkey(new Date()) };
+
+function render() {
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('on', t.dataset.tab === ui.tab));
+  const now = new Date();
+  $('#today-label').innerHTML = esc(now.toLocaleDateString(undefined, {weekday:'short'})) + '<br>' + esc(now.toLocaleDateString(undefined, {day:'2-digit', month:'short'}));
+  $('#view').innerHTML = ui.tab === 'habits' ? viewHabits() : ui.tab === 'vault' ? viewVault() : viewSystem();
+}
+
+function viewHabits() {
+  const L = levelOf(S.player.xp), a = lvlStart(L), b = lvlStart(L + 1);
+  const pct = Math.round((S.player.xp - a) / (b - a) * 100);
+  const top = Math.max(0, ...S.habits.map(h => h.claimed));
+  const title = top ? TIERS[top - 1].title : 'Newcomer';
+  let html = `
+  <section class="panel player">
+    <div class="rank">${rankOf(L)}</div>
+    <div class="p-info">
+      <div class="p-name">${esc(S.player.name)}</div>
+      <div class="p-sub">Title · ${esc(title)}</div>
+      <div class="bar"><i style="width:${pct}%"></i></div>
+      <div class="xp-txt">XP ${S.player.xp} / ${b}</div>
+    </div>
+    <div class="p-lv"><small>LV</small><b>${L}</b></div>
+  </section>`;
+  if (backupDue()) {
+    html += `<section class="panel banner"><p><span class="tag">[ System ]</span><br>It has been a while since your last backup. Save one so your progress is safe.</p><button class="btn sm" data-action="backup">Back up</button></section>`;
+  }
+  if (!S.habits.length) {
+    html += `<section class="panel empty"><div class="tag">[ System ]</div><h3>Welcome, ${esc(S.player.name)}</h3><p>You have no habits yet. Add your first one (up to ${MAX_HABITS}) and start your first quest.</p></section>`;
+  }
+  html += '<div class="habits">' + S.habits.map(habitCard).join('');
+  if (S.habits.length < MAX_HABITS) {
+    html += `<button class="panel add" data-action="add"><div>+ New habit<small>${S.habits.length} / ${MAX_HABITS} slots used</small></div></button>`;
+  } else {
+    html += `<div class="panel add full"><div>All slots in use<small>${MAX_HABITS} / ${MAX_HABITS} habits</small></div></div>`;
+  }
+  html += '</div>';
+  return html;
+}
+
+function habitCard(h) {
+  const tk = dkey(new Date()), yk = dkey(addDays(new Date(), -1));
+  const cur = currentStreak(h), cl = claimableCount(h), next = TIERS[h.claimed];
+  const boxes = weekDays().map((d, i) => {
+    const k = dkey(d), done = !!h.done[k], future = k > tk, open = (k === tk || k === yk);
+    const cls = ['box'];
+    if (done) cls.push('done');
+    if (k === tk) cls.push('today');
+    if (future) cls.push('future');
+    if (open) cls.push('open');
+    if (k < h.created && !done) cls.push('pre');
+    const label = (open ? (done ? 'Unmark ' : 'Mark ') : '') + d.toDateString() + (done ? ', done' : '');
+    return `<div class="col"><span class="dl">${DAY_LETTERS[i]}</span><button class="${cls.join(' ')}" data-action="tick" data-id="${esc(h.id)}" data-day="${k}" aria-label="${esc(label)}" aria-pressed="${done}">${done ? CHECK : '<span>' + d.getDate() + '</span>'}</button></div>`;
+  }).join('');
+  let quest;
+  if (cl > 0) {
+    quest = `<button class="btn claim" data-action="claim" data-id="${esc(h.id)}">Quest complete · Claim reward</button>`;
+  } else if (next) {
+    const shown = Math.min(cur, next.days), p = Math.round(shown / next.days * 100);
+    quest = `<div class="q-row"><span class="q-lbl">Next quest · Lv.${next.n} · ${next.days}-day streak</span><span class="q-val">${shown}/${next.days}</span></div><div class="bar"><i style="width:${p}%"></i></div>`;
+  } else {
+    quest = `<div class="q-row"><span class="q-lbl">All quests cleared · More coming soon</span></div>`;
+  }
+  const pips = TIERS.map(t => `<i class="pip ${t.n <= h.claimed ? 'on' : ''}"></i>`).join('');
+  return `
+  <section class="panel habit">
+    <div class="h-head">
+      <button class="h-name" data-action="edit" data-id="${esc(h.id)}" aria-label="Edit ${esc(h.name)}"><span>${esc(h.name)}</span>${PENCIL}</button>
+      <div class="streak"><small>STREAK</small><b>${cur}</b></div>
+    </div>
+    <div class="week">${boxes}</div>
+    <div class="quest">${quest}<div class="pips">${pips}<span>${h.claimed}/${TIERS.length} cleared</span></div></div>
+  </section>`;
+}
+
+function viewVault() {
+  let html = `<h2 class="sec">Quest ladder</h2><p class="note">Rewards are earned by keeping one habit going for consecutive days. Tap a reward to change it into something you really want.</p><div class="ladder">`;
+  html += TIERS.map(t => `
+    <div class="panel rung">
+      <div class="lv">${t.n}</div>
+      <div><h4>${esc(t.title)}</h4><div class="meta">${t.days} days in a row · +${t.xp} XP</div><p>${esc(rewardTextFor(t))}</p></div>
+      <button class="btn ghost sm" data-action="editreward" data-tier="${t.n}">Edit</button>
+    </div>`).join('');
+  html += `</div><h2 class="sec">Reward log</h2>`;
+  if (!S.rewards.length) {
+    html += `<section class="panel empty"><div class="tag">[ System ]</div><p>No rewards claimed yet. Keep a habit going to clear your first quest.</p></section>`;
+  } else {
+    html += '<div class="log">' + S.rewards.map(r => `
+      <div class="panel log-item">
+        <div class="row"><h4>${esc(r.title)} · Lv.${r.tier}</h4><span class="tag">+${r.xp} XP</span></div>
+        <div class="meta">${esc(r.habitName)} · ${esc(fmtDate(r.at))}</div>
+        <p>${esc(r.text)}</p>
+        <button class="btn ${r.enjoyed ? 'ghost' : ''} sm" data-action="enjoy" data-id="${esc(r.id)}">${r.enjoyed ? 'Enjoyed ✓' : 'Mark as enjoyed'}</button>
+      </div>`).join('') + '</div>';
+  }
+  return html;
+}
+
+function viewSystem() {
+  const lb = S.lastBackup ? fmtDate(S.lastBackup) : 'Never';
+  const ps = persistState === 'granted' ? 'Protected' : persistState === 'denied' ? 'Standard' : persistState === 'unsupported' ? 'Not available' : 'Checking…';
+  return `
+  <h2 class="sec">Player</h2>
+  <section class="panel">
+    <label class="field"><span>Player name</span><input class="input" id="pname" maxlength="24" value="${esc(S.player.name)}" autocomplete="off"></label>
+  </section>
+
+  <h2 class="sec">Data safety</h2>
+  <section class="panel">
+    <p class="note">Your data lives only on this device. A backup file lets you restore everything if the app's data is ever cleared.</p>
+    <div class="kv"><span>Last backup</span><b>${esc(lb)}</b></div>
+    <div class="kv"><span>Storage protection</span><b>${esc(ps)}</b></div>
+    ${storageNote ? `<div class="kv"><span>Warning</span><b>${esc(storageNote)}</b></div>` : ''}
+    <div class="stack" style="margin-top:14px">
+      <button class="btn block" data-action="backup">Save backup file</button>
+      <button class="btn ghost block" data-action="restore">Restore from backup</button>
+    </div>
+  </section>
+
+  <h2 class="sec">About</h2>
+  <section class="panel">
+    <div class="kv"><span>App</span><b>HABSYS</b></div>
+    <div class="kv"><span>Version</span><b>${APP_VERSION}</b></div>
+    <div class="stack" style="margin-top:14px"><button class="btn danger block" data-action="erase">Erase all data</button></div>
+  </section>`;
+}
+
+/* ============ modals + toast ============ */
+function showModal(inner) {
+  const o = $('#overlay');
+  o.innerHTML = `<div class="panel win">${inner}</div>`;
+  o.classList.add('show');
+  const f = o.querySelector('input,textarea');
+  if (f) setTimeout(() => { try { f.focus(); } catch (e) {} }, 60);
+}
+function closeModal() { const o = $('#overlay'); o.classList.remove('show'); o.innerHTML = ''; }
+let toastTimer;
+function toast(msg) {
+  const t = $('#toast'); t.firstElementChild.textContent = msg; t.classList.add('show');
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('show'), 2600);
+}
+
+function openHabitForm(id) {
+  const h = id ? findHabit(id) : null;
+  showModal(`
+    <div class="wtag"><span class="tag">[ System ]</span></div>
+    <h3>${h ? 'Edit habit' : 'New habit'}</h3>
+    <p class="sub">${h ? 'Rename or remove' : 'Slot ' + (S.habits.length + 1) + ' of ' + MAX_HABITS}</p>
+    <label class="field"><span>Habit name</span><input class="input" id="hname" maxlength="30" placeholder="e.g. Read 10 pages" value="${h ? esc(h.name) : ''}" autocomplete="off"></label>
+    <div class="actions">
+      <button class="btn" data-action="savehabit" data-id="${h ? esc(h.id) : ''}">Save</button>
+      ${h ? `<button class="btn danger" data-action="delask" data-id="${esc(h.id)}">Delete habit</button>` : ''}
+      <button class="btn ghost" data-action="close">Cancel</button>
+    </div>`);
+}
+function openClaim(id) {
+  const h = findHabit(id); if (!h) return;
+  const t = TIERS[h.claimed];
+  if (!t || longestStreak(h) < t.days) return;
+  showModal(`
+    <div class="wtag"><span class="tag">[ System ]</span></div>
+    <h3>Quest complete</h3>
+    <p class="sub">${esc(h.name)} · ${t.days}-day streak</p>
+    <div class="reward"><b>You receive</b>+${t.xp} XP · Title: ${esc(t.title)}</div>
+    <div class="reward"><b>Your reward</b>${esc(rewardTextFor(t))}</div>
+    <div class="actions"><button class="btn" data-action="doclaim" data-id="${esc(h.id)}">Claim reward</button><button class="btn ghost" data-action="close">Later</button></div>`);
+}
+function doClaim(id) {
+  const h = findHabit(id); if (!h) return;
+  const t = TIERS[h.claimed];
+  if (!t || longestStreak(h) < t.days) { closeModal(); return; }
+  const oldL = levelOf(S.player.xp);
+  h.claimed += 1;
+  S.player.xp += t.xp;
+  S.rewards.unshift({id: uid(), habitId: h.id, habitName: h.name, tier: t.n, title: t.title, xp: t.xp, text: rewardTextFor(t), at: new Date().toISOString(), enjoyed: false});
+  save();
+  const newL = levelOf(S.player.xp);
+  render();
+  const more = claimableCount(h) > 0;
+  showModal(`
+    <div class="wtag"><span class="tag">[ System ]</span></div>
+    <h3>Reward claimed</h3>
+    <p class="sub">+${t.xp} XP · ${esc(t.title)}</p>
+    ${newL > oldL ? `<div class="reward"><b>Level up</b>LV ${oldL} → LV ${newL} · Rank ${rankOf(newL)}</div>` : ''}
+    <div class="reward"><b>Go enjoy it</b>${esc(S.rewards[0].text)}</div>
+    <p style="color:var(--muted);font-size:14px">Mark it as enjoyed in the Vault once you have had it.</p>
+    <div class="actions"><button class="btn" data-action="afterclaim" data-id="${esc(h.id)}">${more ? 'Next reward' : 'Continue'}</button></div>`);
+}
+function openRewardEdit(n) {
+  const t = TIERS.find(x => x.n === n); if (!t) return;
+  showModal(`
+    <div class="wtag"><span class="tag">[ System ]</span></div>
+    <h3>Lv.${t.n} reward</h3>
+    <p class="sub">${esc(t.title)} · ${t.days} days in a row</p>
+    <label class="field"><span>Your real-life reward</span><textarea class="input" id="rtext" maxlength="160">${esc(rewardTextFor(t))}</textarea></label>
+    <div class="actions"><button class="btn" data-action="saveReward" data-tier="${t.n}">Save</button><button class="btn ghost" data-action="resetReward" data-tier="${t.n}">Reset to default</button><button class="btn ghost" data-action="close">Cancel</button></div>`);
+}
+function confirmBox(title, text, action, label, data) {
+  showModal(`
+    <div class="wtag"><span class="tag">[ System ]</span></div>
+    <h3>${esc(title)}</h3>
+    <p>${text}</p>
+    <div class="actions two"><button class="btn danger" data-action="${action}" ${data || ''}>${esc(label)}</button><button class="btn ghost" data-action="close">Cancel</button></div>`);
+}
+
+/* ============ backup / restore ============ */
+async function doBackup() {
+  const payload = {app:'habsys', backupVersion:1, appVersion:APP_VERSION, exportedAt:new Date().toISOString(), data:S};
+  const name = 'habsys-backup-' + dkey(new Date()) + '.json';
+  const text = JSON.stringify(payload, null, 2);
+  let saved = false;
+  try {
+    const file = new File([text], name, {type:'application/json'});
+    if (navigator.canShare && navigator.canShare({files:[file]}) && navigator.share) {
+      await navigator.share({files:[file], title:'Habsys backup'});
+      saved = true;
+    }
+  } catch (e) {
+    if (e && e.name === 'AbortError') return; // user cancelled the share sheet
+  }
+  if (!saved) {
+    const url = URL.createObjectURL(new Blob([text], {type:'application/json'}));
+    const a = document.createElement('a'); a.href = url; a.download = name;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 4000);
+    saved = true;
+  }
+  if (saved) { S.lastBackup = new Date().toISOString(); save(); toast('Backup created. Keep the file safe.'); render(); }
+}
+let pendingRestore = null;
+function handleRestoreFile(file) {
+  if (!file) return;
+  const r = new FileReader();
+  r.onload = () => {
+    try {
+      const j = JSON.parse(String(r.result));
+      if (!j || j.app !== 'habsys' || !validState(j.data)) throw new Error('bad');
+      pendingRestore = normalize(j.data);
+      const n = pendingRestore.habits.length;
+      confirmBox('Restore backup?',
+        `This backup has <b>${n} habit${n === 1 ? '' : 's'}</b> and <b>${pendingRestore.player.xp} XP</b>` + (j.exportedAt ? ` (saved ${esc(fmtDate(j.exportedAt))})` : '') + `. It will <b>replace</b> what is on this device now.`,
+        'dorestore', 'Restore');
+    } catch (e) { toast('That file is not a Habsys backup.'); }
+  };
+  r.onerror = () => toast('Could not read that file.');
+  r.readAsText(file);
+}
+
+/* ============ actions ============ */
+function toggleDay(id, k) {
+  const h = findHabit(id); if (!h) return;
+  const tk = dkey(new Date()), yk = dkey(addDays(new Date(), -1));
+  if (k !== tk && k !== yk) return;
+  const before = claimableCount(h);
+  if (h.done[k]) delete h.done[k]; else h.done[k] = 1;
+  save(); render();
+  if (claimableCount(h) > before) openClaim(id);
+}
+
+const actions = {
+  tab: el => { ui.tab = el.dataset.tab; render(); window.scrollTo(0, 0); },
+  tick: el => toggleDay(el.dataset.id, el.dataset.day),
+  add: () => { if (S.habits.length >= MAX_HABITS) return; openHabitForm(null); },
+  edit: el => openHabitForm(el.dataset.id),
+  close: closeModal,
+  savehabit: el => {
+    const name = ($('#hname').value || '').trim().slice(0, 30);
+    if (!name) { toast('Give your habit a name.'); return; }
+    const id = el.dataset.id;
+    if (id) { const h = findHabit(id); if (h) h.name = name; }
+    else { if (S.habits.length >= MAX_HABITS) return; S.habits.push({id: uid(), name, created: dkey(new Date()), done: {}, claimed: 0}); askPersist(); }
+    save(); closeModal(); render();
+  },
+  delask: el => { const h = findHabit(el.dataset.id); if (h) confirmBox('Delete habit?', `<b>${esc(h.name)}</b> and its history will be removed. Rewards and XP you already earned stay.`, 'delete', 'Delete', `data-id="${esc(h.id)}"`); },
+  delete: el => { S.habits = S.habits.filter(h => h.id !== el.dataset.id); save(); closeModal(); render(); },
+  claim: el => openClaim(el.dataset.id),
+  doclaim: el => doClaim(el.dataset.id),
+  afterclaim: el => { closeModal(); const h = findHabit(el.dataset.id); if (h && claimableCount(h) > 0) openClaim(h.id); },
+  editreward: el => openRewardEdit(Number(el.dataset.tier)),
+  saveReward: el => { const v = ($('#rtext').value || '').trim().slice(0, 160); const n = Number(el.dataset.tier); if (v) S.rewardText[n] = v; else delete S.rewardText[n]; save(); closeModal(); render(); },
+  resetReward: el => { delete S.rewardText[Number(el.dataset.tier)]; save(); closeModal(); render(); },
+  enjoy: el => { const r = S.rewards.find(x => x.id === el.dataset.id); if (r) { r.enjoyed = !r.enjoyed; save(); render(); } },
+  backup: doBackup,
+  restore: () => { const f = $('#restoreFile'); f.value = ''; f.click(); },
+  dorestore: () => {
+    if (!pendingRestore) return;
+    S = pendingRestore; pendingRestore = null; save(); closeModal(); ui.tab = 'habits'; render(); toast('Backup restored.');
+  },
+  erase: () => confirmBox('Erase everything?', 'All habits, XP and rewards on this device will be deleted. <b>Save a backup first</b> if you may want them back.', 'doerase', 'Erase all'),
+  doerase: () => { S = defaultState(); save(); closeModal(); ui.tab = 'habits'; render(); toast('All data erased.'); }
+};
+
+document.addEventListener('click', e => {
+  const el = e.target.closest('[data-action]');
+  if (!el) {
+    if (e.target.id === 'overlay') closeModal();
+    return;
+  }
+  const fn = actions[el.dataset.action];
+  if (fn) fn(el);
+});
+document.addEventListener('change', e => {
+  if (e.target.id === 'pname') { S.player.name = (e.target.value || '').trim().slice(0, 24) || 'Player'; save(); toast('Name saved.'); }
+  if (e.target.id === 'restoreFile') handleRestoreFile(e.target.files && e.target.files[0]);
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeModal();
+  if (e.key === 'Enter' && e.target.id === 'hname') { const b = document.querySelector('[data-action="savehabit"]'); if (b) b.click(); }
+});
+
+/* new day / back to app => refresh */
+function refreshIfNewDay() {
+  const k = dkey(new Date());
+  if (k !== ui.day) { ui.day = k; render(); }
+}
+document.addEventListener('visibilitychange', () => { if (!document.hidden) { refreshIfNewDay(); render(); } });
+setInterval(refreshIfNewDay, 60000);
+
+/* ============ start ============ */
+(async function init() {
+  S = await loadState();
+  save(); // writes to both stores so they stay in sync
+  render();
+  askPersist();
+  if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  }
+})();
+})();
+</script>
+</body>
+</html>
