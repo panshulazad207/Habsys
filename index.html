@@ -80,6 +80,8 @@ h2.sec::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,var(
 .bar{height:10px;border:1px solid var(--line);background:rgba(3,8,22,.8);border-radius:2px;overflow:hidden}
 .bar i{display:block;height:100%;background:linear-gradient(90deg,var(--blue3),var(--blue2));box-shadow:0 0 12px var(--blue2);transition:width .5s ease}
 .xp-txt{font-family:var(--mono);font-size:11px;letter-spacing:.1em;color:var(--muted);margin-top:5px}
+.sv-line{display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:11px;letter-spacing:.1em;color:var(--blue2);margin-top:5px;text-transform:uppercase}
+.sv-line svg{width:14px;height:14px;flex:none}
 .p-lv{text-align:center;flex:none}
 .p-lv small{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.2em;color:var(--blue2)}
 .p-lv b{font-family:var(--head);font-weight:800;font-size:40px;line-height:1;text-shadow:0 0 14px rgba(92,200,255,.7)}
@@ -116,14 +118,19 @@ h2.sec::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,var(
   background:linear-gradient(145deg,var(--blue2),var(--blue3));border-color:var(--white);color:var(--white);
   box-shadow:0 0 14px rgba(92,200,255,.6),inset 0 0 10px rgba(255,255,255,.25);
 }
+.box.saved{background:rgba(47,139,255,.18);border-color:var(--blue2);color:var(--blue2);box-shadow:0 0 10px rgba(92,200,255,.35) inset}
+.box.saved .ck{filter:drop-shadow(0 0 4px rgba(92,200,255,.8))}
 .box .ck{width:58%;height:58%;filter:drop-shadow(0 0 4px rgba(255,255,255,.8))}
+.yrow{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:12px;padding-top:10px;border-top:1px dashed rgba(88,166,255,.25)}
+.yrow .dl{letter-spacing:.14em;text-transform:uppercase}
+.yrow .box{width:46px;height:46px;max-height:none;aspect-ratio:auto;flex:none}
 @keyframes pulse{0%,100%{box-shadow:0 0 0 rgba(243,248,255,0)}50%{box-shadow:0 0 14px rgba(243,248,255,.55)}}
 
 .quest{margin-top:14px;padding-top:12px;border-top:1px solid rgba(88,166,255,.25)}
 .q-row{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:7px}
 .q-lbl{font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:var(--blue2);text-transform:uppercase}
 .q-val{font-family:var(--mono);font-size:12px;letter-spacing:.08em;color:var(--white)}
-.pips{display:flex;gap:6px;margin-top:9px;align-items:center}
+.pips{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px;align-items:center}
 .pip{width:14px;height:16px;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);background:rgba(88,166,255,.2)}
 .pip.on{background:linear-gradient(160deg,var(--blue2),var(--blue3));box-shadow:0 0 8px var(--blue2)}
 .pips span{font-family:var(--mono);font-size:11px;letter-spacing:.12em;color:var(--muted);margin-left:6px;text-transform:uppercase}
@@ -175,12 +182,16 @@ textarea.input{min-height:96px;resize:none}
 .kv:last-of-type{border-bottom:0}
 .kv b{font-family:var(--mono);font-weight:600;font-size:13px;letter-spacing:.06em;text-align:right}
 
-/* tab bar */
+/* tab bar (4 tabs, sliding highlight) */
 .tabs{position:fixed;left:0;right:0;bottom:0;z-index:20;padding:8px 12px calc(env(safe-area-inset-bottom) + 8px);background:linear-gradient(180deg,rgba(3,8,22,0),rgba(3,8,22,.92) 35%)}
-.tabs .in{max-width:520px;margin:0 auto;display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:6px;border:1px solid var(--line);border-radius:8px;background:rgba(6,16,46,.92);box-shadow:0 0 22px rgba(47,139,255,.3);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
-.tab{display:flex;flex-direction:column;align-items:center;gap:3px;padding:7px 4px;border-radius:5px;color:var(--muted);font-family:var(--head);font-weight:700;font-size:12px;letter-spacing:.2em;text-transform:uppercase}
-.tab svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linejoin:round;stroke-linecap:round}
-.tab.on{color:var(--white);background:linear-gradient(180deg,rgba(47,139,255,.35),rgba(47,139,255,.12));box-shadow:0 0 14px rgba(92,200,255,.4) inset}
+.tabs .in{position:relative;max-width:560px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:6px;border:1px solid var(--line);border-radius:8px;background:rgba(6,16,46,.92);box-shadow:0 0 22px rgba(47,139,255,.3);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.tab-ind{position:absolute;top:6px;bottom:6px;left:6px;width:calc((100% - 30px) / 4);border-radius:5px;pointer-events:none;
+  background:linear-gradient(180deg,rgba(47,139,255,.35),rgba(47,139,255,.12));box-shadow:0 0 14px rgba(92,200,255,.4) inset;
+  transform:translateX(calc(var(--i,0) * (100% + 6px)));transition:transform .4s cubic-bezier(.4,0,.2,1)}
+.tab{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:7px 4px;border-radius:5px;color:var(--muted);font-family:var(--head);font-weight:700;font-size:12px;letter-spacing:.2em;text-transform:uppercase;transition:color .3s ease,transform .12s ease}
+.tab:active{transform:scale(.94)}
+.tab svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linejoin:round;stroke-linecap:round;transition:filter .3s ease}
+.tab.on{color:var(--white)}
 .tab.on svg{filter:drop-shadow(0 0 6px var(--blue2))}
 
 /* modal */
@@ -193,31 +204,81 @@ textarea.input{min-height:96px;resize:none}
 .win h3{font-family:var(--head);font-weight:800;font-size:28px;letter-spacing:.12em;text-transform:uppercase;margin:0 0 6px;text-shadow:0 0 14px rgba(92,200,255,.6)}
 .win .sub{font-family:var(--mono);font-size:13px;letter-spacing:.12em;color:var(--blue2);text-transform:uppercase;margin:0 0 14px}
 .win p{margin:0 0 14px;color:var(--white);font-size:16px}
+.win p.small{font-size:14px;color:var(--muted)}
 .win .reward{border:1px solid var(--line);background:rgba(47,139,255,.1);padding:12px 14px;border-radius:5px;margin-bottom:16px}
 .win .reward b{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--blue2);text-transform:uppercase;margin-bottom:4px;font-weight:600}
 .win .actions{display:grid;gap:10px}
 .win .actions.two{grid-template-columns:1fr 1fr}
+.win .mini{font-family:var(--mono);font-size:11px;letter-spacing:.2em;color:var(--blue2);text-transform:uppercase;margin:16px 0 4px}
+.win .grp{margin-bottom:12px}
+.win .grp .kv:last-child{border-bottom:0}
+.kv.here{color:var(--white)}
+.kv.here b{color:var(--blue2)}
 
 #toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 96px);transform:translateX(-50%) translateY(20px);z-index:60;opacity:0;pointer-events:none;transition:.25s;max-width:calc(100% - 32px)}
 #toast.show{opacity:1;transform:translateX(-50%)}
 #toast div{padding:10px 16px;border:1px solid var(--line);background:rgba(6,16,46,.96);border-radius:5px;font-family:var(--mono);font-size:13px;letter-spacing:.06em;box-shadow:0 0 18px rgba(47,139,255,.45)}
 
+/* smooth switching between tabs */
+#view{transition:opacity .13s ease,transform .13s ease}
+#view.v-out{opacity:0;transform:translateX(calc(var(--dx,0px) * -1))}
+#view.v-in{animation:viewIn .36s cubic-bezier(.2,.7,.2,1) backwards}
+@keyframes viewIn{from{opacity:0;transform:translateX(var(--dx,0px))}to{opacity:1;transform:none}}
+
+/* streak savers */
+.sv-row{display:flex;align-items:center;gap:14px}
+.sv-n{width:64px;height:72px;flex:none;display:grid;place-items:center;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);background:linear-gradient(160deg,var(--blue2),var(--blue3));font-family:var(--head);font-weight:800;font-size:32px;text-shadow:0 0 10px rgba(255,255,255,.7)}
+.sv-row h4{margin:0 0 2px;font-family:var(--head);font-size:19px;letter-spacing:.1em;text-transform:uppercase}
+.sv-row p{margin:0;color:var(--muted);font-size:14px}
+
+/* records */
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+.chip{min-height:44px;max-width:100%;padding:8px 14px;border:1px solid var(--line);border-radius:5px;background:rgba(47,139,255,.08);color:var(--muted);font-family:var(--head);font-weight:700;font-size:15px;letter-spacing:.1em;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:background .3s,border-color .3s,color .3s,box-shadow .3s,transform .12s}
+.chip:active{transform:scale(.96)}
+.chip.on{color:var(--white);border-color:var(--white);background:linear-gradient(180deg,rgba(47,139,255,.55),rgba(27,79,214,.5));box-shadow:0 0 14px rgba(92,200,255,.45)}
+.stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.stat{padding:12px;border:1px solid rgba(88,166,255,.28);border-radius:5px;background:rgba(5,14,40,.55);min-width:0}
+.stat small{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.18em;color:var(--blue2);text-transform:uppercase;margin-bottom:4px}
+.stat b{display:block;font-family:var(--head);font-weight:800;font-size:26px;line-height:1.15;letter-spacing:.04em;overflow-wrap:anywhere}
+.stat b.sm{font-size:19px;padding-top:5px}
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-family:var(--mono);font-size:11px;letter-spacing:.1em;color:var(--muted);text-transform:uppercase;margin:0 2px 12px}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:12px;height:12px;border-radius:3px;display:inline-block}
+.months{display:grid;gap:14px;grid-template-columns:minmax(0,1fr)}
+.m-head{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:10px}
+.m-head h4{margin:0;font-family:var(--head);font-size:18px;letter-spacing:.1em;text-transform:uppercase}
+.m-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}
+.m-grid .wd{text-align:center;font-family:var(--mono);font-size:10px;letter-spacing:.1em;color:var(--dim)}
+.c{aspect-ratio:1/1;display:grid;place-items:center;border-radius:4px;border:1px solid rgba(88,166,255,.22);background:rgba(5,14,40,.6);font-family:var(--mono);font-size:12px;color:var(--muted)}
+.c.x{border-color:transparent;background:none}
+.c.o{opacity:.35;border-color:transparent}
+.c.m{color:rgba(255,141,161,.85);border-color:rgba(255,141,161,.3)}
+.c.d{background:linear-gradient(145deg,var(--blue2),var(--blue3));border-color:var(--white);color:var(--white);box-shadow:0 0 8px rgba(92,200,255,.45)}
+.c.s{border-color:var(--blue2);color:var(--blue2);background:rgba(47,139,255,.18)}
+.c.s svg{display:block;width:62%;height:62%}
+.c.t{outline:2px solid var(--white);outline-offset:1px}
+
 @media (min-width:700px){
   #app{padding-left:24px;padding-right:24px}
   .box{font-size:15px}
   .h-name{font-size:25px}
+  .stats{grid-template-columns:repeat(4,minmax(0,1fr))}
+  .months{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .c{font-size:13px}
 }
 @media (min-width:1000px){
   #app{max-width:1080px}
   .habits{grid-template-columns:repeat(2,minmax(0,1fr))}
   .ladder{grid-template-columns:repeat(2,minmax(0,1fr))}
   .log{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .months{grid-template-columns:repeat(3,minmax(0,1fr))}
 }
 @media (max-width:420px){
   .brand b{font-size:23px;letter-spacing:.24em}
   .week{gap:5px}
   .rung{grid-template-columns:auto 1fr}
   .rung .btn{grid-column:1/-1}
+  .tab{font-size:11px;letter-spacing:.12em}
 }
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
@@ -236,11 +297,15 @@ textarea.input{min-height:96px;resize:none}
 
 <nav class="tabs" aria-label="Main">
   <div class="in">
+    <span class="tab-ind" aria-hidden="true"></span>
     <button class="tab" data-action="tab" data-tab="habits" aria-label="Habits">
       <svg viewBox="0 0 24 24"><rect x="3" y="4" width="5" height="5" rx="1"/><rect x="3" y="15" width="5" height="5" rx="1"/><path d="M12 6.5h9M12 17.5h9"/></svg>Habits
     </button>
     <button class="tab" data-action="tab" data-tab="vault" aria-label="Rewards vault">
       <svg viewBox="0 0 24 24"><path d="M12 3l8 6-8 12L4 9z"/><path d="M4 9h16"/></svg>Vault
+    </button>
+    <button class="tab" data-action="tab" data-tab="records" aria-label="Records and history">
+      <svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4M8.5 15l2.5 2.5 4.5-4.5"/></svg>Records
     </button>
     <button class="tab" data-action="tab" data-tab="system" aria-label="System settings">
       <svg viewBox="0 0 24 24"><path d="M12 2.5l8 4.5v10l-8 4.5-8-4.5V7z"/><circle cx="12" cy="12" r="3"/></svg>System
@@ -257,20 +322,34 @@ textarea.input{min-height:96px;resize:none}
 'use strict';
 
 /* ============ constants ============ */
-const APP_VERSION = '1.0.0';
-const MAX_HABITS = 5;
+const APP_VERSION = '1.5.0';
+const MAX_HABITS = 10;
+// Quest ladder. "savers" = streak savers given as a bonus when the quest is claimed.
 const TIERS = [
-  {n:1, days:2,  xp:25,  title:'Awakened',    reward:'A small treat: your favourite drink or snack'},
-  {n:2, days:5,  xp:60,  title:'Disciplined', reward:'30 minutes of guilt-free fun'},
-  {n:3, days:10, xp:120, title:'Resolute',    reward:'A movie night or a meal you love'},
-  {n:4, days:15, xp:200, title:'Elite',       reward:'Buy yourself something small you have been wanting'},
-  {n:5, days:20, xp:300, title:'Sovereign',   reward:'A big reward you have earned: plan something special'}
+  {n:1,  days:2,   xp:25,   savers:0, title:'Awakened',    reward:'A small treat: your favourite drink or snack'},
+  {n:2,  days:5,   xp:60,   savers:0, title:'Disciplined', reward:'30 minutes of guilt-free fun'},
+  {n:3,  days:10,  xp:120,  savers:1, title:'Resolute',    reward:'A movie night or a meal you love'},
+  {n:4,  days:15,  xp:200,  savers:0, title:'Elite',       reward:'Buy yourself something small you have been wanting'},
+  {n:5,  days:20,  xp:300,  savers:0, title:'Sovereign',   reward:'A big reward you have earned: plan something special'},
+  {n:6,  days:50,  xp:600,  savers:2, title:'Vanguard',    reward:'A proper treat: a meal out or something you have been craving'},
+  {n:7,  days:75,  xp:800,  savers:0, title:'Champion',    reward:'Something that feeds your growth: a book, a course or gear for a hobby'},
+  {n:8,  days:100, xp:1100, savers:3, title:'Centurion',   reward:'A day out or an experience you will remember'},
+  {n:9,  days:150, xp:1600, savers:3, title:'Paragon',     reward:'A gift for yourself that you have wanted for a long time'},
+  {n:10, days:200, xp:2200, savers:3, title:'Ascendant',   reward:'A full day that is only about you: plan it your way'},
+  {n:11, days:250, xp:2800, savers:3, title:'Titan',       reward:'Celebrate with the people who support you: a special dinner or outing'},
+  {n:12, days:300, xp:3500, savers:4, title:'Monarch',     reward:'A meaningful upgrade for something you use every day'},
+  {n:13, days:365, xp:5000, savers:5, title:'Legend',      reward:'A full year of discipline: a trip or a purchase you will remember for life'}
 ];
-const RANKS = [{min:1,l:'E'},{min:3,l:'D'},{min:5,l:'C'},{min:7,l:'B'},{min:9,l:'A'},{min:11,l:'S'}];
+// Rank letters by player LEVEL.
+const RANKS = [{min:1,l:'E'},{min:50,l:'D'},{min:100,l:'C'},{min:150,l:'B'},{min:200,l:'A'},{min:365,l:'S'}];
+// Level 1 to 2 costs LV_BASE XP. Every next level costs LV_STEP XP more than the one before.
+const LV_BASE = 25, LV_STEP = 2;
 const DAY_LETTERS = 'MTWTFSS';
 const DB_NAME = 'habsys', STORE = 'kv', DB_KEY = 'state', LS_KEY = 'habsys_state_v1';
 const CHECK = '<svg class="ck" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 const PENCIL = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20l1-5L16.5 3.5l4 4L9 19z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>';
+const SHIELD = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l7 3v5.5c0 4.3-2.8 7.6-7 9.5-4.2-1.9-7-5.2-7-9.5V6z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/></svg>';
+const SHIELD_CK = SHIELD.replace('<svg ', '<svg class="ck" ');
 
 /* ============ helpers ============ */
 const $ = s => document.querySelector(s);
@@ -281,14 +360,17 @@ const addDays = (d, n) => new Date(d.getFullYear(), d.getMonth(), d.getDate() + 
 const parseKey = k => { const p = k.split('-').map(Number); return new Date(p[0], p[1] - 1, p[2]); };
 const uid = () => 'h' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
 const fmtDate = iso => { try { return new Date(iso).toLocaleDateString(undefined, {day:'numeric', month:'short', year:'numeric'}); } catch (e) { return ''; } };
+const fmtKey = k => { try { return parseKey(k).toLocaleDateString(undefined, {day:'numeric', month:'short', year:'numeric'}); } catch (e) { return ''; } };
+const saverTxt = n => n ? ' · +' + n + ' saver' + (n > 1 ? 's' : '') : '';
 function weekDays() {
   const t = new Date(), dow = (t.getDay() + 6) % 7, mon = addDays(t, -dow);
   return Array.from({length: 7}, (_, i) => addDays(mon, i));
 }
 
 /* ============ state + storage ============ */
+// In habit.done: 1 = habit done, 2 = day protected by a streak saver.
 function defaultState() {
-  return { v:1, player:{name:'Player', xp:0}, habits:[], rewards:[], rewardText:{}, lastBackup:null, updatedAt:0 };
+  return { v:2, player:{name:'Player', xp:0}, savers:0, habits:[], rewards:[], rewardText:{}, lastBackup:null, updatedAt:0 };
 }
 function validState(s) { return s && typeof s === 'object' && Array.isArray(s.habits); }
 function normalize(raw) {
@@ -300,7 +382,7 @@ function normalize(raw) {
   s.habits = raw.habits.slice(0, MAX_HABITS).map(h => {
     const done = {};
     if (h && h.done && typeof h.done === 'object') {
-      for (const k of Object.keys(h.done)) if (/^\d{4}-\d{2}-\d{2}$/.test(k) && h.done[k]) done[k] = 1;
+      for (const k of Object.keys(h.done)) if (/^\d{4}-\d{2}-\d{2}$/.test(k) && h.done[k]) done[k] = Number(h.done[k]) === 2 ? 2 : 1;
     }
     return {
       id: String((h && h.id) || uid()),
@@ -316,6 +398,10 @@ function normalize(raw) {
     xp: Math.max(0, Math.floor(Number(r.xp) || 0)), text: String(r.text || '').slice(0, 160),
     at: String(r.at || ''), enjoyed: !!r.enjoyed
   }));
+  // Data from version 1.0 has no savers yet: give the savers for quests already claimed.
+  s.savers = raw.savers === undefined
+    ? s.rewards.reduce((n, r) => n + (TIERS[r.tier - 1] ? TIERS[r.tier - 1].savers : 0), 0)
+    : Math.max(0, Math.floor(Number(raw.savers) || 0));
   const rt = raw.rewardText && typeof raw.rewardText === 'object' ? raw.rewardText : {};
   for (const t of TIERS) if (typeof rt[t.n] === 'string' && rt[t.n].trim()) s.rewardText[t.n] = rt[t.n].trim().slice(0, 160);
   s.lastBackup = typeof raw.lastBackup === 'string' ? raw.lastBackup : null;
@@ -374,29 +460,45 @@ async function askPersist() {
 }
 
 /* ============ game logic ============ */
+// Streaks count only days where the habit was really done. A day protected by a streak
+// saver keeps the streak alive but does not add a day to it.
 function currentStreak(h) {
   let d = new Date();
   if (!h.done[dkey(d)]) d = addDays(d, -1);
   let n = 0;
-  while (h.done[dkey(d)]) { n++; d = addDays(d, -1); }
+  while (h.done[dkey(d)]) { if (h.done[dkey(d)] === 1) n++; d = addDays(d, -1); }
   return n;
 }
 function longestStreak(h) {
   const ks = Object.keys(h.done).sort();
   let best = 0, run = 0, prev = null;
   for (const k of ks) {
-    if (prev && dkey(addDays(prev, 1)) === k) run++; else run = 1;
+    if (!(prev && dkey(addDays(prev, 1)) === k)) run = 0;
+    if (h.done[k] === 1) run++;
     if (run > best) best = run;
     prev = parseKey(k);
   }
   return best;
 }
+// Real done-days in the unbroken run that ends the day before day k.
+function chainBefore(h, k) {
+  let d = addDays(parseKey(k), -1), n = 0;
+  while (h.done[dkey(d)]) { if (h.done[dkey(d)] === 1) n++; d = addDays(d, -1); }
+  return n;
+}
 function claimableCount(h) {
   const L = longestStreak(h);
   return TIERS.filter(t => t.n > h.claimed && L >= t.days).length;
 }
-const levelOf = xp => Math.floor(Math.sqrt(xp / 25)) + 1;
-const lvlStart = L => 25 * (L - 1) * (L - 1);
+const xpFor = L => LV_BASE * (L - 1) + LV_STEP * (L - 1) * (L - 2) / 2;   // total XP needed to reach level L
+function levelOf(xp) {
+  const a = LV_STEP / 2, b = LV_BASE - a;
+  let L = Math.max(1, Math.floor((-b + Math.sqrt(b * b + 4 * a * xp)) / (2 * a)) + 1);
+  while (xpFor(L + 1) <= xp) L++;
+  while (L > 1 && xpFor(L) > xp) L--;
+  return L;
+}
+const lvlStart = L => xpFor(L);
 const rankOf = L => { let r = 'E'; for (const x of RANKS) if (L >= x.min) r = x.l; return r; };
 const rewardTextFor = t => S.rewardText[t.n] || t.reward;
 const findHabit = id => S.habits.find(h => h.id === id);
@@ -410,13 +512,47 @@ function backupDue() {
 }
 
 /* ============ UI state + render ============ */
-const ui = { tab: 'habits', day: dkey(new Date()) };
+const TABS = ['habits', 'vault', 'records', 'system'];
+const ui = { tab: 'habits', day: dkey(new Date()), rec: null };
 
-function render() {
-  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('on', t.dataset.tab === ui.tab));
+function renderNav() {
+  document.querySelectorAll('.tab').forEach(t => {
+    const on = t.dataset.tab === ui.tab;
+    t.classList.toggle('on', on);
+    if (on) t.setAttribute('aria-current', 'page'); else t.removeAttribute('aria-current');
+  });
+  $('.tabs .in').style.setProperty('--i', String(TABS.indexOf(ui.tab)));
+}
+function renderView() {
   const now = new Date();
   $('#today-label').innerHTML = esc(now.toLocaleDateString(undefined, {weekday:'short'})) + '<br>' + esc(now.toLocaleDateString(undefined, {day:'2-digit', month:'short'}));
-  $('#view').innerHTML = ui.tab === 'habits' ? viewHabits() : ui.tab === 'vault' ? viewVault() : viewSystem();
+  $('#view').innerHTML = ui.tab === 'habits' ? viewHabits() : ui.tab === 'vault' ? viewVault() : ui.tab === 'records' ? viewRecords() : viewSystem();
+}
+function render() { renderNav(); renderView(); }
+
+// Smooth fade/slide for the content area.
+function playIn(dx) {
+  const v = $('#view');
+  v.style.setProperty('--dx', dx + 'px');
+  v.classList.remove('v-in', 'v-out');
+  void v.offsetWidth;
+  v.classList.add('v-in');
+}
+const reduceMotion = () => !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+let swapTimer;
+function switchTab(name) {
+  if (TABS.indexOf(name) < 0) return;
+  if (name === ui.tab) { window.scrollTo(0, 0); return; }
+  const dir = TABS.indexOf(name) > TABS.indexOf(ui.tab) ? 1 : -1;
+  ui.tab = name;
+  renderNav();
+  if (reduceMotion()) { renderView(); window.scrollTo(0, 0); return; }
+  const v = $('#view');
+  v.style.setProperty('--dx', (dir * 28) + 'px');
+  v.classList.remove('v-in');
+  v.classList.add('v-out');
+  clearTimeout(swapTimer);
+  swapTimer = setTimeout(() => { renderView(); window.scrollTo(0, 0); playIn(dir * 28); }, 130);
 }
 
 function viewHabits() {
@@ -431,7 +567,8 @@ function viewHabits() {
       <div class="p-name">${esc(S.player.name)}</div>
       <div class="p-sub">Title · ${esc(title)}</div>
       <div class="bar"><i style="width:${pct}%"></i></div>
-      <div class="xp-txt">XP ${S.player.xp} / ${b}</div>
+      <div class="xp-txt">XP ${S.player.xp.toLocaleString()} / ${b.toLocaleString()}</div>
+      <div class="sv-line">${SHIELD}Streak savers · ${S.savers}</div>
     </div>
     <div class="p-lv"><small>LV</small><b>${L}</b></div>
   </section>`;
@@ -454,17 +591,23 @@ function viewHabits() {
 function habitCard(h) {
   const tk = dkey(new Date()), yk = dkey(addDays(new Date(), -1));
   const cur = currentStreak(h), cl = claimableCount(h), next = TIERS[h.claimed];
-  const boxes = weekDays().map((d, i) => {
-    const k = dkey(d), done = !!h.done[k], future = k > tk, open = (k === tk || k === yk);
+  const boxBtn = d => {
+    const k = dkey(d), v = h.done[k], done = v === 1, saved = v === 2, future = k > tk, open = (k === tk || k === yk);
     const cls = ['box'];
     if (done) cls.push('done');
+    if (saved) cls.push('saved');
     if (k === tk) cls.push('today');
     if (future) cls.push('future');
     if (open) cls.push('open');
-    if (k < h.created && !done) cls.push('pre');
-    const label = (open ? (done ? 'Unmark ' : 'Mark ') : '') + d.toDateString() + (done ? ', done' : '');
-    return `<div class="col"><span class="dl">${DAY_LETTERS[i]}</span><button class="${cls.join(' ')}" data-action="tick" data-id="${esc(h.id)}" data-day="${k}" aria-label="${esc(label)}" aria-pressed="${done}">${done ? CHECK : '<span>' + d.getDate() + '</span>'}</button></div>`;
-  }).join('');
+    if (k < h.created && !v) cls.push('pre');
+    const label = (open ? (done ? 'Unmark ' : saved ? 'Return streak saver for ' : 'Mark ') : '') + d.toDateString() + (done ? ', done' : saved ? ', protected by a streak saver' : '');
+    return `<button class="${cls.join(' ')}" data-action="tick" data-id="${esc(h.id)}" data-day="${k}" aria-label="${esc(label)}" aria-pressed="${done}">${done ? CHECK : saved ? SHIELD_CK : '<span>' + d.getDate() + '</span>'}</button>`;
+  };
+  const wk = weekDays();
+  const boxes = wk.map((d, i) => `<div class="col"><span class="dl">${DAY_LETTERS[i]}</span>${boxBtn(d)}</div>`).join('');
+  // On a Monday, yesterday (Sunday) belongs to last week's row, so it gets its own small line.
+  const yd = addDays(new Date(), -1);
+  const yrow = wk.some(d => dkey(d) === yk) ? '' : `<div class="yrow"><span class="dl">Yesterday · ${esc(yd.toLocaleDateString(undefined, {weekday:'short', day:'numeric', month:'short'}))}</span>${boxBtn(yd)}</div>`;
   let quest;
   if (cl > 0) {
     quest = `<button class="btn claim" data-action="claim" data-id="${esc(h.id)}">Quest complete · Claim reward</button>`;
@@ -472,7 +615,7 @@ function habitCard(h) {
     const shown = Math.min(cur, next.days), p = Math.round(shown / next.days * 100);
     quest = `<div class="q-row"><span class="q-lbl">Next quest · Lv.${next.n} · ${next.days}-day streak</span><span class="q-val">${shown}/${next.days}</span></div><div class="bar"><i style="width:${p}%"></i></div>`;
   } else {
-    quest = `<div class="q-row"><span class="q-lbl">All quests cleared · More coming soon</span></div>`;
+    quest = `<div class="q-row"><span class="q-lbl">All quests cleared · Legend</span></div>`;
   }
   const pips = TIERS.map(t => `<i class="pip ${t.n <= h.claimed ? 'on' : ''}"></i>`).join('');
   return `
@@ -481,17 +624,22 @@ function habitCard(h) {
       <button class="h-name" data-action="edit" data-id="${esc(h.id)}" aria-label="Edit ${esc(h.name)}"><span>${esc(h.name)}</span>${PENCIL}</button>
       <div class="streak"><small>STREAK</small><b>${cur}</b></div>
     </div>
-    <div class="week">${boxes}</div>
+    <div class="week">${boxes}</div>${yrow}
     <div class="quest">${quest}<div class="pips">${pips}<span>${h.claimed}/${TIERS.length} cleared</span></div></div>
   </section>`;
 }
 
 function viewVault() {
-  let html = `<h2 class="sec">Quest ladder</h2><p class="note">Rewards are earned by keeping one habit going for consecutive days. Tap a reward to change it into something you really want.</p><div class="ladder">`;
+  let html = `<h2 class="sec">Streak savers</h2>
+  <section class="panel">
+    <div class="sv-row"><div class="sv-n">${S.savers}</div><div><h4>Savers in stock</h4><p>Earned from quests that show a saver bonus below. They work on any habit.</p></div></div>
+    <p class="note" style="margin:14px 0 0">Missed a day? Tap yesterday's box on that habit and choose <b>Use a streak saver</b>. Your streak stays alive, but the saved day does not add a day to it. It works on yesterday only, and only while a streak is running. Tap the shield again before the day ends to get the saver back.</p>
+  </section>
+  <h2 class="sec">Quest ladder</h2><p class="note">Rewards are earned by keeping one habit going for consecutive days. Tap Edit to change a reward into something you really want.</p><div class="ladder">`;
   html += TIERS.map(t => `
     <div class="panel rung">
       <div class="lv">${t.n}</div>
-      <div><h4>${esc(t.title)}</h4><div class="meta">${t.days} days in a row · +${t.xp} XP</div><p>${esc(rewardTextFor(t))}</p></div>
+      <div><h4>${esc(t.title)}</h4><div class="meta">${t.days} days in a row · +${t.xp} XP${saverTxt(t.savers)}</div><p>${esc(rewardTextFor(t))}</p></div>
       <button class="btn ghost sm" data-action="editreward" data-tier="${t.n}">Edit</button>
     </div>`).join('');
   html += `</div><h2 class="sec">Reward log</h2>`;
@@ -500,12 +648,82 @@ function viewVault() {
   } else {
     html += '<div class="log">' + S.rewards.map(r => `
       <div class="panel log-item">
-        <div class="row"><h4>${esc(r.title)} · Lv.${r.tier}</h4><span class="tag">+${r.xp} XP</span></div>
+        <div class="row"><h4>${esc(r.title)} · Lv.${r.tier}</h4><span class="tag">+${r.xp} XP${saverTxt((TIERS[r.tier - 1] || {}).savers || 0)}</span></div>
         <div class="meta">${esc(r.habitName)} · ${esc(fmtDate(r.at))}</div>
         <p>${esc(r.text)}</p>
         <button class="btn ${r.enjoyed ? 'ghost' : ''} sm" data-action="enjoy" data-id="${esc(r.id)}">${r.enjoyed ? 'Enjoyed ✓' : 'Mark as enjoyed'}</button>
       </div>`).join('') + '</div>';
   }
+  return html;
+}
+
+/* ---- records: full history of each habit ---- */
+function habitStats(h) {
+  const keys = Object.keys(h.done).sort();
+  const nDone = keys.filter(k => h.done[k] === 1).length;
+  const nSaved = keys.length - nDone;
+  const startKey = keys.length && keys[0] < h.created ? keys[0] : h.created;
+  const today = new Date(), tk = dkey(today);
+  const endKey = h.done[tk] ? tk : dkey(addDays(today, -1));
+  const tracked = Math.max(0, Math.round((parseKey(endKey) - parseKey(startKey)) / 86400000) + 1);
+  return {
+    nDone: nDone, nSaved: nSaved, startKey: startKey, endKey: endKey, tracked: tracked,
+    missed: Math.max(0, tracked - nDone - nSaved),
+    rate: tracked ? Math.round(nDone / tracked * 100) : null
+  };
+}
+function monthPanel(h, y, m, st, tk) {
+  const days = new Date(y, m + 1, 0).getDate(), offset = (new Date(y, m, 1).getDay() + 6) % 7;
+  let cells = '', nDone = 0, tracked = 0;
+  for (let i = 0; i < offset; i++) cells += '<i class="c x"></i>';
+  for (let d = 1; d <= days; d++) {
+    const k = y + '-' + pad(m + 1) + '-' + pad(d), v = h.done[k], inRange = k >= st.startKey && k <= st.endKey;
+    let cls = 'c', inner = d;
+    if (v === 1) { cls += ' d'; nDone++; }
+    else if (v === 2) { cls += ' s'; inner = SHIELD; }
+    else if (inRange) cls += ' m';
+    else cls += ' o';
+    if (inRange) tracked++;
+    if (k === tk) cls += ' t';
+    cells += `<span class="${cls}">${inner}</span>`;
+  }
+  const pct = tracked ? ' · ' + Math.round(nDone / tracked * 100) + '%' : '';
+  const name = new Date(y, m, 1).toLocaleDateString(undefined, {month:'long', year:'numeric'});
+  return `<section class="panel"><div class="m-head"><h4>${esc(name)}</h4><span class="tag">${nDone} done${pct}</span></div><div class="m-grid">${DAY_LETTERS.split('').map(l => `<span class="wd">${l}</span>`).join('')}${cells}</div></section>`;
+}
+function viewRecords() {
+  let html = '<h2 class="sec">Records</h2>';
+  if (!S.habits.length) {
+    return html + '<section class="panel empty"><div class="tag">[ System ]</div><h3>No history yet</h3><p>Add a habit in the Habits tab. Every day you complete will be recorded here.</p></section>';
+  }
+  const h = findHabit(ui.rec) || S.habits[0];
+  ui.rec = h.id;
+  const st = habitStats(h), tk = dkey(new Date());
+  html += '<div class="chips">' + S.habits.map(x => `<button class="chip ${x.id === h.id ? 'on' : ''}" data-action="rec" data-id="${esc(x.id)}">${esc(x.name)}</button>`).join('') + '</div>';
+  const tile = (l, v, c) => `<div class="stat"><small>${l}</small><b${c ? ' class="' + c + '"' : ''}>${v}</b></div>`;
+  html += `<section class="panel"><div class="tag" style="margin-bottom:12px">[ ${esc(h.name)} ]</div><div class="stats">`
+    + tile('Days done', st.nDone)
+    + tile('Success rate', st.rate === null ? '—' : st.rate + '%')
+    + tile('Current streak', currentStreak(h))
+    + tile('Longest streak', longestStreak(h))
+    + tile('Missed days', st.missed)
+    + tile('Savers used', st.nSaved)
+    + tile('Quests cleared', h.claimed + ' / ' + TIERS.length)
+    + tile('Tracking since', esc(fmtKey(st.startKey)), 'sm')
+    + '</div></section>';
+  const rw = S.rewards.filter(r => r.habitId === h.id);
+  html += '<h2 class="sec">Quests cleared</h2>';
+  html += rw.length
+    ? '<section class="panel">' + rw.map(r => `<div class="kv"><span>Lv.${r.tier} · ${esc(r.title)}</span><b>${esc(fmtDate(r.at))} · +${r.xp} XP</b></div>`).join('') + '</section>'
+    : '<section class="panel empty"><p>No quests cleared on this habit yet.</p></section>';
+  html += '<h2 class="sec">Full history</h2><div class="legend">'
+    + '<span><i style="background:linear-gradient(145deg,var(--blue2),var(--blue3))"></i>Done</span>'
+    + '<span><i style="border:1px solid var(--blue2);background:rgba(47,139,255,.18)"></i>Saver used</span>'
+    + '<span><i style="border:1px solid rgba(255,141,161,.55)"></i>Missed</span></div>';
+  const sd = parseKey(st.startKey), now = new Date(), months = [];
+  let y = sd.getFullYear(), m = sd.getMonth();
+  while (y < now.getFullYear() || (y === now.getFullYear() && m <= now.getMonth())) { months.push([y, m]); if (++m > 11) { m = 0; y++; } }
+  html += '<div class="months">' + months.reverse().map(p => monthPanel(h, p[0], p[1], st, tk)).join('') + '</div>';
   return html;
 }
 
@@ -516,6 +734,12 @@ function viewSystem() {
   <h2 class="sec">Player</h2>
   <section class="panel">
     <label class="field"><span>Player name</span><input class="input" id="pname" maxlength="24" value="${esc(S.player.name)}" autocomplete="off"></label>
+  </section>
+
+  <h2 class="sec">Guide</h2>
+  <section class="panel">
+    <p class="note">See how XP, levels and ranks work, and how far you are from the next rank.</p>
+    <button class="btn ghost block" data-action="info">Levels &amp; ranks info</button>
   </section>
 
   <h2 class="sec">Data safety</h2>
@@ -574,7 +798,7 @@ function openClaim(id) {
     <div class="wtag"><span class="tag">[ System ]</span></div>
     <h3>Quest complete</h3>
     <p class="sub">${esc(h.name)} · ${t.days}-day streak</p>
-    <div class="reward"><b>You receive</b>+${t.xp} XP · Title: ${esc(t.title)}</div>
+    <div class="reward"><b>You receive</b>+${t.xp} XP · Title: ${esc(t.title)}${t.savers ? ' · +' + t.savers + ' streak saver' + (t.savers > 1 ? 's' : '') : ''}</div>
     <div class="reward"><b>Your reward</b>${esc(rewardTextFor(t))}</div>
     <div class="actions"><button class="btn" data-action="doclaim" data-id="${esc(h.id)}">Claim reward</button><button class="btn ghost" data-action="close">Later</button></div>`);
 }
@@ -585,6 +809,7 @@ function doClaim(id) {
   const oldL = levelOf(S.player.xp);
   h.claimed += 1;
   S.player.xp += t.xp;
+  S.savers += t.savers || 0;
   S.rewards.unshift({id: uid(), habitId: h.id, habitName: h.name, tier: t.n, title: t.title, xp: t.xp, text: rewardTextFor(t), at: new Date().toISOString(), enjoyed: false});
   save();
   const newL = levelOf(S.player.xp);
@@ -594,7 +819,8 @@ function doClaim(id) {
     <div class="wtag"><span class="tag">[ System ]</span></div>
     <h3>Reward claimed</h3>
     <p class="sub">+${t.xp} XP · ${esc(t.title)}</p>
-    ${newL > oldL ? `<div class="reward"><b>Level up</b>LV ${oldL} → LV ${newL} · Rank ${rankOf(newL)}</div>` : ''}
+    ${newL > oldL ? `<div class="reward"><b>Level up</b>LV ${oldL} → LV ${newL} · Rank ${rankOf(newL)}${rankOf(newL) !== rankOf(oldL) ? ' · New rank!' : ''}</div>` : ''}
+    ${t.savers ? `<div class="reward"><b>Streak savers</b>+${t.savers} · you now have ${S.savers}</div>` : ''}
     <div class="reward"><b>Go enjoy it</b>${esc(S.rewards[0].text)}</div>
     <p style="color:var(--muted);font-size:14px">Mark it as enjoyed in the Vault once you have had it.</p>
     <div class="actions"><button class="btn" data-action="afterclaim" data-id="${esc(h.id)}">${more ? 'Next reward' : 'Continue'}</button></div>`);
@@ -614,6 +840,41 @@ function confirmBox(title, text, action, label, data) {
     <h3>${esc(title)}</h3>
     <p>${text}</p>
     <div class="actions two"><button class="btn danger" data-action="${action}" ${data || ''}>${esc(label)}</button><button class="btn ghost" data-action="close">Cancel</button></div>`);
+}
+function openSaverChoice(id, k) {
+  const h = findHabit(id); if (!h) return;
+  const n = chainBefore(h, k);
+  showModal(`
+    <div class="wtag"><span class="tag">[ System ]</span></div>
+    <h3>Yesterday</h3>
+    <p class="sub">${esc(h.name)}</p>
+    <p>You have a <b>${n}-day streak</b> running. Did you complete this habit yesterday?</p>
+    <div class="reward"><b>Streak savers</b>You have ${S.savers}. Using one keeps your streak alive but does not add a day to it.</div>
+    <div class="actions">
+      <button class="btn" data-action="markdone" data-id="${esc(id)}" data-day="${esc(k)}">I did it: mark done</button>
+      <button class="btn ghost" data-action="usesaver" data-id="${esc(id)}" data-day="${esc(k)}">I missed it: use a streak saver</button>
+      <button class="btn ghost" data-action="close">Cancel</button>
+    </div>`);
+}
+function openInfo() {
+  const L = levelOf(S.player.xp), cur = rankOf(L), cost = n => xpFor(n) - xpFor(n - 1);
+  const need = xpFor(L + 1) - S.player.xp;
+  const ranks = RANKS.map((r, i) => {
+    const nx = RANKS[i + 1];
+    return `<div class="kv ${r.l === cur ? 'here' : ''}"><span>Rank ${r.l}${r.l === cur ? ' · you' : ''}</span><b>${nx ? 'Level ' + r.min + ' to ' + (nx.min - 1) : 'Level ' + r.min + ' and above'}</b></div>`;
+  }).join('');
+  const marks = [2, 10, 25, 50, 100, 150, 200, 365].map(n => `<div class="kv"><span>Level ${n}</span><b>${xpFor(n).toLocaleString()} XP in total</b></div>`).join('');
+  showModal(`
+    <div class="wtag"><span class="tag">[ System ]</span></div>
+    <h3>Levels &amp; ranks</h3>
+    <p class="sub">How you grow</p>
+    <div class="reward"><b>Your status</b>Level ${L} · Rank ${cur}<br>${S.player.xp.toLocaleString()} XP · ${need.toLocaleString()} XP to Level ${L + 1}</div>
+    <p>XP comes only from clearing quests, which means keeping one habit going for a streak. Daily ticks give no XP, so every level is proof of real consistency.</p>
+    <p>Levels get harder as you climb. Level 1 to 2 takes ${cost(2)} XP, and every level after that needs ${LV_STEP} XP more than the one before. Level 49 to 50 takes ${cost(50)} XP, and Level 364 to 365 takes ${cost(365)} XP. There is no maximum level.</p>
+    <div class="mini">Ranks</div><div class="grp">${ranks}</div>
+    <div class="mini">XP needed in total</div><div class="grp">${marks}</div>
+    <p class="small">Streak savers are explained in the Vault tab.</p>
+    <div class="actions"><button class="btn" data-action="close">Got it</button></div>`);
 }
 
 /* ============ backup / restore ============ */
@@ -660,19 +921,49 @@ function handleRestoreFile(file) {
 }
 
 /* ============ actions ============ */
+function afterChange(id, before) {
+  save(); render();
+  const h = findHabit(id);
+  if (h && claimableCount(h) > before) openClaim(id);
+}
+function markDone(id, k) {
+  const h = findHabit(id); if (!h) return;
+  const tk = dkey(new Date()), yk = dkey(addDays(new Date(), -1));
+  if ((k !== tk && k !== yk) || h.done[k]) return;
+  const before = claimableCount(h);
+  h.done[k] = 1;
+  afterChange(id, before);
+}
+function useSaver(id, k) {
+  const h = findHabit(id); if (!h) return;
+  const yk = dkey(addDays(new Date(), -1));
+  if (k !== yk || h.done[k] || S.savers < 1 || chainBefore(h, k) < 1) return;
+  const before = claimableCount(h);
+  h.done[k] = 2;
+  S.savers -= 1;
+  afterChange(id, before);
+  toast('Streak saver used. Your streak is protected.');
+}
 function toggleDay(id, k) {
   const h = findHabit(id); if (!h) return;
   const tk = dkey(new Date()), yk = dkey(addDays(new Date(), -1));
   if (k !== tk && k !== yk) return;
+  if (h.done[k] === 2) { // protected day: tapping again returns the saver
+    delete h.done[k]; S.savers += 1; save(); render(); toast('Streak saver returned.'); return;
+  }
+  if (k === yk && !h.done[k] && S.savers > 0 && chainBefore(h, k) > 0) { openSaverChoice(id, k); return; }
   const before = claimableCount(h);
   if (h.done[k]) delete h.done[k]; else h.done[k] = 1;
-  save(); render();
-  if (claimableCount(h) > before) openClaim(id);
+  afterChange(id, before);
 }
 
 const actions = {
-  tab: el => { ui.tab = el.dataset.tab; render(); window.scrollTo(0, 0); },
+  tab: el => switchTab(el.dataset.tab),
   tick: el => toggleDay(el.dataset.id, el.dataset.day),
+  rec: el => { ui.rec = el.dataset.id; renderView(); playIn(0); },
+  info: openInfo,
+  markdone: el => { closeModal(); markDone(el.dataset.id, el.dataset.day); },
+  usesaver: el => { closeModal(); useSaver(el.dataset.id, el.dataset.day); },
   add: () => { if (S.habits.length >= MAX_HABITS) return; openHabitForm(null); },
   edit: el => openHabitForm(el.dataset.id),
   close: closeModal,
@@ -734,6 +1025,7 @@ setInterval(refreshIfNewDay, 60000);
   S = await loadState();
   save(); // writes to both stores so they stay in sync
   render();
+  playIn(0);
   askPersist();
   if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
     navigator.serviceWorker.register('sw.js').catch(() => {});
