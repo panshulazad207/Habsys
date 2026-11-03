@@ -93,17 +93,27 @@ h2.sec::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,var(
 /* habits */
 .habits{display:grid;gap:16px;grid-template-columns:minmax(0,1fr)}
 .panel{min-width:0}
-.h-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px}
+.h-head{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:12px}
 .h-name{font-family:var(--head);font-weight:800;font-size:23px;letter-spacing:.06em;text-transform:uppercase;text-align:left;color:var(--white);min-height:44px;padding:0;display:flex;align-items:center;gap:8px;min-width:0;flex:1}
 .h-name span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .h-name svg{width:15px;height:15px;flex:none;opacity:.55}
-.streak{text-align:right;flex:none}
+.h-more{width:44px;height:44px;flex:none;display:grid;place-items:center;border-radius:5px;color:var(--muted);transition:background .2s,color .2s}
+.h-more svg{width:22px;height:22px;fill:currentColor}
+.h-more:active{background:rgba(47,139,255,.18);color:var(--white)}
+.streak{text-align:right;flex:none;padding-left:4px}
 .streak small{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.2em;color:var(--blue2)}
 .streak b{font-family:var(--head);font-weight:800;font-size:32px;line-height:1}
+/* optional extras (2-minute version + note): only drawn when the habit has them */
+.extras{display:grid;gap:8px;margin:-2px 0 12px}
+.x-line{display:flex;align-items:baseline;gap:10px;font-size:14px;color:var(--white)}
+.x-line span:last-child{min-width:0;overflow-wrap:anywhere}
+.x-tag{flex:none;font-family:var(--mono);font-size:10px;letter-spacing:.18em;color:var(--blue2);text-transform:uppercase;border:1px solid var(--line);border-radius:3px;padding:2px 6px}
+.x-note{margin:0;font-size:14px;line-height:1.4;color:var(--muted);padding-left:10px;border-left:2px solid var(--line);overflow-wrap:anywhere;white-space:pre-wrap}
 .week{display:grid;grid-template-columns:repeat(7,1fr);gap:8px}
 .col{display:flex;flex-direction:column;align-items:center;gap:6px;min-width:0}
 .dl{font-family:var(--mono);font-size:11px;letter-spacing:.1em;color:var(--muted)}
 .box{
+  position:relative;
   width:100%;aspect-ratio:1/1;max-height:84px;display:grid;place-items:center;border-radius:5px;
   border:1px solid rgba(88,166,255,.35);background:rgba(5,14,40,.75);color:var(--dim);
   font-family:var(--mono);font-size:13px;transition:transform .12s,box-shadow .2s,background .2s;
@@ -121,6 +131,7 @@ h2.sec::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,var(
 .box.saved{background:rgba(47,139,255,.18);border-color:var(--blue2);color:var(--blue2);box-shadow:0 0 10px rgba(92,200,255,.35) inset}
 .box.saved .ck{filter:drop-shadow(0 0 4px rgba(92,200,255,.8))}
 .box .ck{width:58%;height:58%;filter:drop-shadow(0 0 4px rgba(255,255,255,.8))}
+.box .mb{position:absolute;right:4px;bottom:3px;font-family:var(--mono);font-weight:700;font-size:10px;line-height:1;color:var(--white);opacity:.95}
 .yrow{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:12px;padding-top:10px;border-top:1px dashed rgba(88,166,255,.25)}
 .yrow .dl{letter-spacing:.14em;text-transform:uppercase}
 .yrow .box{width:46px;height:46px;max-height:none;aspect-ratio:auto;flex:none}
@@ -217,6 +228,7 @@ textarea.input{min-height:96px;resize:none}
 .win .mini{font-family:var(--mono);font-size:11px;letter-spacing:.2em;color:var(--blue2);text-transform:uppercase;margin:16px 0 4px}
 .win .grp{margin-bottom:12px}
 .win .grp .kv:last-child{border-bottom:0}
+.win .hint{margin:-6px 0 16px;font-size:13px;color:var(--muted)}
 .kv.here{color:var(--white)}
 .kv.here b{color:var(--blue2)}
 
@@ -249,16 +261,18 @@ textarea.input{min-height:96px;resize:none}
 .legend{display:flex;flex-wrap:wrap;gap:14px;font-family:var(--mono);font-size:11px;letter-spacing:.1em;color:var(--muted);text-transform:uppercase;margin:0 2px 12px}
 .legend span{display:inline-flex;align-items:center;gap:6px}
 .legend i{width:12px;height:12px;border-radius:3px;display:inline-block}
+.legend i.lgl{background:radial-gradient(circle at 74% 74%,#fff 0 2px,transparent 2.6px),linear-gradient(145deg,var(--blue2),var(--blue3))}
 .months{display:grid;gap:14px;grid-template-columns:minmax(0,1fr)}
 .m-head{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:10px}
 .m-head h4{margin:0;font-family:var(--head);font-size:18px;letter-spacing:.1em;text-transform:uppercase}
 .m-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}
 .m-grid .wd{text-align:center;font-family:var(--mono);font-size:10px;letter-spacing:.1em;color:var(--dim)}
-.c{aspect-ratio:1/1;display:grid;place-items:center;border-radius:4px;border:1px solid rgba(88,166,255,.22);background:rgba(5,14,40,.6);font-family:var(--mono);font-size:12px;color:var(--muted)}
+.c{position:relative;aspect-ratio:1/1;display:grid;place-items:center;border-radius:4px;border:1px solid rgba(88,166,255,.22);background:rgba(5,14,40,.6);font-family:var(--mono);font-size:12px;color:var(--muted)}
 .c.x{border-color:transparent;background:none}
 .c.o{opacity:.35;border-color:transparent}
 .c.m{color:rgba(255,141,161,.85);border-color:rgba(255,141,161,.3)}
 .c.d{background:linear-gradient(145deg,var(--blue2),var(--blue3));border-color:var(--white);color:var(--white);box-shadow:0 0 8px rgba(92,200,255,.45)}
+.c.l::after{content:"";position:absolute;right:3px;bottom:3px;width:5px;height:5px;border-radius:50%;background:var(--white)}
 .c.s{border-color:var(--blue2);color:var(--blue2);background:rgba(47,139,255,.18)}
 .c.s svg{display:block;width:62%;height:62%}
 .c.t{outline:2px solid var(--white);outline-offset:1px}
@@ -327,8 +341,9 @@ textarea.input{min-height:96px;resize:none}
 'use strict';
 
 /* ============ constants ============ */
-const APP_VERSION = '1.6.0';
+const APP_VERSION = '1.7.0';
 const MAX_HABITS = 10;
+const MAX_NOTE = 200, MAX_MINI = 60;   // length limits for a habit's note and 2-minute version
 // Backup reminders: the banner shows when this many changes (or days with any change) have passed since the last backup.
 const BACKUP_CHANGES = 10, BACKUP_DAYS = 3;
 const SNAP_KEEP = 5;   // how many daily safety copies and how many event safety copies the app keeps
@@ -357,6 +372,7 @@ const DB_NAME = 'habsys', STORE = 'kv', DB_KEY = 'state', LS_KEY = 'habsys_state
 const CACHE_NAME = 'habsys-data';   // third storage area (Cache Storage). sw.js must never delete it.
 const CHECK = '<svg class="ck" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 const PENCIL = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20l1-5L16.5 3.5l4 4L9 19z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>';
+const DOTS = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="5" r="2.1"/><circle cx="12" cy="12" r="2.1"/><circle cx="12" cy="19" r="2.1"/></svg>';
 const SHIELD = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l7 3v5.5c0 4.3-2.8 7.6-7 9.5-4.2-1.9-7-5.2-7-9.5V6z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/></svg>';
 const SHIELD_CK = SHIELD.replace('<svg ', '<svg class="ck" ');
 
@@ -395,6 +411,8 @@ function sum53(str) {
 
 /* ============ state ============ */
 // In habit.done: 1 = habit done, 2 = day protected by a streak saver.
+// habit.lite = days (keys) that were done with the 2-minute version. Those days are ALSO done = 1, so they count as real days.
+// habit.mini = text of the 2-minute version ('' = none). habit.note = free note ('' = none).
 // changes = number of edits since the last backup. bigMoment = a quest/habit milestone happened since the last backup.
 function defaultState() {
   return { v:2, player:{name:'Player', xp:0}, savers:0, habits:[], rewards:[], rewardText:{}, lastBackup:null, changes:0, bigMoment:false, updatedAt:0 };
@@ -407,15 +425,22 @@ function normalize(raw) {
   s.player.name = String(p.name || 'Player').trim().slice(0, 24) || 'Player';
   s.player.xp = Math.max(0, Math.floor(Number(p.xp) || 0));
   s.habits = raw.habits.slice(0, MAX_HABITS).map(h => {
-    const done = {};
+    const done = {}, lite = {};
     if (h && h.done && typeof h.done === 'object') {
       for (const k of Object.keys(h.done)) if (/^\d{4}-\d{2}-\d{2}$/.test(k) && h.done[k]) done[k] = Number(h.done[k]) === 2 ? 2 : 1;
+    }
+    // A 2-minute day only makes sense on a day that is done.
+    if (h && h.lite && typeof h.lite === 'object') {
+      for (const k of Object.keys(h.lite)) if (h.lite[k] && done[k] === 1) lite[k] = true;
     }
     return {
       id: String((h && h.id) || uid()),
       name: String((h && h.name) || 'Habit').trim().slice(0, 30) || 'Habit',
       created: /^\d{4}-\d{2}-\d{2}$/.test(h && h.created) ? h.created : dkey(new Date()),
       done: done,
+      lite: lite,
+      mini: String((h && h.mini) || '').trim().slice(0, MAX_MINI),
+      note: String((h && h.note) || '').trim().slice(0, MAX_NOTE),
       claimed: Math.min(TIERS.length, Math.max(0, Math.floor(Number(h && h.claimed) || 0)))
     };
   });
@@ -647,8 +672,8 @@ async function askPersist() {
 }
 
 /* ============ game logic ============ */
-// Streaks count only days where the habit was really done. A day protected by a streak
-// saver keeps the streak alive but does not add a day to it.
+// Streaks count only days where the habit was really done (full habit OR the 2-minute version).
+// A day protected by a streak saver keeps the streak alive but does not add a day to it.
 function currentStreak(h) {
   let d = new Date();
   if (!h.done[dkey(d)]) d = addDays(d, -1);
@@ -816,20 +841,30 @@ function viewHabits() {
   return html;
 }
 
+// The 2-minute version and the note are drawn only when the habit has them. No empty placeholders.
+function extrasHtml(h) {
+  let x = '';
+  if (h.mini) x += `<div class="x-line"><span class="x-tag">2-min</span><span>${esc(h.mini)}</span></div>`;
+  if (h.note) x += `<p class="x-note">${esc(h.note)}</p>`;
+  return x ? `<div class="extras">${x}</div>` : '';
+}
+
 function habitCard(h) {
   const tk = dkey(new Date()), yk = dkey(addDays(new Date(), -1));
   const cur = currentStreak(h), cl = claimableCount(h), next = TIERS[h.claimed];
   const boxBtn = d => {
     const k = dkey(d), v = h.done[k], done = v === 1, saved = v === 2, future = k > tk, open = (k === tk || k === yk);
+    const lite = done && !!(h.lite && h.lite[k]);
     const cls = ['box'];
     if (done) cls.push('done');
+    if (lite) cls.push('lite');
     if (saved) cls.push('saved');
     if (k === tk) cls.push('today');
     if (future) cls.push('future');
     if (open) cls.push('open');
     if (k < h.created && !v) cls.push('pre');
-    const label = (open ? (done ? 'Unmark ' : saved ? 'Return streak saver for ' : 'Mark ') : '') + d.toDateString() + (done ? ', done' : saved ? ', protected by a streak saver' : '');
-    return `<button class="${cls.join(' ')}" data-action="tick" data-id="${esc(h.id)}" data-day="${k}" aria-label="${esc(label)}" aria-pressed="${done}">${done ? CHECK : saved ? SHIELD_CK : '<span>' + d.getDate() + '</span>'}</button>`;
+    const label = (open ? (done ? 'Unmark ' : saved ? 'Return streak saver for ' : 'Mark ') : '') + d.toDateString() + (lite ? ', done with the 2-minute version' : done ? ', done' : saved ? ', protected by a streak saver' : '');
+    return `<button class="${cls.join(' ')}" data-action="tick" data-id="${esc(h.id)}" data-day="${k}" aria-label="${esc(label)}" aria-pressed="${done}">${done ? CHECK + (lite ? '<b class="mb" aria-hidden="true">2</b>' : '') : saved ? SHIELD_CK : '<span>' + d.getDate() + '</span>'}</button>`;
   };
   const wk = weekDays();
   const boxes = wk.map((d, i) => `<div class="col"><span class="dl">${DAY_LETTERS[i]}</span>${boxBtn(d)}</div>`).join('');
@@ -850,8 +885,10 @@ function habitCard(h) {
   <section class="panel habit">
     <div class="h-head">
       <button class="h-name" data-action="edit" data-id="${esc(h.id)}" aria-label="Edit ${esc(h.name)}"><span>${esc(h.name)}</span>${PENCIL}</button>
+      <button class="h-more" data-action="extras" data-id="${esc(h.id)}" aria-label="Note and 2-minute version for ${esc(h.name)}">${DOTS}</button>
       <div class="streak"><small>STREAK</small><b>${cur}</b></div>
     </div>
+    ${extrasHtml(h)}
     <div class="week">${boxes}</div>${yrow}
     <div class="quest">${quest}<div class="pips">${pips}<span>${h.claimed}/${TIERS.length} cleared</span></div></div>
   </section>`;
@@ -890,12 +927,13 @@ function habitStats(h) {
   const keys = Object.keys(h.done).sort();
   const nDone = keys.filter(k => h.done[k] === 1).length;
   const nSaved = keys.length - nDone;
+  const nLite = keys.filter(k => h.done[k] === 1 && h.lite && h.lite[k]).length;
   const startKey = keys.length && keys[0] < h.created ? keys[0] : h.created;
   const today = new Date(), tk = dkey(today);
   const endKey = h.done[tk] ? tk : dkey(addDays(today, -1));
   const tracked = Math.max(0, Math.round((parseKey(endKey) - parseKey(startKey)) / 86400000) + 1);
   return {
-    nDone: nDone, nSaved: nSaved, startKey: startKey, endKey: endKey, tracked: tracked,
+    nDone: nDone, nSaved: nSaved, nLite: nLite, startKey: startKey, endKey: endKey, tracked: tracked,
     missed: Math.max(0, tracked - nDone - nSaved),
     rate: tracked ? Math.round(nDone / tracked * 100) : null
   };
@@ -907,7 +945,7 @@ function monthPanel(h, y, m, st, tk) {
   for (let d = 1; d <= days; d++) {
     const k = y + '-' + pad(m + 1) + '-' + pad(d), v = h.done[k], inRange = k >= st.startKey && k <= st.endKey;
     let cls = 'c', inner = d;
-    if (v === 1) { cls += ' d'; nDone++; }
+    if (v === 1) { cls += ' d'; nDone++; if (h.lite && h.lite[k]) cls += ' l'; }
     else if (v === 2) { cls += ' s'; inner = SHIELD; }
     else if (inRange) cls += ' m';
     else cls += ' o';
@@ -929,13 +967,14 @@ function viewRecords() {
   const st = habitStats(h), tk = dkey(new Date());
   html += '<div class="chips">' + S.habits.map(x => `<button class="chip ${x.id === h.id ? 'on' : ''}" data-action="rec" data-id="${esc(x.id)}">${esc(x.name)}</button>`).join('') + '</div>';
   const tile = (l, v, c) => `<div class="stat"><small>${l}</small><b${c ? ' class="' + c + '"' : ''}>${v}</b></div>`;
-  html += `<section class="panel"><div class="tag" style="margin-bottom:12px">[ ${esc(h.name)} ]</div><div class="stats">`
+  html += `<section class="panel"><div class="tag" style="margin-bottom:12px">[ ${esc(h.name)} ]</div>${extrasHtml(h)}<div class="stats">`
     + tile('Days done', st.nDone)
     + tile('Success rate', st.rate === null ? '—' : st.rate + '%')
     + tile('Current streak', currentStreak(h))
     + tile('Longest streak', longestStreak(h))
     + tile('Missed days', st.missed)
     + tile('Savers used', st.nSaved)
+    + (st.nLite ? tile('2-minute days', st.nLite) : '')
     + tile('Quests cleared', h.claimed + ' / ' + TIERS.length)
     + tile('Tracking since', esc(fmtKey(st.startKey)), 'sm')
     + '</div></section>';
@@ -946,6 +985,7 @@ function viewRecords() {
     : '<section class="panel empty"><p>No quests cleared on this habit yet.</p></section>';
   html += '<h2 class="sec">Full history</h2><div class="legend">'
     + '<span><i style="background:linear-gradient(145deg,var(--blue2),var(--blue3))"></i>Done</span>'
+    + (st.nLite ? '<span><i class="lgl"></i>2-minute day</span>' : '')
     + '<span><i style="border:1px solid var(--blue2);background:rgba(47,139,255,.18)"></i>Saver used</span>'
     + '<span><i style="border:1px solid rgba(255,141,161,.55)"></i>Missed</span></div>';
   const sd = parseKey(st.startKey), now = new Date(), months = [];
@@ -1022,6 +1062,22 @@ function openHabitForm(id) {
       <button class="btn ghost" data-action="close">Cancel</button>
     </div>`);
 }
+// Three-dot menu on a habit: add, change or remove its 2-minute version and its note. An empty field means "none".
+function openExtras(id) {
+  const h = findHabit(id); if (!h) return;
+  showModal(`
+    <div class="wtag"><span class="tag">[ System ]</span></div>
+    <h3>Habit extras</h3>
+    <p class="sub">${esc(h.name)}</p>
+    <label class="field"><span>2-minute version</span><input class="input" id="hmini" maxlength="${MAX_MINI}" placeholder="e.g. Read just 1 page" value="${esc(h.mini)}" autocomplete="off"></label>
+    <p class="hint">For a very busy or low-energy day: do only this tiny version. It counts as a done day, so your streak keeps going. Showing up matters more than doing it perfectly.</p>
+    <label class="field"><span>Note</span><textarea class="input" id="hnote" maxlength="${MAX_NOTE}" placeholder="Why this habit matters to you, or how you want to do it">${esc(h.note)}</textarea></label>
+    <p class="hint">Leave a field empty to remove it. Empty ones are not shown on the habit.</p>
+    <div class="actions">
+      <button class="btn" data-action="saveextras" data-id="${esc(h.id)}">Save</button>
+      <button class="btn ghost" data-action="close">Cancel</button>
+    </div>`);
+}
 function openClaim(id) {
   const h = findHabit(id); if (!h) return;
   const t = TIERS[h.claimed];
@@ -1075,18 +1131,27 @@ function confirmBox(title, text, action, label, data) {
     <p>${text}</p>
     <div class="actions two"><button class="btn danger" data-action="${action}" ${data || ''}>${esc(label)}</button><button class="btn ghost" data-action="close">Cancel</button></div>`);
 }
-function openSaverChoice(id, k) {
+// Shown when tapping an empty box that has more than one possible answer:
+// the habit has a 2-minute version, and/or a streak saver can be used for yesterday.
+function saverOkFor(h, k) {
+  return k === dkey(addDays(new Date(), -1)) && S.savers > 0 && chainBefore(h, k) > 0;
+}
+function openDayChoice(id, k) {
   const h = findHabit(id); if (!h) return;
+  const isY = k !== dkey(new Date());
+  const saver = saverOkFor(h, k);
   const n = chainBefore(h, k);
   showModal(`
     <div class="wtag"><span class="tag">[ System ]</span></div>
-    <h3>Yesterday</h3>
+    <h3>${isY ? 'Yesterday' : 'Today'}</h3>
     <p class="sub">${esc(h.name)}</p>
-    <p>You have a <b>${n}-day streak</b> running. Did you complete this habit yesterday?</p>
-    <div class="reward"><b>Streak savers</b>You have ${S.savers}. Using one keeps your streak alive but does not add a day to it.</div>
+    <p>${saver ? `You have a <b>${n}-day streak</b> running. Did you complete this habit yesterday?` : `What did you do ${isY ? 'yesterday' : 'today'}?`}</p>
+    ${h.mini ? `<div class="reward"><b>2-minute version</b>${esc(h.mini)}<br>It counts as a done day, so your streak continues.</div>` : ''}
+    ${saver ? `<div class="reward"><b>Streak savers</b>You have ${S.savers}. Using one keeps your streak alive but does not add a day to it.</div>` : ''}
     <div class="actions">
-      <button class="btn" data-action="markdone" data-id="${esc(id)}" data-day="${esc(k)}">I did it: mark done</button>
-      <button class="btn ghost" data-action="usesaver" data-id="${esc(id)}" data-day="${esc(k)}">I missed it: use a streak saver</button>
+      <button class="btn" data-action="markdone" data-id="${esc(id)}" data-day="${esc(k)}">${saver ? 'I did it: mark done' : 'I did the full habit'}</button>
+      ${h.mini ? `<button class="btn ghost" data-action="marklite" data-id="${esc(id)}" data-day="${esc(k)}">I did the 2-minute version</button>` : ''}
+      ${saver ? `<button class="btn ghost" data-action="usesaver" data-id="${esc(id)}" data-day="${esc(k)}">I missed it: use a streak saver</button>` : ''}
       <button class="btn ghost" data-action="close">Cancel</button>
     </div>`);
 }
@@ -1182,13 +1247,17 @@ function afterChange(id, before) {
   const h = findHabit(id);
   if (h && claimableCount(h) > before) openClaim(id);
 }
-function markDone(id, k) {
+// lite = true: the day was done with the 2-minute version (still a real done day).
+function markDone(id, k, lite) {
   const h = findHabit(id); if (!h) return;
   const tk = dkey(new Date()), yk = dkey(addDays(new Date(), -1));
   if ((k !== tk && k !== yk) || h.done[k]) return;
   const before = claimableCount(h);
   h.done[k] = 1;
+  if (!h.lite) h.lite = {};
+  if (lite) h.lite[k] = true; else delete h.lite[k];
   afterChange(id, before);
+  if (lite) toast('2-minute version done. Streak kept alive.');
 }
 function useSaver(id, k) {
   const h = findHabit(id); if (!h) return;
@@ -1207,10 +1276,17 @@ function toggleDay(id, k) {
   if (h.done[k] === 2) { // protected day: tapping again returns the saver
     delete h.done[k]; S.savers += 1; save(); render(); toast('Streak saver returned.'); return;
   }
-  if (k === yk && !h.done[k] && S.savers > 0 && chainBefore(h, k) > 0) { openSaverChoice(id, k); return; }
-  const before = claimableCount(h);
-  if (h.done[k]) delete h.done[k]; else h.done[k] = 1;
-  afterChange(id, before);
+  if (h.done[k]) { // done day (full or 2-minute): tapping again unmarks it
+    const before = claimableCount(h);
+    delete h.done[k];
+    if (h.lite) delete h.lite[k];
+    afterChange(id, before);
+    return;
+  }
+  // Empty day: ask only when there is a real choice (a 2-minute version exists and/or a streak saver can be used).
+  // A habit without either behaves exactly as before: one tap marks it done.
+  if (h.mini || saverOkFor(h, k)) { openDayChoice(id, k); return; }
+  markDone(id, k, false);
 }
 function startFresh() {
   closeModal();
@@ -1223,17 +1299,25 @@ const actions = {
   tick: el => toggleDay(el.dataset.id, el.dataset.day),
   rec: el => { ui.rec = el.dataset.id; renderView(); playIn(0); },
   info: openInfo,
-  markdone: el => { closeModal(); markDone(el.dataset.id, el.dataset.day); },
+  markdone: el => { closeModal(); markDone(el.dataset.id, el.dataset.day, false); },
+  marklite: el => { closeModal(); markDone(el.dataset.id, el.dataset.day, true); },
   usesaver: el => { closeModal(); useSaver(el.dataset.id, el.dataset.day); },
   add: () => { if (S.habits.length >= MAX_HABITS) return; openHabitForm(null); },
   edit: el => openHabitForm(el.dataset.id),
+  extras: el => openExtras(el.dataset.id),
+  saveextras: el => {
+    const h = findHabit(el.dataset.id); if (!h) return;
+    h.mini = ($('#hmini').value || '').trim().slice(0, MAX_MINI);
+    h.note = ($('#hnote').value || '').trim().slice(0, MAX_NOTE);
+    save(); closeModal(); render();
+  },
   close: closeModal,
   savehabit: el => {
     const name = ($('#hname').value || '').trim().slice(0, 30);
     if (!name) { toast('Give your habit a name.'); return; }
     const id = el.dataset.id;
     if (id) { const h = findHabit(id); if (h) h.name = name; }
-    else { if (S.habits.length >= MAX_HABITS) return; S.habits.push({id: uid(), name, created: dkey(new Date()), done: {}, claimed: 0}); S.bigMoment = true; askPersist(); }
+    else { if (S.habits.length >= MAX_HABITS) return; S.habits.push({id: uid(), name, created: dkey(new Date()), done: {}, lite: {}, mini: '', note: '', claimed: 0}); S.bigMoment = true; askPersist(); }
     save(); closeModal(); render();
   },
   delask: el => { const h = findHabit(el.dataset.id); if (h) confirmBox('Delete habit?', `<b>${esc(h.name)}</b> and its history will be removed. Rewards and XP you already earned stay.`, 'delete', 'Delete', `data-id="${esc(h.id)}"`); },
