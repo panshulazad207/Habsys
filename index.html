@@ -141,6 +141,8 @@ h2.sec::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,var(
 .empty{text-align:center;padding:28px 18px;margin-bottom:16px}
 .empty h3{font-family:var(--head);font-size:22px;letter-spacing:.14em;text-transform:uppercase;margin:6px 0 8px}
 .empty p{margin:0;color:var(--muted);font-size:15px}
+.empty .stack{margin-top:18px;text-align:left}
+.empty p + p{margin-top:10px}
 
 /* buttons */
 .btn{
@@ -193,6 +195,9 @@ textarea.input{min-height:96px;resize:none}
 .tab svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linejoin:round;stroke-linecap:round;transition:filter .3s ease}
 .tab.on{color:var(--white)}
 .tab.on svg{filter:drop-shadow(0 0 6px var(--blue2))}
+/* while the welcome / recovery screen is showing, there is nothing to navigate to */
+.rescuing .tabs{display:none}
+.rescuing #app{padding-bottom:calc(env(safe-area-inset-bottom) + 32px)}
 
 /* modal */
 #overlay{position:fixed;inset:0;z-index:50;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(2,6,20,.8);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);overflow-y:auto}
@@ -322,8 +327,11 @@ textarea.input{min-height:96px;resize:none}
 'use strict';
 
 /* ============ constants ============ */
-const APP_VERSION = '1.5.1';
+const APP_VERSION = '1.6.0';
 const MAX_HABITS = 10;
+// Backup reminders: the banner shows when this many changes (or days with any change) have passed since the last backup.
+const BACKUP_CHANGES = 10, BACKUP_DAYS = 3;
+const SNAP_KEEP = 5;   // how many daily safety copies and how many event safety copies the app keeps
 // Quest ladder. "savers" = streak savers given as a bonus when the quest is claimed.
 const TIERS = [
   {n:1,  days:2,   xp:25,   savers:0, title:'Awakened',    reward:'A small treat: your favourite drink or snack'},
@@ -346,6 +354,7 @@ const RANKS = [{min:1,l:'E'},{min:50,l:'D'},{min:100,l:'C'},{min:150,l:'B'},{min
 const LV_BASE = 25, LV_STEP = 2;
 const DAY_LETTERS = 'MTWTFSS';
 const DB_NAME = 'habsys', STORE = 'kv', DB_KEY = 'state', LS_KEY = 'habsys_state_v1';
+const CACHE_NAME = 'habsys-data';   // third storage area (Cache Storage). sw.js must never delete it.
 const CHECK = '<svg class="ck" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 const PENCIL = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20l1-5L16.5 3.5l4 4L9 19z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>';
 const SHIELD = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l7 3v5.5c0 4.3-2.8 7.6-7 9.5-4.2-1.9-7-5.2-7-9.5V6z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/></svg>';
@@ -362,17 +371,35 @@ const uid = () => 'h' + Date.now().toString(36) + Math.random().toString(36).sli
 const fmtDate = iso => { try { return new Date(iso).toLocaleDateString(undefined, {day:'numeric', month:'short', year:'numeric'}); } catch (e) { return ''; } };
 const fmtKey = k => { try { return parseKey(k).toLocaleDateString(undefined, {day:'numeric', month:'short', year:'numeric'}); } catch (e) { return ''; } };
 const saverTxt = n => n ? ' · +' + n + ' saver' + (n > 1 ? 's' : '') : '';
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const withTimeout = (p, ms) => new Promise((res, rej) => {
+  const t = setTimeout(() => rej(new Error('timeout')), ms);
+  p.then(v => { clearTimeout(t); res(v); }, e => { clearTimeout(t); rej(e); });
+});
 function weekDays() {
   const t = new Date(), dow = (t.getDay() + 6) % 7, mon = addDays(t, -dow);
   return Array.from({length: 7}, (_, i) => addDays(mon, i));
 }
-
-/* ============ state + storage ============ */
-// In habit.done: 1 = habit done, 2 = day protected by a streak saver.
-function defaultState() {
-  return { v:2, player:{name:'Player', xp:0}, savers:0, habits:[], rewards:[], rewardText:{}, lastBackup:null, updatedAt:0 };
+// Small fingerprint (cyrb53). Used to detect damaged copies and damaged backup files. Not a password.
+function sum53(str) {
+  let h1 = 0xdeadbeef, h2 = 0x41c6ce57;
+  for (let i = 0; i < str.length; i++) {
+    const ch = str.charCodeAt(i);
+    h1 = Math.imul(h1 ^ ch, 2654435761);
+    h2 = Math.imul(h2 ^ ch, 1597334677);
+  }
+  h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+  h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+  return (4294967296 * (2097151 & h2) + (h1 >>> 0)).toString(36);
 }
-function validState(s) { return s && typeof s === 'object' && Array.isArray(s.habits); }
+
+/* ============ state ============ */
+// In habit.done: 1 = habit done, 2 = day protected by a streak saver.
+// changes = number of edits since the last backup. bigMoment = a quest/habit milestone happened since the last backup.
+function defaultState() {
+  return { v:2, player:{name:'Player', xp:0}, savers:0, habits:[], rewards:[], rewardText:{}, lastBackup:null, changes:0, bigMoment:false, updatedAt:0 };
+}
+function validState(s) { return !!s && typeof s === 'object' && Array.isArray(s.habits); }
 function normalize(raw) {
   const s = defaultState();
   if (!validState(raw)) return s;
@@ -405,14 +432,43 @@ function normalize(raw) {
   const rt = raw.rewardText && typeof raw.rewardText === 'object' ? raw.rewardText : {};
   for (const t of TIERS) if (typeof rt[t.n] === 'string' && rt[t.n].trim()) s.rewardText[t.n] = rt[t.n].trim().slice(0, 160);
   s.lastBackup = typeof raw.lastBackup === 'string' ? raw.lastBackup : null;
+  s.changes = Math.max(0, Math.floor(Number(raw.changes) || 0));
+  s.bigMoment = !!raw.bigMoment;
   s.updatedAt = Number(raw.updatedAt) || 0;
   return s;
 }
+const meaningful = st => !!st && (st.habits.length > 0 || st.player.xp > 0 || st.rewards.length > 0);
 
+/* ============ storage: 3 protected copies + safety copies ============ */
+// Every save goes to THREE separate storage areas (IndexedDB, localStorage, Cache Storage). Each copy carries a
+// fingerprint, so a damaged copy is detected and the app falls back to a good one. The app never writes an
+// empty state over data it could not read, and it keeps daily safety copies it can restore from by itself.
 let S = defaultState();
 let storageNote = '';
 let persistState = 'unknown'; // 'granted' | 'denied' | 'unsupported' | 'unknown'
+let health = {idb:null, ls:null, cache:null};
+let writesLocked = false;     // true while the stored data could not be read: nothing is written until the person decides
 let dbPromise = null;
+
+function makeRec(state) {
+  const data = JSON.stringify(state);
+  return {fmt:2, app:APP_VERSION, savedAt:Date.now(), sum:sum53(data), data:data};
+}
+// Reads one stored copy. Returns null (nothing there), {bad:true} (damaged) or {state, upd, app}.
+function unpack(x) {
+  if (x === undefined || x === null || x === '') return null;
+  try {
+    if (typeof x === 'string') x = JSON.parse(x);
+    if (x && x.fmt === 2 && typeof x.data === 'string') {
+      if (sum53(x.data) !== x.sum) return {bad:true};
+      const st = JSON.parse(x.data);
+      if (!validState(st)) return {bad:true};
+      return {state: normalize(st), upd: Number(st.updatedAt) || 0, app: x.app || null};
+    }
+    if (validState(x)) return {state: normalize(x), upd: Number(x.updatedAt) || 0, app: null}; // copy written by version 1.5.x or older
+  } catch (e) {}
+  return {bad:true};
+}
 
 function idb() {
   if (dbPromise) return dbPromise;
@@ -420,34 +476,165 @@ function idb() {
     if (!window.indexedDB) return rej(new Error('IndexedDB unavailable'));
     const r = indexedDB.open(DB_NAME, 1);
     r.onupgradeneeded = () => { r.result.createObjectStore(STORE); };
-    r.onsuccess = () => res(r.result);
+    r.onsuccess = () => {
+      const db = r.result;
+      db.onclose = () => { dbPromise = null; };
+      db.onversionchange = () => { db.close(); dbPromise = null; };
+      res(db);
+    };
     r.onerror = () => rej(r.error);
     r.onblocked = () => rej(new Error('IndexedDB blocked'));
   });
   dbPromise.catch(() => { dbPromise = null; });
   return dbPromise;
 }
-async function idbGet(k) {
-  const db = await idb();
-  return new Promise((res, rej) => { const rq = db.transaction(STORE, 'readonly').objectStore(STORE).get(k); rq.onsuccess = () => res(rq.result); rq.onerror = () => rej(rq.error); });
+// iOS can close the database connection in the background: reconnect once and try again.
+async function idbRun(fn) {
+  try { return await fn(await idb()); }
+  catch (e) { dbPromise = null; return await fn(await idb()); }
 }
-async function idbSet(k, v) {
-  const db = await idb();
-  return new Promise((res, rej) => { const tx = db.transaction(STORE, 'readwrite'); tx.objectStore(STORE).put(v, k); tx.oncomplete = () => res(); tx.onerror = () => rej(tx.error); tx.onabort = () => rej(tx.error); });
+const idbGet = k => idbRun(db => new Promise((res, rej) => {
+  const rq = db.transaction(STORE, 'readonly').objectStore(STORE).get(k);
+  rq.onsuccess = () => res(rq.result); rq.onerror = () => rej(rq.error);
+}));
+const idbSet = (k, v) => idbRun(db => new Promise((res, rej) => {
+  const tx = db.transaction(STORE, 'readwrite'); tx.objectStore(STORE).put(v, k);
+  tx.oncomplete = () => res(); tx.onerror = () => rej(tx.error); tx.onabort = () => rej(tx.error);
+}));
+
+const cacheUrl = k => new URL('./__habsys_' + k + '.json', location.href).href;
+async function cacheGet(k) {
+  if (!window.caches) return undefined;
+  const c = await caches.open(CACHE_NAME), r = await c.match(cacheUrl(k));
+  return r ? await r.text() : undefined;
 }
-async function loadState() {
-  let a = null, b = null;
-  try { a = await idbGet(DB_KEY); } catch (e) {}
-  try { const t = localStorage.getItem(LS_KEY); if (t) b = JSON.parse(t); } catch (e) {}
-  const best = [a, b].filter(validState).sort((x, y) => (y.updatedAt || 0) - (x.updatedAt || 0))[0];
-  return best ? normalize(best) : defaultState();
+async function cachePut(k, text) {
+  if (!window.caches) throw new Error('Cache Storage unavailable');
+  const c = await caches.open(CACHE_NAME);
+  await c.put(cacheUrl(k), new Response(text, {headers:{'content-type':'application/json'}}));
 }
-function save() {
+
+function updateNote() {
+  const vals = [health.idb, health.ls, health.cache].filter(v => v !== null);
+  const ok = vals.filter(Boolean).length;
+  storageNote = ok === 0 ? 'Could not save to this device. Save a backup file now.'
+    : ok < vals.length ? 'One storage area is unavailable. Your data is still saved in the others.' : '';
+}
+function writeAll(rec) {
+  const str = JSON.stringify(rec);
+  let ls = false;
+  try { localStorage.setItem(LS_KEY, str); ls = true; } catch (e) {}
+  const a = withTimeout(idbSet(DB_KEY, rec), 8000).then(() => true, () => { dbPromise = null; return false; });
+  const b = window.caches ? withTimeout(cachePut('state', str), 8000).then(() => true, () => false) : Promise.resolve(null);
+  Promise.all([a, b]).then(r => { health = {idb:r[0], ls:ls, cache:r[1]}; updateNote(); });
+}
+// opts.noCount = this save is housekeeping, not a change the person made.
+function save(opts) {
   S.updatedAt = Date.now();
-  const snap = JSON.parse(JSON.stringify(S));
-  try { localStorage.setItem(LS_KEY, JSON.stringify(snap)); } catch (e) {}
-  idbSet(DB_KEY, snap).then(() => { storageNote = ''; }).catch(() => { storageNote = 'Primary storage unavailable: using backup copy only.'; });
+  if (!(opts && opts.noCount)) S.changes = (S.changes || 0) + 1;
+  if (writesLocked) return;
+  writeAll(makeRec(S));
+  maybeSnap();
 }
+// Re-write the current copy when the app goes to the background, in case a write was still in flight.
+function flush() { if (!writesLocked && !ui.rescue) { writeAll(makeRec(S)); maybeSnap(); } }
+
+/* ---- safety copies (invisible: used only for automatic recovery) ---- */
+// 'snaps' = one copy per day (last 5). 'events' = copies taken at key moments (upgrade, quest claimed; last 5).
+// Both lists are also mirrored into Cache Storage.
+let snapChain = Promise.resolve();
+async function readList(key) {
+  try { const v = await withTimeout(idbGet(key), 4000); return Array.isArray(v) ? v : (v == null ? [] : null); }
+  catch (e) { return null; }   // null = could not read: never write over it
+}
+async function mirrorSnaps() {
+  try {
+    const a = await readList('snaps'), b = await readList('events');
+    if (a && b) await cachePut('snaps', JSON.stringify({snaps:a, events:b}));
+  } catch (e) {}
+}
+// The daily copy of today is refreshed at most every SNAP_REFRESH ms, so it never falls far behind your real data.
+const SNAP_REFRESH = 20 * 60000;
+let lastSnapAt = 0;
+function maybeSnap() {
+  if (writesLocked || ui.rescue || !meaningful(S) || Date.now() - lastSnapAt < SNAP_REFRESH) return;
+  lastSnapAt = Date.now();
+  snapshot('daily');
+}
+function snapshot(kind) {
+  if (writesLocked || !meaningful(S)) return;
+  const rec = makeRec(S), day = dkey(new Date()), at = Date.now(), key = kind === 'daily' ? 'snaps' : 'events';
+  if (kind === 'daily') lastSnapAt = at;
+  snapChain = snapChain.then(async () => {
+    const list = await readList(key);
+    if (list === null) return;
+    const entry = {kind:kind, day:day, at:at, rec:rec};
+    if (kind === 'daily') {
+      const i = list.findIndex(e => e && e.day === day);
+      if (i >= 0) {
+        if (at - (Number(list[i].at) || 0) < SNAP_REFRESH) return;   // today's copy is recent enough
+        list[i] = entry;                                              // refresh today's copy in place
+      } else list.unshift(entry);
+    } else list.unshift(entry);
+    await idbSet(key, list.slice(0, SNAP_KEEP));
+    await mirrorSnaps();
+  }).catch(() => {});
+}
+function clearSnaps() {
+  snapChain = snapChain.then(async () => {
+    try { await idbSet('snaps', []); await idbSet('events', []); } catch (e) {}
+    try { await cachePut('snaps', JSON.stringify({snaps:[], events:[]})); } catch (e) {}
+  }).catch(() => {});
+}
+async function readSnapshots() {
+  let a = await readList('snaps'), b = await readList('events');
+  if (a === null || b === null) {
+    try {
+      const m = JSON.parse(await withTimeout(cacheGet('snaps'), 4000) || 'null');
+      if (m) { if (a === null) a = m.snaps; if (b === null) b = m.events; }
+    } catch (e) {}
+  }
+  const out = [];
+  for (const e of [].concat(Array.isArray(a) ? a : [], Array.isArray(b) ? b : [])) {
+    const u = e && unpack(e.rec);
+    if (u && u.state) out.push({state:u.state, app:u.app, at:Number(e.at) || 0});
+  }
+  return out;
+}
+
+/* ---- loading: pick the best good copy, repair, or ask ---- */
+// status: 'ok' | 'recovered' | 'fresh' (nothing stored anywhere) | 'damaged' | 'unreadable' (stored data could not be read)
+async function loadAll() {
+  let idbRaw, idbErr = false;
+  for (let i = 0; i < 3; i++) {
+    try { idbRaw = await withTimeout(idbGet(DB_KEY), 4000); idbErr = false; break; }
+    catch (e) { idbErr = !!window.indexedDB; dbPromise = null; if (i < 2) await sleep(400); }
+  }
+  let lsRaw = null; try { lsRaw = localStorage.getItem(LS_KEY); } catch (e) {}
+  let cRaw; try { cRaw = await withTimeout(cacheGet('state'), 4000); } catch (e) {}
+  const cand = [unpack(idbRaw), unpack(lsRaw), unpack(cRaw)];
+  const good = cand.filter(c => c && c.state).sort((a, b) => b.upd - a.upd);
+  const anyBad = cand.some(c => c && c.bad);
+  const snaps = await readSnapshots();
+  if (good.length) {
+    const best = good[0];
+    // Progress can only go up by itself (XP and rewards never shrink unless you erase or restore, and both of those
+    // reset the safety copies). A safety copy with more progress than the live data means something went wrong.
+    const lost = snaps
+      .filter(s => s.state.player.xp > best.state.player.xp || s.state.rewards.length > best.state.rewards.length)
+      .sort((a, b) => (b.state.player.xp - a.state.player.xp) || (b.at - a.at))[0];
+    if (lost) return {state:lost.state, status:'recovered', app:lost.app};
+    return {state:best.state, status:'ok', app:best.app};
+  }
+  if (snaps.length) {
+    const s = snaps.sort((a, b) => b.at - a.at)[0];
+    return {state:s.state, status:'recovered', app:s.app};
+  }
+  if (anyBad) return {state:defaultState(), status:'damaged'};
+  if (idbErr) return {state:defaultState(), status:'unreadable'};
+  return {state:defaultState(), status:'fresh'};
+}
+
 async function askPersist() {
   try {
     if (navigator.storage && navigator.storage.persisted) {
@@ -456,7 +643,7 @@ async function askPersist() {
       else persistState = 'unsupported';
     } else persistState = 'unsupported';
   } catch (e) { persistState = 'unsupported'; }
-  if (ui.tab === 'system') render();
+  if (ui.tab === 'system' && !ui.rescue) render();
 }
 
 /* ============ game logic ============ */
@@ -502,18 +689,26 @@ const lvlStart = L => xpFor(L);
 const rankOf = L => { let r = 'E'; for (const x of RANKS) if (L >= x.min) r = x.l; return r; };
 const rewardTextFor = t => S.rewardText[t.n] || t.reward;
 const findHabit = id => S.habits.find(h => h.id === id);
-function backupDue() {
-  if (!S.habits.length) return false;
-  let ref;
-  if (S.lastBackup) ref = new Date(S.lastBackup);
-  else ref = parseKey(S.habits.map(h => h.created).sort()[0]);
-  if (isNaN(ref)) return false;
-  return (Date.now() - ref.getTime()) / 86400000 >= 7;
+
+// Backup reminder: counts edits since the last backup, and reacts to big moments (quest claimed, habit added).
+function backupInfo() {
+  if (!meaningful(S)) return {due:false};
+  const ch = S.changes || 0;
+  let days = null;
+  if (S.lastBackup) { const t = new Date(S.lastBackup).getTime(); if (!isNaN(t)) days = Math.max(0, Math.floor((Date.now() - t) / 86400000)); }
+  const ago = days === null ? 'never' : days === 0 ? 'today' : days === 1 ? 'yesterday' : days + ' days ago';
+  let due = false, msg = '';
+  if (days === null) { due = true; msg = 'You have never saved a backup. Save one now so your progress is safe.'; }
+  else if (ch > 0 && S.bigMoment) { due = true; msg = 'Big moment recorded. Save a backup now to lock in your progress.'; }
+  else if (ch >= BACKUP_CHANGES || (ch > 0 && days >= BACKUP_DAYS)) {
+    due = true; msg = ch + ' change' + (ch === 1 ? '' : 's') + ' since your last backup (' + ago + '). Save one so your progress is safe.';
+  }
+  return {due:due, msg:msg, changes:ch, days:days, ago:ago};
 }
 
 /* ============ UI state + render ============ */
 const TABS = ['habits', 'vault', 'records', 'system'];
-const ui = { tab: 'habits', day: dkey(new Date()), rec: null };
+const ui = { tab: 'habits', day: dkey(new Date()), rec: null, rescue: null };  // rescue: null | 'fresh' | 'damaged' | 'unreadable'
 
 function renderNav() {
   document.querySelectorAll('.tab').forEach(t => {
@@ -526,9 +721,9 @@ function renderNav() {
 function renderView() {
   const now = new Date();
   $('#today-label').innerHTML = esc(now.toLocaleDateString(undefined, {weekday:'short'})) + '<br>' + esc(now.toLocaleDateString(undefined, {day:'2-digit', month:'short'}));
-  $('#view').innerHTML = ui.tab === 'habits' ? viewHabits() : ui.tab === 'vault' ? viewVault() : ui.tab === 'records' ? viewRecords() : viewSystem();
+  $('#view').innerHTML = ui.rescue ? viewRescue() : ui.tab === 'habits' ? viewHabits() : ui.tab === 'vault' ? viewVault() : ui.tab === 'records' ? viewRecords() : viewSystem();
 }
-function render() { renderNav(); renderView(); }
+function render() { document.body.classList.toggle('rescuing', !!ui.rescue); renderNav(); renderView(); }
 
 // Smooth fade/slide for the content area.
 function playIn(dx) {
@@ -541,7 +736,7 @@ function playIn(dx) {
 const reduceMotion = () => !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
 let swapTimer;
 function switchTab(name) {
-  if (TABS.indexOf(name) < 0) return;
+  if (TABS.indexOf(name) < 0 || ui.rescue) return;
   if (name === ui.tab) { window.scrollTo(0, 0); return; }
   const dir = TABS.indexOf(name) > TABS.indexOf(ui.tab) ? 1 : -1;
   ui.tab = name;
@@ -553,6 +748,38 @@ function switchTab(name) {
   v.classList.add('v-out');
   clearTimeout(swapTimer);
   swapTimer = setTimeout(() => { renderView(); window.scrollTo(0, 0); playIn(dir * 28); }, 130);
+}
+
+/* ---- welcome / recovery screen: shown only when no saved progress could be loaded ---- */
+function viewRescue() {
+  if (ui.rescue === 'fresh') {
+    return `
+    <section class="panel empty">
+      <div class="tag">[ System ]</div>
+      <h3>Welcome</h3>
+      <p>No saved progress was found on this device.</p>
+      <p>If you already use Habsys and just re-added the icon or reset your iPad, restore your backup file now and everything comes back, including streaks, XP and rewards.</p>
+      <p>If this is your first time, start fresh.</p>
+      <div class="stack">
+        <button class="btn block" data-action="restore">Restore my progress</button>
+        <button class="btn ghost block" data-action="startfresh">Start fresh</button>
+      </div>
+    </section>`;
+  }
+  const damaged = ui.rescue === 'damaged';
+  return `
+    <section class="panel empty">
+      <div class="tag">[ System ]</div>
+      <h3>${damaged ? 'Saved data is damaged' : 'Could not read your data'}</h3>
+      <p>${damaged
+        ? 'A saved copy was found on this device, but it did not pass its safety check. Nothing has been changed or deleted.'
+        : 'Your iPad did not answer when the app asked for your saved data. Nothing has been deleted. Close the app completely and open it again, or try once more.'}</p>
+      <div class="stack">
+        <button class="btn block" data-action="retry">Try again</button>
+        <button class="btn ghost block" data-action="restore">Restore from backup file</button>
+        ${damaged ? '<button class="btn danger block" data-action="askfresh">Start fresh</button>' : ''}
+      </div>
+    </section>`;
 }
 
 function viewHabits() {
@@ -572,8 +799,9 @@ function viewHabits() {
     </div>
     <div class="p-lv"><small>LV</small><b>${L}</b></div>
   </section>`;
-  if (backupDue()) {
-    html += `<section class="panel banner"><p><span class="tag">[ System ]</span><br>It has been a while since your last backup. Save one so your progress is safe.</p><button class="btn sm" data-action="backup">Back up</button></section>`;
+  const bi = backupInfo();
+  if (bi.due) {
+    html += `<section class="panel banner"><p><span class="tag">[ System ]</span><br>${esc(bi.msg)}</p><button class="btn sm" data-action="backup">Back up</button></section>`;
   }
   if (!S.habits.length) {
     html += `<section class="panel empty"><div class="tag">[ System ]</div><h3>Welcome, ${esc(S.player.name)}</h3><p>You have no habits yet. Add your first one (up to ${MAX_HABITS}) and start your first quest.</p></section>`;
@@ -730,6 +958,8 @@ function viewRecords() {
 function viewSystem() {
   const lb = S.lastBackup ? fmtDate(S.lastBackup) : 'Never';
   const ps = persistState === 'granted' ? 'Protected' : persistState === 'denied' ? 'Standard' : persistState === 'unsupported' ? 'Not available' : 'Checking…';
+  const vals = [health.idb, health.ls, health.cache].filter(v => v !== null);
+  const copies = vals.length && vals.every(v => v !== undefined) && health.idb !== null ? vals.filter(Boolean).length + ' of ' + vals.length + ' working' : 'Checking…';
   return `
   <h2 class="sec">Player</h2>
   <section class="panel">
@@ -744,9 +974,11 @@ function viewSystem() {
 
   <h2 class="sec">Data safety</h2>
   <section class="panel">
-    <p class="note">Your data lives only on this device. A backup file lets you restore everything if the app's data is ever cleared.</p>
+    <p class="note">Your data lives only on this device. The app keeps several protected copies and daily safety copies by itself and repairs them if one gets damaged. Only a backup file survives deleting the app or resetting the iPad, so save one regularly.</p>
     <div class="kv"><span>Last backup</span><b>${esc(lb)}</b></div>
+    <div class="kv"><span>Changes since backup</span><b>${S.changes || 0}</b></div>
     <div class="kv"><span>Storage protection</span><b>${esc(ps)}</b></div>
+    <div class="kv"><span>Protected copies</span><b>${esc(copies)}</b></div>
     ${storageNote ? `<div class="kv"><span>Warning</span><b>${esc(storageNote)}</b></div>` : ''}
     <div class="stack" style="margin-top:14px">
       <button class="btn block" data-action="backup">Save backup file</button>
@@ -811,7 +1043,9 @@ function doClaim(id) {
   S.player.xp += t.xp;
   S.savers += t.savers || 0;
   S.rewards.unshift({id: uid(), habitId: h.id, habitName: h.name, tier: t.n, title: t.title, xp: t.xp, text: rewardTextFor(t), at: new Date().toISOString(), enjoyed: false});
+  S.bigMoment = true;
   save();
+  snapshot('claim');
   const newL = levelOf(S.player.xp);
   render();
   const more = claimableCount(h) > 0;
@@ -822,7 +1056,7 @@ function doClaim(id) {
     ${newL > oldL ? `<div class="reward"><b>Level up</b>LV ${oldL} → LV ${newL} · Rank ${rankOf(newL)}${rankOf(newL) !== rankOf(oldL) ? ' · New rank!' : ''}</div>` : ''}
     ${t.savers ? `<div class="reward"><b>Streak savers</b>+${t.savers} · you now have ${S.savers}</div>` : ''}
     <div class="reward"><b>Go enjoy it</b>${esc(S.rewards[0].text)}</div>
-    <p style="color:var(--muted);font-size:14px">Mark it as enjoyed in the Vault once you have had it.</p>
+    <p style="color:var(--muted);font-size:14px">Mark it as enjoyed in the Vault once you have had it. Then save a backup on the Habits tab to lock in this win.</p>
     <div class="actions"><button class="btn" data-action="afterclaim" data-id="${esc(h.id)}">${more ? 'Next reward' : 'Continue'}</button></div>`);
 }
 function openRewardEdit(n) {
@@ -878,10 +1112,19 @@ function openInfo() {
 }
 
 /* ============ backup / restore ============ */
+// A backup file carries a fingerprint of its data. On restore the fingerprint is checked, so a damaged or
+// half-copied file is rejected instead of overwriting good data.
+const backupSumOk = j => !!j && typeof j.checksum === 'string' && sum53(JSON.stringify(j.data)) === j.checksum;
 async function doBackup() {
-  const payload = {app:'habsys', backupVersion:1, appVersion:APP_VERSION, exportedAt:new Date().toISOString(), data:S};
+  if (ui.rescue) return;
+  const payload = {app:'habsys', backupVersion:2, appVersion:APP_VERSION, exportedAt:new Date().toISOString(), checksum:sum53(JSON.stringify(S)), data:S};
   const name = 'habsys-backup-' + dkey(new Date()) + '.json';
   const text = JSON.stringify(payload, null, 2);
+  // Check the file we are about to hand over reads back correctly.
+  try {
+    const back = JSON.parse(text);
+    if (!backupSumOk(back) || !validState(back.data)) throw new Error('bad');
+  } catch (e) { toast('Backup failed its safety check. Nothing was saved. Try again.'); return; }
   let saved = false;
   try {
     const file = new File([text], name, {type:'application/json'});
@@ -899,22 +1142,35 @@ async function doBackup() {
     setTimeout(() => URL.revokeObjectURL(url), 4000);
     saved = true;
   }
-  if (saved) { S.lastBackup = new Date().toISOString(); save(); toast('Backup created. Keep the file safe.'); render(); }
+  if (saved) {
+    S.lastBackup = new Date().toISOString(); S.changes = 0; S.bigMoment = false;
+    save({noCount:true}); toast('Backup created. Keep the file safe.'); render();
+  }
 }
-let pendingRestore = null;
+let pendingRestore = null, pendingRestoreAt = null;
 function handleRestoreFile(file) {
   if (!file) return;
+  if (file.size > 5000000) { toast('That file is too large to be a Habsys backup.'); return; }
   const r = new FileReader();
   r.onload = () => {
-    try {
-      const j = JSON.parse(String(r.result));
-      if (!j || j.app !== 'habsys' || !validState(j.data)) throw new Error('bad');
-      pendingRestore = normalize(j.data);
-      const n = pendingRestore.habits.length;
-      confirmBox('Restore backup?',
-        `This backup has <b>${n} habit${n === 1 ? '' : 's'}</b> and <b>${pendingRestore.player.xp} XP</b>` + (j.exportedAt ? ` (saved ${esc(fmtDate(j.exportedAt))})` : '') + `. It will <b>replace</b> what is on this device now.`,
-        'dorestore', 'Restore');
-    } catch (e) { toast('That file is not a Habsys backup.'); }
+    let j = null;
+    try { j = JSON.parse(String(r.result)); } catch (e) {}
+    if (!j || j.app !== 'habsys' || !validState(j.data)) { toast('That file is not a Habsys backup.'); return; }
+    let verified = false;
+    if (typeof j.checksum === 'string') {
+      if (!backupSumOk(j)) { toast('This backup file is damaged, so it was not used. Your current data is untouched.'); return; }
+      verified = true;
+    }
+    pendingRestore = normalize(j.data);
+    pendingRestoreAt = (j.exportedAt && !isNaN(new Date(j.exportedAt))) ? String(j.exportedAt) : null;
+    const n = pendingRestore.habits.length, xp = pendingRestore.player.xp;
+    let txt = `This backup has <b>${n} habit${n === 1 ? '' : 's'}</b> and <b>${xp.toLocaleString()} XP</b>` + (j.exportedAt ? ` (saved ${esc(fmtDate(j.exportedAt))})` : '')
+      + (ui.rescue ? '.' : `. It will <b>replace</b> what is on this device now.`)
+      + (verified ? ' The file passed its integrity check.' : ' This is an older file without an integrity check.');
+    if (!ui.rescue && xp < S.player.xp) {
+      txt += `<br><br><b>Warning:</b> this backup has less progress than what is on this device now (${S.player.xp.toLocaleString()} XP). Restoring will lose the difference.`;
+    }
+    confirmBox('Restore backup?', txt, 'dorestore', 'Restore');
   };
   r.onerror = () => toast('Could not read that file.');
   r.readAsText(file);
@@ -956,6 +1212,11 @@ function toggleDay(id, k) {
   if (h.done[k]) delete h.done[k]; else h.done[k] = 1;
   afterChange(id, before);
 }
+function startFresh() {
+  closeModal();
+  S = defaultState(); writesLocked = false; ui.rescue = null; ui.tab = 'habits';
+  save({noCount:true}); render(); askPersist();
+}
 
 const actions = {
   tab: el => switchTab(el.dataset.tab),
@@ -972,7 +1233,7 @@ const actions = {
     if (!name) { toast('Give your habit a name.'); return; }
     const id = el.dataset.id;
     if (id) { const h = findHabit(id); if (h) h.name = name; }
-    else { if (S.habits.length >= MAX_HABITS) return; S.habits.push({id: uid(), name, created: dkey(new Date()), done: {}, claimed: 0}); askPersist(); }
+    else { if (S.habits.length >= MAX_HABITS) return; S.habits.push({id: uid(), name, created: dkey(new Date()), done: {}, claimed: 0}); S.bigMoment = true; askPersist(); }
     save(); closeModal(); render();
   },
   delask: el => { const h = findHabit(el.dataset.id); if (h) confirmBox('Delete habit?', `<b>${esc(h.name)}</b> and its history will be removed. Rewards and XP you already earned stay.`, 'delete', 'Delete', `data-id="${esc(h.id)}"`); },
@@ -988,10 +1249,19 @@ const actions = {
   restore: () => { const f = $('#restoreFile'); f.value = ''; f.click(); },
   dorestore: () => {
     if (!pendingRestore) return;
-    S = pendingRestore; pendingRestore = null; save(); closeModal(); ui.tab = 'habits'; render(); toast('Backup restored.');
+    S = pendingRestore; pendingRestore = null;
+    S.changes = 0; S.bigMoment = false; S.lastBackup = pendingRestoreAt || new Date().toISOString();
+    writesLocked = false; ui.rescue = null; ui.tab = 'habits';
+    clearSnaps();                 // safety copies of the old data must not undo this restore
+    save({noCount:true});
+    snapshot('daily');
+    closeModal(); render(); toast('Backup restored.'); askPersist();
   },
-  erase: () => confirmBox('Erase everything?', 'All habits, XP and rewards on this device will be deleted. <b>Save a backup first</b> if you may want them back.', 'doerase', 'Erase all'),
-  doerase: () => { S = defaultState(); save(); closeModal(); ui.tab = 'habits'; render(); toast('All data erased.'); }
+  retry: () => { boot(); },
+  askfresh: () => confirmBox('Start fresh?', 'The damaged copy on this device will be replaced by an empty start. If you have a backup file, use Restore instead.', 'startfresh', 'Start fresh'),
+  startfresh: startFresh,
+  erase: () => confirmBox('Erase everything?', 'All habits, XP and rewards on this device will be deleted, including the app\'s automatic safety copies. <b>Save a backup first</b> if you may want them back.', 'doerase', 'Erase all'),
+  doerase: () => { S = defaultState(); clearSnaps(); save({noCount:true}); closeModal(); ui.tab = 'habits'; render(); toast('All data erased.'); }
 };
 
 document.addEventListener('click', e => {
@@ -1015,22 +1285,41 @@ document.addEventListener('keydown', e => {
 /* new day / back to app => refresh */
 function refreshIfNewDay() {
   const k = dkey(new Date());
-  if (k !== ui.day) { ui.day = k; render(); }
+  if (k !== ui.day) { ui.day = k; if (!ui.rescue) { snapshot('daily'); } render(); }
 }
-document.addEventListener('visibilitychange', () => { if (!document.hidden) { refreshIfNewDay(); render(); } });
+// If another window of the app saved newer data, take it instead of overwriting it with old data.
+function adoptNewer() {
+  if (ui.rescue || writesLocked) return;
+  try { const u = unpack(localStorage.getItem(LS_KEY)); if (u && u.state && u.upd > S.updatedAt) S = u.state; } catch (e) {}
+}
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) { flush(); return; }
+  adoptNewer(); refreshIfNewDay(); render();
+});
+window.addEventListener('pagehide', flush);
 setInterval(refreshIfNewDay, 60000);
 
 /* ============ start ============ */
-(async function init() {
-  S = await loadState();
-  save(); // writes to both stores so they stay in sync
-  render();
-  playIn(0);
-  askPersist();
-  if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
-    navigator.serviceWorker.register('sw.js').catch(() => {});
+async function boot() {
+  const r = await loadAll();
+  S = r.state;
+  if (r.status === 'ok' || r.status === 'recovered') {
+    writesLocked = false; ui.rescue = null;
+    if (r.status === 'ok' && r.app !== APP_VERSION) snapshot('upgrade');  // copy of the data exactly as the older version left it
+    save({noCount:true});   // writes all three copies, which also repairs any damaged one
+    snapshot('daily');
+    askPersist();
+    render(); playIn(0);
+    if (r.status === 'recovered') toast('Your progress was restored from a safety copy.');
+  } else {
+    writesLocked = true; ui.rescue = r.status;   // 'fresh' | 'damaged' | 'unreadable': nothing is written until the person decides
+    render(); playIn(0);
   }
-})();
+}
+boot();
+if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+}
 })();
 </script>
 </body>
