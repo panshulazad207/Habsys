@@ -13,7 +13,7 @@
 <link rel="apple-touch-icon" href="icon-180.png?v=199">
 <link rel="icon" type="image/png" href="icon-192.png?v=199">
 <style>
-/* ===== Habsys 2.0.0: Today ring, never-miss-twice, weekly reflection, identity statements, celebrations ===== */
+/* ===== Habsys 2.0.5: arrange habits (new) on top of 2.0.0: Today ring, never-miss-twice, weekly reflection, identity statements, celebrations ===== */
 :root{
   color-scheme:dark;
   --bg0:#0a0b10;
@@ -216,6 +216,18 @@ h2.sec{font-family:var(--head);font-size:25px;letter-spacing:-.02em;color:var(--
 .empty .stack{margin-top:22px;text-align:left}
 .empty p + p{margin-top:12px}
 
+/* arrange habits (new in 2.0.5) */
+.arrbar{display:flex;justify-content:flex-end;margin:-4px 0 14px}
+.arr-list{display:grid;gap:8px;margin-bottom:14px}
+.arr-row{display:flex;align-items:center;gap:12px;min-height:60px;padding:8px 8px 8px 16px;border-radius:18px;background:var(--surface2);border:1px solid var(--hair)}
+.arr-n{flex:none;width:22px;font-family:var(--head);font-weight:800;font-size:15px;color:var(--muted);font-variant-numeric:tabular-nums}
+.arr-dot{flex:none;width:11px;height:11px;border-radius:50%;background:var(--ac);box-shadow:0 0 0 4px color-mix(in srgb,var(--ac) 22%,transparent)}
+.arr-row b{flex:1;min-width:0;font-family:var(--head);font-weight:700;font-size:16px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.arr-btn{flex:none;width:46px;height:46px;display:grid;place-items:center;border-radius:14px;background:rgba(255,255,255,.08);color:var(--white);transition:transform .2s var(--spring),background .2s,opacity .2s}
+.arr-btn svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
+.arr-btn:active{transform:scale(.88);background:rgba(255,255,255,.16)}
+.arr-btn:disabled{opacity:.25;pointer-events:none}
+
 /* buttons */
 .btn{
   display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:54px;padding:10px 22px;border-radius:18px;
@@ -369,6 +381,7 @@ textarea.input.sm{min-height:76px}
   .tab:hover:not(.on){color:var(--white)}
   .add:hover:not(.full){background:rgba(255,255,255,.035)}
   .t-row:hover{background:var(--surface3)}
+  .arr-btn:hover:not(:disabled){background:rgba(255,255,255,.14)}
 }
 @media (min-width:700px){
   #app{padding-left:26px;padding-right:26px}
@@ -439,7 +452,7 @@ textarea.input.sm{min-height:76px}
 'use strict';
 
 /* ============ constants ============ */
-const APP_VERSION = '2.0.0';
+const APP_VERSION = '2.0.5';
 const MAX_HABITS = 10;
 const MAX_NOTE = 200, MAX_MINI = 60, MAX_ID = 60, MAX_REF = 200;   // length limits: note, 2-minute version, identity, reflection answers
 // Backup reminders: the banner shows when this many changes (or days with any change) have passed since the last backup.
@@ -478,6 +491,8 @@ const PENCIL = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20l1-5L1
 const DOTS = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="5" r="2.1"/><circle cx="12" cy="12" r="2.1"/><circle cx="12" cy="19" r="2.1"/></svg>';
 const SHIELD = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l7 3v5.5c0 4.3-2.8 7.6-7 9.5-4.2-1.9-7-5.2-7-9.5V6z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/></svg>';
 const SHIELD_CK = SHIELD.replace('<svg ', '<svg class="ck" ');
+const ARR_UP = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 15l6-6 6 6"/></svg>';
+const ARR_DOWN = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>';
 
 /* ============ helpers ============ */
 const $ = s => document.querySelector(s);
@@ -518,6 +533,7 @@ function sum53(str) {
 // habit.mini = text of the 2-minute version ('' = none). habit.note = free note ('' = none).
 // habit.identity = identity statement, for example "I am a reader" ('' = none).
 // habit.days = weekdays the habit is followed on (0 = Monday ... 6 = Sunday, sorted). [] = every day (a normal habit).
+// The order of S.habits IS the order shown on the Habits tab and in the Today card (changed with "Arrange habits").
 // reflections = weekly reflections {week (Monday key), win, hard, focus, rate, at}. cel = celebrations already shown. allDay = last day the "day complete" celebration was shown.
 // changes = number of edits since the last backup. bigMoment = a quest/habit milestone happened since the last backup.
 function defaultState() {
@@ -865,6 +881,7 @@ const findHabit = id => S.habits.find(h => h.id === id);
 
 /* ---- Today ring ---- */
 // A habit is due today when today is on its schedule (or it is already marked done today).
+// The list follows the order of S.habits, so it always matches the order you chose with "Arrange habits".
 function dueToday() {
   const t = new Date(), tk = dkey(t);
   return S.habits.filter(h => tk >= h.created && (isSched(h, t) || h.done[tk]));
@@ -1098,6 +1115,10 @@ function viewHabits() {
   }
   if (!S.habits.length) {
     html += `<section class="panel empty"><div class="tag">Habsys</div><h3>Welcome, ${esc(S.player.name)}</h3><p>You have no habits yet. Add your first one (up to ${MAX_HABITS}) and start your first quest.</p></section>`;
+  }
+  // Arrange button: only useful with two or more habits.
+  if (S.habits.length > 1) {
+    html += `<div class="arrbar"><button class="btn ghost sm" data-action="arrange">Arrange habits</button></div>`;
   }
   html += '<div class="habits">' + S.habits.map(habitCard).join('');
   if (S.habits.length < MAX_HABITS) {
@@ -1419,6 +1440,37 @@ function openHabitForm(id) {
       <button class="btn ghost" data-action="close">Cancel</button>
     </div>`);
 }
+
+/* ---- arrange habits (new in 2.0.5) ---- */
+// The order of S.habits is the order on the Habits tab AND in the Today card. Each tap on an arrow swaps two
+// neighbours, saves, and redraws the screen underneath. Only the list inside the sheet is redrawn, so the sheet stays still.
+function arrRows() {
+  const n = S.habits.length;
+  return S.habits.map((h, i) => `
+    <div class="arr-row" style="--ac:${HCOL[i % HCOL.length]}">
+      <span class="arr-n">${i + 1}</span><span class="arr-dot"></span><b>${esc(h.name)}</b>
+      <button class="arr-btn" data-action="moveup" data-id="${esc(h.id)}" aria-label="Move ${esc(h.name)} up"${i === 0 ? ' disabled' : ''}>${ARR_UP}</button>
+      <button class="arr-btn" data-action="movedown" data-id="${esc(h.id)}" aria-label="Move ${esc(h.name)} down"${i === n - 1 ? ' disabled' : ''}>${ARR_DOWN}</button>
+    </div>`).join('');
+}
+function openArrange() {
+  if (S.habits.length < 2) return;
+  showModal(`
+    <div class="wtag"><span class="tag">Habsys</span></div>
+    <h3>Arrange habits</h3>
+    <p class="sub">Top of the list shows first</p>
+    <div class="arr-list" id="arrlist">${arrRows()}</div>
+    <p class="hint">Use the arrows to move a habit up or down. The same order is used on the Habits tab and in the Today card. Colours follow the position, so the top habit is always blue.</p>
+    <div class="actions"><button class="btn" data-action="close">Done</button></div>`);
+}
+function moveHabit(id, dir) {
+  const i = S.habits.findIndex(h => h.id === id), j = i + dir;
+  if (i < 0 || j < 0 || j >= S.habits.length) return;
+  const t = S.habits[i]; S.habits[i] = S.habits[j]; S.habits[j] = t;
+  save(); render();
+  const l = $('#arrlist'); if (l) l.innerHTML = arrRows();
+}
+
 // Three-dot menu on a habit: four buttons. Each one opens its own small form. A tick on a button means it is already set.
 function openExtras(id) {
   const h = findHabit(id); if (!h) return;
@@ -1759,6 +1811,9 @@ const actions = {
   tick: el => toggleDay(el.dataset.id, el.dataset.day),
   rec: el => { ui.rec = el.dataset.id; renderView(); playIn(0); },
   info: openInfo,
+  arrange: openArrange,
+  moveup: el => moveHabit(el.dataset.id, -1),
+  movedown: el => moveHabit(el.dataset.id, 1),
   markdone: el => { closeModal(); markDone(el.dataset.id, el.dataset.day, false); },
   marklite: el => { closeModal(); markDone(el.dataset.id, el.dataset.day, true); },
   usesaver: el => { closeModal(); useSaver(el.dataset.id, el.dataset.day); },
