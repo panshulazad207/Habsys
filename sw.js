@@ -1,5 +1,5 @@
 // Habsys offline worker. Bump CACHE when releasing a new version.
-const CACHE = 'habsys-v1.9.9';
+const CACHE = 'habsys-v2.0.0';
 const SHELL = ['./', 'index.html', 'manifest.webmanifest', 'icon-180.png', 'icon-192.png', 'icon-512.png'];
 
 self.addEventListener('install', e => {

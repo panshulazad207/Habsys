@@ -13,7 +13,7 @@
 <link rel="apple-touch-icon" href="icon-180.png?v=199">
 <link rel="icon" type="image/png" href="icon-192.png?v=199">
 <style>
-/* ===== Habsys 1.9.9: same app, more polish. Look and feel only, no behaviour changes ===== */
+/* ===== Habsys 2.0.0: Today ring, never-miss-twice, weekly reflection, identity statements, celebrations ===== */
 :root{
   color-scheme:dark;
   --bg0:#0a0b10;
@@ -91,10 +91,42 @@ h2.sec{font-family:var(--head);font-size:25px;letter-spacing:-.02em;color:var(--
 .p-lv small{display:block;font-family:var(--body);font-weight:700;font-size:11px;letter-spacing:.18em;color:rgba(255,255,255,.7)}
 .p-lv b{font-family:var(--head);font-weight:800;font-size:48px;line-height:1.02;font-variant-numeric:tabular-nums;color:#fff;text-shadow:0 4px 18px rgba(20,10,90,.35)}
 
-/* backup banner */
+/* Today ring */
+.today{margin-bottom:18px;padding:22px}
+.t-top{display:flex;align-items:center;gap:20px}
+.ring{position:relative;width:112px;height:112px;flex:none}
+.ring svg{width:100%;height:100%;transform:rotate(-90deg);display:block}
+.ring circle{fill:none;stroke-width:10}
+.ring .rt{stroke:rgba(255,255,255,.09)}
+.ring .rp{stroke:var(--blue2);stroke-linecap:round;transition:stroke-dashoffset .8s var(--ease),stroke .4s;filter:drop-shadow(0 0 8px rgba(91,140,255,.55))}
+.ring.full .rp{stroke:#25c795;filter:drop-shadow(0 0 8px rgba(37,199,149,.6))}
+.ring .rc{position:absolute;inset:0;display:grid;place-content:center;text-align:center;font-family:var(--head);font-weight:800;font-size:28px;font-variant-numeric:tabular-nums;line-height:1}
+.ring .rc small{display:block;font-family:var(--body);font-weight:700;font-size:9.5px;letter-spacing:.16em;color:var(--muted);margin-top:6px}
+.t-msg{min-width:0}
+.t-msg h3{margin:0 0 5px;font-family:var(--head);font-weight:800;font-size:21px;letter-spacing:-.015em}
+.t-msg p{margin:0;font-size:14px;line-height:1.45;color:var(--muted)}
+.t-focus{margin-top:10px;padding-left:12px;border-left:2px solid var(--blue);font-size:13.5px;line-height:1.4;color:var(--white);overflow-wrap:anywhere}
+.t-focus b{display:block;font-family:var(--body);font-weight:700;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--blue2);margin-bottom:2px}
+.t-list{display:grid;gap:8px;margin-top:18px;padding-top:16px;border-top:1px solid var(--hair)}
+.t-row{display:flex;align-items:center;gap:14px;width:100%;min-height:58px;padding:8px 14px 8px 12px;border-radius:18px;background:var(--surface2);border:1px solid var(--hair);text-align:left;transition:transform .22s var(--spring),background .25s}
+.t-row:active{transform:scale(.98)}
+.t-dot{width:30px;height:30px;flex:none;border-radius:50%;border:2px solid var(--ac);display:grid;place-items:center;color:#fff;transition:background .3s,box-shadow .3s}
+.t-row.on .t-dot{background:var(--ac);box-shadow:0 6px 12px -6px var(--ac)}
+.t-dot .ck{width:58%;height:58%}
+.t-txt{flex:1;min-width:0;display:grid}
+.t-txt b{font-family:var(--head);font-weight:700;font-size:16px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.t-row.on .t-txt b{color:var(--muted);text-decoration:line-through;text-decoration-color:rgba(255,255,255,.25)}
+.t-txt small{font-size:12px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.t-txt small.nm{color:var(--gold);font-weight:600}
+.t-st{flex:none;text-align:right;font-family:var(--head);font-weight:800;font-size:19px;font-variant-numeric:tabular-nums}
+.t-st small{display:block;font-family:var(--body);font-weight:700;font-size:9px;letter-spacing:.14em;color:var(--muted)}
+
+/* backup / reminder banner */
 .banner{display:flex;align-items:center;gap:14px;margin-bottom:18px;padding:14px 16px;border-radius:22px;border-color:rgba(255,207,110,.28);background:linear-gradient(135deg,rgba(255,207,110,.11),rgba(255,159,74,.05)),var(--surface)}
 .banner p{margin:0;flex:1;font-size:14px;line-height:1.45;color:var(--white)}
 .banner .tag{color:var(--gold);font-weight:700;font-size:12px}
+.banner.ref{border-color:rgba(148,178,255,.3);background:linear-gradient(135deg,rgba(91,140,255,.14),rgba(123,64,228,.06)),var(--surface)}
+.banner.ref .tag{color:var(--blue2)}
 
 /* habits */
 .habits{display:grid;gap:18px;grid-template-columns:minmax(0,1fr)}
@@ -124,12 +156,15 @@ h2.sec{font-family:var(--head);font-size:25px;letter-spacing:-.02em;color:var(--
 .streak{text-align:right;flex:none;padding-left:4px;min-width:50px}
 .streak small{display:block;font-family:var(--body);font-weight:700;font-size:9.5px;letter-spacing:.16em;color:var(--muted)}
 .streak b{font-family:var(--head);font-weight:800;font-size:36px;line-height:1.02;letter-spacing:-.02em;font-variant-numeric:tabular-nums;color:var(--white)}
-/* optional extras (days, 2-minute version, note): only drawn when the habit has them */
+/* optional extras (identity, days, 2-minute version, note): only drawn when the habit has them */
 .extras{display:grid;gap:10px;margin:-4px 0 18px}
 .x-line{display:flex;align-items:baseline;gap:10px;font-size:14px;color:var(--white)}
 .x-line span:last-child{min-width:0;overflow-wrap:anywhere}
 .x-tag{flex:none;font-family:var(--body);font-weight:700;font-size:10px;letter-spacing:.08em;color:var(--ac);text-transform:uppercase;background:color-mix(in srgb,var(--ac) 15%,transparent);border:1px solid color-mix(in srgb,var(--ac) 22%,transparent);border-radius:8px;padding:3px 9px}
 .x-note{margin:0;font-size:14px;line-height:1.45;color:var(--muted);padding-left:12px;border-left:2px solid color-mix(in srgb,var(--ac) 65%,transparent);overflow-wrap:anywhere;white-space:pre-wrap}
+/* never miss twice */
+.nmt{margin:-2px 0 16px;padding:12px 14px;border-radius:16px;border:1px solid rgba(255,207,110,.3);background:rgba(255,207,110,.08);font-size:13.5px;line-height:1.45;color:var(--white);overflow-wrap:anywhere}
+.nmt b{display:block;font-family:var(--body);font-weight:700;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);margin-bottom:3px}
 .week{display:grid;grid-template-columns:repeat(7,1fr);gap:8px}
 .rest{margin-top:16px;padding:12px;border:1px dashed var(--hair2);border-radius:var(--r-sm);text-align:center;font-family:var(--body);font-weight:600;font-size:13px;color:var(--muted);background:rgba(255,255,255,.02)}
 .col{display:flex;flex-direction:column;align-items:center;gap:9px;min-width:0}
@@ -210,6 +245,8 @@ h2.sec{font-family:var(--head);font-size:25px;letter-spacing:-.02em;color:var(--
 .log-item h4{margin:0;font-family:var(--head);font-weight:800;font-size:17.5px;letter-spacing:-.01em}
 .log-item .meta{font-family:var(--body);font-weight:600;font-size:12.5px;color:var(--blue2);margin-top:4px}
 .log-item p{margin:10px 0 14px;font-size:15px;line-height:1.45}
+.log-item p.rl{margin:10px 0 0;font-size:14px;color:var(--muted);overflow-wrap:anywhere}
+.log-item p.rl b{color:var(--white);font-weight:700}
 .enjoyed{color:var(--muted)}
 .note{color:var(--muted);font-size:14.5px;line-height:1.5;margin:0 0 14px}
 .field{display:block;margin-bottom:16px}
@@ -218,6 +255,7 @@ h2.sec{font-family:var(--head);font-size:25px;letter-spacing:-.02em;color:var(--
 .input:focus{border-color:var(--blue);background:rgba(255,255,255,.09);box-shadow:0 0 0 4px rgba(91,140,255,.22)}
 .input:focus-visible{outline:none}
 textarea.input{min-height:104px;resize:none;line-height:1.4}
+textarea.input.sm{min-height:76px}
 .stack{display:grid;gap:12px}
 .kv{display:flex;justify-content:space-between;gap:12px;font-size:15px;padding:13px 0;border-bottom:1px solid var(--hair)}
 .kv:last-of-type{border-bottom:0}
@@ -250,7 +288,7 @@ textarea.input{min-height:104px;resize:none;line-height:1.4}
 .win .sub{font-family:var(--body);font-weight:600;font-size:14.5px;color:var(--blue2);margin:0 0 18px}
 .win p{margin:0 0 14px;color:var(--white);font-size:16px;line-height:1.5}
 .win p.small{font-size:14px;color:var(--muted)}
-.win .reward{background:rgba(255,255,255,.055);border:1px solid var(--hair);padding:15px 17px;border-radius:20px;margin-bottom:14px;line-height:1.5}
+.win .reward{background:rgba(255,255,255,.055);border:1px solid var(--hair);padding:15px 17px;border-radius:20px;margin-bottom:14px;line-height:1.5;overflow-wrap:anywhere}
 .win .reward b{display:block;font-family:var(--body);font-weight:700;font-size:12.5px;color:var(--blue2);margin-bottom:4px}
 .win .actions{display:grid;gap:10px;margin-top:4px}
 .win .actions.two{grid-template-columns:1fr 1fr}
@@ -260,13 +298,22 @@ textarea.input{min-height:104px;resize:none;line-height:1.4}
 .win .hint{margin:-6px 0 16px;font-size:13px;line-height:1.45;color:var(--muted)}
 .kv.here{color:var(--white)}
 .kv.here b{color:var(--blue2)}
+/* celebration sheet */
+.cel-ic{width:76px;height:84px;margin:0 auto 16px;display:grid;place-items:center;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);background:linear-gradient(160deg,#ffdd85,#ff9f4a);color:#3a2300;animation:pop .6s var(--spring)}
+.cel-ic .ck{width:44%;height:44%}
+.win.cel{text-align:center}
+.win.cel .reward{text-align:left}
+@keyframes pop{from{transform:scale(.4);opacity:0}to{transform:none;opacity:1}}
+.fx{position:fixed;inset:0;z-index:80;pointer-events:none;overflow:hidden}
+.fx i{position:absolute;top:-16px;width:9px;height:15px;border-radius:2px;opacity:0;animation:fall linear forwards}
+@keyframes fall{0%{opacity:1;transform:translate(0,0) rotate(0)}100%{opacity:1;transform:translate(var(--dx),108vh) rotate(var(--r))}}
 /* weekday picker for flexible habits */
 .dchips{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px;margin-bottom:16px}
 .dchip{min-height:50px;border:0;border-radius:15px;background:rgba(255,255,255,.07);color:var(--muted);font-family:var(--head);font-weight:700;font-size:13px;transition:background .25s var(--ease),color .25s,box-shadow .25s,transform .22s var(--spring)}
 .dchip:active{transform:scale(.92)}
 .dchip.on{color:#fff;background:linear-gradient(180deg,#6c97ff,#4a6cf5);box-shadow:0 8px 16px -8px rgba(74,108,245,.9),inset 0 1px 0 rgba(255,255,255,.28)}
 
-#toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 108px);transform:translateX(-50%) translateY(18px) scale(.97);z-index:60;opacity:0;pointer-events:none;transition:opacity .3s var(--ease),transform .4s var(--spring);max-width:calc(100% - 32px)}
+#toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 108px);transform:translateX(-50%) translateY(18px) scale(.97);z-index:90;opacity:0;pointer-events:none;transition:opacity .3s var(--ease),transform .4s var(--spring);max-width:calc(100% - 32px)}
 #toast.show{opacity:1;transform:translateX(-50%)}
 #toast div{padding:12px 20px;border:1px solid var(--hair2);background:rgba(36,39,53,.92);-webkit-backdrop-filter:blur(20px) saturate(160%);backdrop-filter:blur(20px) saturate(160%);border-radius:999px;font-family:var(--body);font-weight:600;font-size:14px;text-align:center;box-shadow:inset 0 1px 0 rgba(255,255,255,.07),0 16px 36px -10px rgba(0,0,0,.85)}
 
@@ -321,6 +368,7 @@ textarea.input{min-height:104px;resize:none;line-height:1.4}
   .chip:hover:not(.on){color:var(--white);background:var(--surface2)}
   .tab:hover:not(.on){color:var(--white)}
   .add:hover:not(.full){background:rgba(255,255,255,.035)}
+  .t-row:hover{background:var(--surface3)}
 }
 @media (min-width:700px){
   #app{padding-left:26px;padding-right:26px}
@@ -336,6 +384,7 @@ textarea.input{min-height:104px;resize:none;line-height:1.4}
   .ladder{grid-template-columns:repeat(2,minmax(0,1fr))}
   .log{grid-template-columns:repeat(2,minmax(0,1fr))}
   .months{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .t-list{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
 @media (max-width:420px){
   .brand b{font-size:24px}
@@ -344,6 +393,9 @@ textarea.input{min-height:104px;resize:none;line-height:1.4}
   .rung{grid-template-columns:auto 1fr}
   .rung .btn{grid-column:1/-1}
   .tab{font-size:10.5px}
+  .ring{width:96px;height:96px}
+  .ring .rc{font-size:24px}
+  .t-top{gap:16px}
 }
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
@@ -387,12 +439,16 @@ textarea.input{min-height:104px;resize:none;line-height:1.4}
 'use strict';
 
 /* ============ constants ============ */
-const APP_VERSION = '1.9.9';
+const APP_VERSION = '2.0.0';
 const MAX_HABITS = 10;
-const MAX_NOTE = 200, MAX_MINI = 60;   // length limits for a habit's note and 2-minute version
+const MAX_NOTE = 200, MAX_MINI = 60, MAX_ID = 60, MAX_REF = 200;   // length limits: note, 2-minute version, identity, reflection answers
 // Backup reminders: the banner shows when this many changes (or days with any change) have passed since the last backup.
 const BACKUP_CHANGES = 10, BACKUP_DAYS = 3;
 const SNAP_KEEP = 5;   // how many daily safety copies and how many event safety copies the app keeps
+// Streak lengths that get a celebration (on top of the quest rewards).
+const MILESTONES = [3, 7, 14, 21, 30, 50, 60, 75, 90, 100, 150, 200, 250, 300, 365];
+// Same ten colours as the habit cards (by list position), used by the Today list.
+const HCOL = ['#5b8cff', '#ff6b5e', '#25c795', '#f5a524', '#a46bff', '#3db8f5', '#ff5f9e', '#84cc3b', '#ff8a3d', '#1fc3bc'];
 // Quest ladder. "savers" = streak savers given as a bonus when the quest is claimed.
 const TIERS = [
   {n:1,  days:2,   xp:25,   savers:0, title:'Awakened',    reward:'A small treat: your favourite drink or snack'},
@@ -460,10 +516,12 @@ function sum53(str) {
 // In habit.done: 1 = habit done, 2 = day protected by a streak saver.
 // habit.lite = days (keys) that were done with the 2-minute version. Those days are ALSO done = 1, so they count as real days.
 // habit.mini = text of the 2-minute version ('' = none). habit.note = free note ('' = none).
+// habit.identity = identity statement, for example "I am a reader" ('' = none).
 // habit.days = weekdays the habit is followed on (0 = Monday ... 6 = Sunday, sorted). [] = every day (a normal habit).
+// reflections = weekly reflections {week (Monday key), win, hard, focus, rate, at}. cel = celebrations already shown. allDay = last day the "day complete" celebration was shown.
 // changes = number of edits since the last backup. bigMoment = a quest/habit milestone happened since the last backup.
 function defaultState() {
-  return { v:2, player:{name:'Player', xp:0}, savers:0, habits:[], rewards:[], rewardText:{}, lastBackup:null, changes:0, bigMoment:false, updatedAt:0 };
+  return { v:2, player:{name:'Player', xp:0}, savers:0, habits:[], rewards:[], rewardText:{}, reflections:[], cel:{}, allDay:'', lastBackup:null, changes:0, bigMoment:false, updatedAt:0 };
 }
 function validState(s) { return !!s && typeof s === 'object' && Array.isArray(s.habits); }
 function normalize(raw) {
@@ -491,6 +549,7 @@ function normalize(raw) {
       lite: lite,
       mini: String((h && h.mini) || '').trim().slice(0, MAX_MINI),
       note: String((h && h.note) || '').trim().slice(0, MAX_NOTE),
+      identity: String((h && h.identity) || '').trim().slice(0, MAX_ID),
       days: days.length === 7 ? [] : days,
       claimed: Math.min(TIERS.length, Math.max(0, Math.floor(Number(h && h.claimed) || 0)))
     };
@@ -507,6 +566,21 @@ function normalize(raw) {
     : Math.max(0, Math.floor(Number(raw.savers) || 0));
   const rt = raw.rewardText && typeof raw.rewardText === 'object' ? raw.rewardText : {};
   for (const t of TIERS) if (typeof rt[t.n] === 'string' && rt[t.n].trim()) s.rewardText[t.n] = rt[t.n].trim().slice(0, 160);
+  // Weekly reflections (new in 2.0). One per week, newest first.
+  const seenWk = {};
+  s.reflections = (Array.isArray(raw.reflections) ? raw.reflections : [])
+    .filter(r => r && /^\d{4}-\d{2}-\d{2}$/.test(r.week) && !seenWk[r.week] && (seenWk[r.week] = true))
+    .slice(0, 156)
+    .map(r => ({
+      week: r.week, win: String(r.win || '').slice(0, MAX_REF), hard: String(r.hard || '').slice(0, MAX_REF), focus: String(r.focus || '').slice(0, MAX_REF),
+      rate: Math.min(100, Math.max(0, Math.floor(Number(r.rate) || 0))), at: String(r.at || '')
+    }))
+    .sort((a, b) => a.week < b.week ? 1 : -1);
+  // Celebrations already shown (new in 2.0).
+  if (raw.cel && typeof raw.cel === 'object') {
+    for (const k of Object.keys(raw.cel).slice(-400)) if (raw.cel[k] && k.length <= 60) s.cel[k] = 1;
+  }
+  s.allDay = /^\d{4}-\d{2}-\d{2}$/.test(raw.allDay) ? raw.allDay : '';
   s.lastBackup = typeof raw.lastBackup === 'string' ? raw.lastBackup : null;
   s.changes = Math.max(0, Math.floor(Number(raw.changes) || 0));
   s.bigMoment = !!raw.bigMoment;
@@ -789,6 +863,87 @@ const rankOf = L => { let r = 'E'; for (const x of RANKS) if (L >= x.min) r = x.
 const rewardTextFor = t => S.rewardText[t.n] || t.reward;
 const findHabit = id => S.habits.find(h => h.id === id);
 
+/* ---- Today ring ---- */
+// A habit is due today when today is on its schedule (or it is already marked done today).
+function dueToday() {
+  const t = new Date(), tk = dkey(t);
+  return S.habits.filter(h => tk >= h.created && (isSched(h, t) || h.done[tk]));
+}
+function allDueDone() {
+  const tk = dkey(new Date()), due = dueToday();
+  return due.length > 0 && due.every(h => h.done[tk]);
+}
+
+/* ---- Never miss twice ---- */
+// The previous day (before date d) on which the habit was scheduled, as a key.
+function prevSchedKey(h, d) {
+  for (let i = 1; i <= 14; i++) { const x = addDays(d, -i); if (isSched(h, x)) return dkey(x); }
+  return null;
+}
+// A miss = a scheduled day that is neither done nor protected by a saver.
+const wasMissed = (h, k) => !!k && k >= h.created && !h.done[k];
+// Returns null, or {key, twice} when the last scheduled day was missed and today is still open.
+function nmtInfo(h) {
+  const t = new Date(), tk = dkey(t);
+  if (h.done[tk] || !isSched(h, t) || tk < h.created) return null;
+  const p = prevSchedKey(h, t);
+  if (!wasMissed(h, p)) return null;
+  const p2 = prevSchedKey(h, parseKey(p));
+  return {key: p, twice: wasMissed(h, p2)};
+}
+function dayWord(k) {
+  const yk = dkey(addDays(new Date(), -1));
+  return k === yk ? 'yesterday' : parseKey(k).toLocaleDateString(undefined, {weekday:'long'});
+}
+function nmtText(h, n) {
+  const tail = h.mini ? 'Your 2-minute version counts: ' + h.mini + '.' : 'Do a small version. Showing up beats perfect.';
+  return n.twice
+    ? 'You missed ' + dayWord(n.key) + ' and the day before. A new run starts with one done day, so make today that day. ' + tail
+    : 'You missed ' + dayWord(n.key) + '. One miss is an accident, two is the start of a new habit. Do it today. ' + tail;
+}
+
+/* ---- Weekly reflection ---- */
+const weekKey = d => dkey(addDays(d, -wdOf(d)));
+// Days, done days and saver days of every habit in the week that starts on Monday key wk (future days are left out).
+function weekStats(wk) {
+  const tk = dkey(new Date()), mon = parseKey(wk);
+  const rows = S.habits.map(h => {
+    let due = 0, done = 0, saved = 0;
+    for (let i = 0; i < 7; i++) {
+      const d = addDays(mon, i), k = dkey(d);
+      if (k > tk) break;
+      if (k < h.created && !h.done[k]) continue;
+      const v = h.done[k];
+      if (v === 1) { due++; done++; }
+      else if (v === 2) saved++;
+      else if (isSched(h, d)) due++;
+    }
+    return {h: h, due: due, done: done, saved: saved};
+  });
+  const due = rows.reduce((n, r) => n + r.due, 0), done = rows.reduce((n, r) => n + r.done, 0);
+  return {
+    rows: rows, due: due, done: done, rate: due ? Math.round(done / due * 100) : null,
+    perfect: rows.filter(r => r.due > 0 && r.done === r.due).map(r => r.h.name)
+  };
+}
+// Reflection is offered from Sunday (this week) until Wednesday (last week), if not done yet.
+function reflectDueWeek() {
+  if (!S.habits.length) return null;
+  const t = new Date(), wd = wdOf(t);
+  const wk = wd === 6 ? weekKey(t) : wd <= 2 ? weekKey(addDays(t, -7)) : null;
+  if (!wk || S.reflections.some(r => r.week === wk)) return null;
+  return weekStats(wk).due > 0 ? wk : null;
+}
+// The focus chosen in the latest reflection, shown on the Today card for about a week.
+function currentFocus() {
+  const r = S.reflections[0];
+  return r && r.focus && r.week >= weekKey(addDays(new Date(), -7)) ? r.focus : '';
+}
+const weekRange = wk => {
+  const m = parseKey(wk), f = d => d.toLocaleDateString(undefined, {day:'numeric', month:'short'});
+  return f(m) + ' – ' + f(addDays(m, 6));
+};
+
 // Backup reminder: counts edits since the last backup, and reacts to big moments (quest claimed, habit added).
 function backupInfo() {
   if (!meaningful(S)) return {due:false};
@@ -807,7 +962,7 @@ function backupInfo() {
 
 /* ============ UI state + render ============ */
 const TABS = ['habits', 'vault', 'records', 'system'];
-const ui = { tab: 'habits', day: dkey(new Date()), rec: null, rescue: null };  // rescue: null | 'fresh' | 'damaged' | 'unreadable'
+const ui = { tab: 'habits', day: dkey(new Date()), rec: null, rescue: null, pend: null };  // rescue: null | 'fresh' | 'damaged' | 'unreadable'
 
 function renderNav() {
   document.querySelectorAll('.tab').forEach(t => {
@@ -881,6 +1036,40 @@ function viewRescue() {
     </section>`;
 }
 
+// The Today card: a ring of how many habits are done today, a one-tap list, and your current weekly focus.
+function todayPanel() {
+  if (!S.habits.length) return '';
+  const tk = dkey(new Date()), due = dueToday(), n = due.length;
+  const done = due.filter(h => h.done[tk]).length, full = n > 0 && done === n;
+  const C = 2 * Math.PI * 46, off = (C * (1 - (n ? done / n : 0))).toFixed(1);
+  let title, msg;
+  if (!n) { title = 'Rest day'; msg = 'Nothing is due today. Rest well, then come back strong.'; }
+  else if (full) { title = 'Day complete'; msg = 'Every habit is done. Each one was a vote for who you are becoming.'; }
+  else if (done === 0) {
+    const first = due.find(h => h.identity);
+    title = 'Today';
+    msg = first ? 'Cast your first vote: ' + first.identity + '.' : n + ' habit' + (n === 1 ? '' : 's') + ' to do. Start with the easiest one.';
+  } else { title = 'Keep going'; msg = (n - done) + ' to go. Finish the chain today.'; }
+  const focus = currentFocus();
+  const rows = due.map(h => {
+    const d = !!h.done[tk], nm = d ? null : nmtInfo(h), col = HCOL[S.habits.indexOf(h) % HCOL.length];
+    const sub = nm ? '<small class="nm">Never miss twice</small>' : h.identity ? '<small>' + esc(h.identity) + '</small>' : '';
+    return `<button class="t-row${d ? ' on' : ''}" style="--ac:${col}" data-action="tick" data-id="${esc(h.id)}" data-day="${tk}" aria-label="${d ? 'Unmark ' : 'Mark '}${esc(h.name)} today" aria-pressed="${d}">
+      <span class="t-dot">${d ? CHECK : ''}</span><span class="t-txt"><b>${esc(h.name)}</b>${sub}</span><span class="t-st">${currentStreak(h)}<small>STREAK</small></span></button>`;
+  }).join('');
+  return `
+  <section class="panel today">
+    <div class="t-top">
+      <div class="ring${full ? ' full' : ''}" role="img" aria-label="${done} of ${n} habits done today">
+        <svg viewBox="0 0 112 112"><circle class="rt" cx="56" cy="56" r="46"/><circle class="rp" cx="56" cy="56" r="46" stroke-dasharray="${C.toFixed(1)}" stroke-dashoffset="${off}"/></svg>
+        <div class="rc"><span>${n ? done + '/' + n : '–'}</span><small>TODAY</small></div>
+      </div>
+      <div class="t-msg"><h3>${title}</h3><p>${esc(msg)}</p>${focus ? `<div class="t-focus"><b>This week's focus</b>${esc(focus)}</div>` : ''}</div>
+    </div>
+    ${rows ? `<div class="t-list">${rows}</div>` : ''}
+  </section>`;
+}
+
 function viewHabits() {
   const L = levelOf(S.player.xp), a = lvlStart(L), b = lvlStart(L + 1);
   const pct = Math.round((S.player.xp - a) / (b - a) * 100);
@@ -898,6 +1087,11 @@ function viewHabits() {
     </div>
     <div class="p-lv"><small>LV</small><b>${L}</b></div>
   </section>`;
+  html += todayPanel();
+  const rw = reflectDueWeek();
+  if (rw) {
+    html += `<section class="panel banner ref"><p><span class="tag">Weekly reflection</span><br>Your week of ${esc(weekRange(rw))} is ready to review. It takes two minutes and sets your focus.</p><button class="btn sm" data-action="reflect" data-week="${rw}">Reflect</button></section>`;
+  }
   const bi = backupInfo();
   if (bi.due) {
     html += `<section class="panel banner"><p><span class="tag">Habsys</span><br>${esc(bi.msg)}</p><button class="btn sm" data-action="backup">Back up</button></section>`;
@@ -915,9 +1109,10 @@ function viewHabits() {
   return html;
 }
 
-// The days, the 2-minute version and the note are drawn only when the habit has them. No empty placeholders.
+// The identity, days, 2-minute version and note are drawn only when the habit has them. No empty placeholders.
 function extrasHtml(h) {
   let x = '';
+  if (h.identity) x += `<div class="x-line"><span class="x-tag">Identity</span><span>${esc(h.identity)}</span></div>`;
   if (h.days && h.days.length) x += `<div class="x-line"><span class="x-tag">Days</span><span>${esc(daysLabel(h.days))}</span></div>`;
   if (h.mini) x += `<div class="x-line"><span class="x-tag">2-min</span><span>${esc(h.mini)}</span></div>`;
   if (h.note) x += `<p class="x-note">${esc(h.note)}</p>`;
@@ -950,6 +1145,8 @@ function habitCard(h) {
   // On a Monday, yesterday (Sunday) belongs to last week's row, so it gets its own small line.
   const yd = addDays(new Date(), -1);
   const yrow = (wk.some(d => dkey(d) === yk) || !(isSched(h, yd) || h.done[yk])) ? '' : `<div class="yrow"><span class="dl">Yesterday · ${esc(yd.toLocaleDateString(undefined, {weekday:'short', day:'numeric', month:'short'}))}</span>${boxBtn(yd)}</div>`;
+  const nm = nmtInfo(h);
+  const nmt = nm ? `<div class="nmt"><b>Never miss twice</b>${esc(nmtText(h, nm))}</div>` : '';
   let quest;
   if (cl > 0) {
     quest = `<button class="btn claim" data-action="claim" data-id="${esc(h.id)}">Quest complete · Claim reward</button>`;
@@ -964,10 +1161,10 @@ function habitCard(h) {
   <section class="panel habit">
     <div class="h-head">
       <button class="h-name" data-action="edit" data-id="${esc(h.id)}" aria-label="Edit ${esc(h.name)}"><span>${esc(h.name)}</span>${PENCIL}</button>
-      <button class="h-more" data-action="extras" data-id="${esc(h.id)}" aria-label="Options for ${esc(h.name)}: 2-minute habit, note, flexible days">${DOTS}</button>
+      <button class="h-more" data-action="extras" data-id="${esc(h.id)}" aria-label="Options for ${esc(h.name)}: identity, 2-minute habit, note, flexible days">${DOTS}</button>
       <div class="streak"><small>STREAK</small><b>${cur}</b></div>
     </div>
-    ${extrasHtml(h)}
+    ${extrasHtml(h)}${nmt}
     <div class="week${flex ? ' flex' : ''}"${flex ? ` style="grid-template-columns:repeat(${vis.length},minmax(0,1fr))"` : ''}>${boxes}</div>${rest}${yrow}
     <div class="quest">${quest}<div class="pips">${pips}<span>${h.claimed}/${TIERS.length} cleared</span></div></div>
   </section>`;
@@ -1011,14 +1208,23 @@ function habitStats(h) {
   const today = new Date(), tk = dkey(today);
   const endKey = h.done[tk] ? tk : dkey(addDays(today, -1));
   // Only days that count: done days, and scheduled days that were not done. Rest days are left out.
-  let tracked = 0, missed = 0;
+  // bounce = a done day straight after a missed scheduled day (never missed twice). twice = a miss straight after a miss.
+  let tracked = 0, missed = 0, bounce = 0, twice = 0, prevMiss = false;
   for (let d = parseKey(startKey); dkey(d) <= endKey; d = addDays(d, 1)) {
-    if (h.done[dkey(d)]) tracked++;
-    else if (isSched(h, d)) { tracked++; missed++; }
+    const v = h.done[dkey(d)];
+    if (v) {
+      tracked++;
+      if (v === 1 && prevMiss) bounce++;
+      prevMiss = false;
+    } else if (isSched(h, d)) {
+      tracked++; missed++;
+      if (prevMiss) twice++;
+      prevMiss = true;
+    }
   }
   return {
     nDone: nDone, nSaved: nSaved, nLite: nLite, startKey: startKey, endKey: endKey, tracked: tracked,
-    missed: missed,
+    missed: missed, bounce: bounce, twice: twice,
     rate: tracked ? Math.round(nDone / tracked * 100) : null
   };
 }
@@ -1047,6 +1253,24 @@ function viewRecords() {
   if (!S.habits.length) {
     return html + '<section class="panel empty"><div class="tag">Habsys</div><h3>No history yet</h3><p>Add a habit in the Habits tab. Every day you complete will be recorded here.</p></section>';
   }
+  // weekly reflection
+  const thisWk = weekKey(new Date()), lastWk = weekKey(addDays(new Date(), -7));
+  const has = wk => S.reflections.some(r => r.week === wk);
+  html += `<section class="panel"><p class="note">Once a week, look back: what worked, what got in the way, and the one thing you will focus on next. Reflection turns streaks into learning.</p>
+    <div class="stack">
+      <button class="btn block" data-action="reflect" data-week="${thisWk}">${has(thisWk) ? 'Edit this week' : 'Reflect on this week'}</button>
+      <button class="btn ghost block" data-action="reflect" data-week="${lastWk}">${has(lastWk) ? 'Edit last week' : 'Reflect on last week'}</button>
+    </div></section>`;
+  if (S.reflections.length) {
+    html += '<div class="log" style="margin-top:12px">' + S.reflections.slice(0, 12).map(r => `
+      <div class="panel log-item">
+        <div class="row"><h4>${esc(weekRange(r.week))}</h4><span class="tag">${r.rate}%</span></div>
+        ${r.win ? `<p class="rl"><b>Win:</b> ${esc(r.win)}</p>` : ''}
+        ${r.hard ? `<p class="rl"><b>Got in the way:</b> ${esc(r.hard)}</p>` : ''}
+        ${r.focus ? `<p class="rl"><b>Focus:</b> ${esc(r.focus)}</p>` : ''}
+      </div>`).join('') + '</div>';
+  }
+  html += '<h2 class="sec">Habit history</h2>';
   const h = findHabit(ui.rec) || S.habits[0];
   ui.rec = h.id;
   const st = habitStats(h), tk = dkey(new Date());
@@ -1058,6 +1282,8 @@ function viewRecords() {
     + tile('Current streak', currentStreak(h))
     + tile('Longest streak', longestStreak(h))
     + tile('Missed days', st.missed)
+    + tile('Bounce-backs', st.bounce)
+    + tile('Missed twice', st.twice)
     + tile('Savers used', st.nSaved)
     + (st.nLite ? tile('2-minute days', st.nLite) : '')
     + tile('Quests cleared', h.claimed + ' / ' + TIERS.length)
@@ -1120,10 +1346,10 @@ function viewSystem() {
   </section>`;
 }
 
-/* ============ modals + toast ============ */
-function showModal(inner) {
+/* ============ modals + toast + celebrations ============ */
+function showModal(inner, cls) {
   const o = $('#overlay');
-  o.innerHTML = `<div class="panel win">${inner}</div>`;
+  o.innerHTML = `<div class="panel win${cls ? ' ' + cls : ''}">${inner}</div>`;
   o.classList.add('show');
   const f = o.querySelector('input,textarea');
   if (f) setTimeout(() => { try { f.focus(); } catch (e) {} }, 60);
@@ -1134,6 +1360,49 @@ function toast(msg) {
   const t = $('#toast'); t.firstElementChild.textContent = msg; t.classList.add('show');
   clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('show'), 2600);
 }
+// A short burst of confetti. Skipped when the device asks for reduced motion.
+function confetti() {
+  if (reduceMotion()) return;
+  const cols = ['#5b8cff', '#ff6b5e', '#25c795', '#f5a524', '#a46bff', '#3db8f5', '#ff5f9e', '#ffdd85'];
+  let h = '';
+  for (let i = 0; i < 44; i++) {
+    const x = Math.random() * 100, dx = Math.round(Math.random() * 160 - 80), r = Math.round(Math.random() * 720 - 360);
+    const t = (1.8 + Math.random() * 1.4).toFixed(2), dl = (Math.random() * .35).toFixed(2);
+    h += `<i style="left:${x.toFixed(1)}%;background:${cols[i % cols.length]};--dx:${dx}px;--r:${r}deg;animation-duration:${t}s;animation-delay:${dl}s"></i>`;
+  }
+  const w = document.createElement('div');
+  w.className = 'fx'; w.setAttribute('aria-hidden', 'true'); w.innerHTML = h;
+  document.body.appendChild(w);
+  setTimeout(() => w.remove(), 3800);
+}
+// Called after a habit is marked done. Shows the celebration that fits: day complete, streak milestone, or a comeback.
+// If another popup is open (a quest to claim), it waits and runs when that popup is closed.
+function celebrate(id, k, bounced) {
+  const h = findHabit(id); if (!h) return;
+  if ($('#overlay').classList.contains('show')) { ui.pend = {id: id, k: k, bounced: bounced, t: Date.now()}; return; }
+  ui.pend = null;
+  const tk = dkey(new Date()), cur = currentStreak(h);
+  const ms = MILESTONES.indexOf(cur) >= 0 && !S.cel['m:' + h.id + ':' + cur] ? cur : 0;
+  const all = k === tk && S.allDay !== tk && allDueDone();
+  if (!ms && !all) { if (bounced) toast('Back on track. You never missed twice.'); return; }
+  if (ms) S.cel['m:' + h.id + ':' + ms] = 1;
+  if (all) S.allDay = tk;
+  const ks = Object.keys(S.cel);
+  for (let i = 0; i < ks.length - 400; i++) delete S.cel[ks[i]];
+  save({noCount:true});
+  const votes = S.habits.filter(x => x.identity && x.done[tk] === 1).map(x => esc(x.identity));
+  let body = '';
+  if (all) body += `<div class="reward"><b>Today's votes</b>${votes.length ? votes.join('<br>') : 'Every habit done. This is how days become a life.'}</div>`;
+  if (ms) body += `<div class="reward"><b>${ms}-day streak</b>${esc(h.name)}: ${ms} real days in a row. ${h.identity ? esc(h.identity) + '. You are proving it.' : 'This is no longer luck. It is who you are.'}</div>`;
+  if (bounced) body += `<div class="reward"><b>Never missed twice</b>You came straight back after a miss. That is the skill that matters most.</div>`;
+  showModal(`
+    <div class="cel-ic">${CHECK}</div>
+    <h3>${all ? 'Day complete' : ms + '-day streak'}</h3>
+    <p class="sub">${all ? 'All ' + dueToday().length + ' habits done' : esc(h.name)}</p>
+    ${body}
+    <div class="actions"><button class="btn" data-action="close">Keep going</button></div>`, 'cel');
+  confetti();
+}
 
 function openHabitForm(id) {
   const h = id ? findHabit(id) : null;
@@ -1142,14 +1411,15 @@ function openHabitForm(id) {
     <h3>${h ? 'Edit habit' : 'New habit'}</h3>
     <p class="sub">${h ? 'Rename or remove' : 'Slot ' + (S.habits.length + 1) + ' of ' + MAX_HABITS}</p>
     <label class="field"><span>Habit name</span><input class="input" id="hname" maxlength="30" placeholder="e.g. Read 10 pages" value="${h ? esc(h.name) : ''}" autocomplete="off"></label>
-    ${h ? '' : `<div class="field"><span>Flexible days (optional)</span><div class="dchips" style="margin-bottom:6px">${DAY_SHORT.map((n, i) => `<button class="dchip" data-action="toggleday" data-d="${i}" aria-pressed="false">${n}</button>`).join('')}</div><p class="hint" style="margin:0 0 6px">Leave all days unselected for an every-day habit. You can change this later with the three-dot button.</p></div>`}
+    ${h ? '' : `<label class="field"><span>Who are you becoming? (optional)</span><input class="input" id="hid" maxlength="${MAX_ID}" placeholder="e.g. I am a reader" autocomplete="off"></label>
+    <div class="field"><span>Flexible days (optional)</span><div class="dchips" style="margin-bottom:6px">${DAY_SHORT.map((n, i) => `<button class="dchip" data-action="toggleday" data-d="${i}" aria-pressed="false">${n}</button>`).join('')}</div><p class="hint" style="margin:0 0 6px">Leave all days unselected for an every-day habit. You can change this later with the three-dot button.</p></div>`}
     <div class="actions">
       <button class="btn" data-action="savehabit" data-id="${h ? esc(h.id) : ''}">Save</button>
       ${h ? `<button class="btn danger" data-action="delask" data-id="${esc(h.id)}">Delete habit</button>` : ''}
       <button class="btn ghost" data-action="close">Cancel</button>
     </div>`);
 }
-// Three-dot menu on a habit: three buttons. Each one opens its own small form. A tick on a button means it is already set.
+// Three-dot menu on a habit: four buttons. Each one opens its own small form. A tick on a button means it is already set.
 function openExtras(id) {
   const h = findHabit(id); if (!h) return;
   const on = v => v ? ' ✓' : '';
@@ -1158,12 +1428,26 @@ function openExtras(id) {
     <h3>Habit options</h3>
     <p class="sub">${esc(h.name)}</p>
     <div class="actions">
+      <button class="btn" data-action="xid" data-id="${esc(h.id)}">Identity statement${on(h.identity)}</button>
       <button class="btn" data-action="xmini" data-id="${esc(h.id)}">2-minute habit${on(h.mini)}</button>
       <button class="btn" data-action="xnote" data-id="${esc(h.id)}">Note${on(h.note)}</button>
       <button class="btn" data-action="xdays" data-id="${esc(h.id)}">Flexible habit${on(h.days && h.days.length)}</button>
       <button class="btn ghost" data-action="close">Close</button>
     </div>
     <p class="hint" style="margin:14px 0 0">A tick means it is already set on this habit.</p>`);
+}
+function openIdentity(id) {
+  const h = findHabit(id); if (!h) return;
+  showModal(`
+    <div class="wtag"><span class="tag">Habsys</span></div>
+    <h3>Identity statement</h3>
+    <p class="sub">${esc(h.name)}</p>
+    <label class="field"><span>Who are you becoming?</span><input class="input" id="hid" maxlength="${MAX_ID}" placeholder="e.g. I am a reader" value="${esc(h.identity)}" autocomplete="off"></label>
+    <p class="hint">Lasting change starts with who you believe you are, not only what you do. Every done day is a vote for this identity. Examples: "I am someone who moves every day", "I am a writer". Leave it empty to remove it.</p>
+    <div class="actions">
+      <button class="btn" data-action="saveidentity" data-id="${esc(h.id)}">Save</button>
+      <button class="btn ghost" data-action="extras" data-id="${esc(h.id)}">Back</button>
+    </div>`);
 }
 function openMini(id) {
   const h = findHabit(id); if (!h) return;
@@ -1254,6 +1538,7 @@ function doClaim(id) {
     <div class="reward"><b>Go enjoy it</b>${esc(S.rewards[0].text)}</div>
     <p style="color:var(--muted);font-size:14px">Mark it as enjoyed in the Vault once you have had it. Then save a backup on the Habits tab to lock in this win.</p>
     <div class="actions"><button class="btn" data-action="afterclaim" data-id="${esc(h.id)}">${more ? 'Next reward' : 'Continue'}</button></div>`);
+  confetti();
 }
 function openRewardEdit(n) {
   const t = TIERS.find(x => x.n === n); if (!t) return;
@@ -1263,6 +1548,38 @@ function openRewardEdit(n) {
     <p class="sub">${esc(t.title)} · ${t.days} days in a row</p>
     <label class="field"><span>Your real-life reward</span><textarea class="input" id="rtext" maxlength="160">${esc(rewardTextFor(t))}</textarea></label>
     <div class="actions"><button class="btn" data-action="saveReward" data-tier="${t.n}">Save</button><button class="btn ghost" data-action="resetReward" data-tier="${t.n}">Reset to default</button><button class="btn ghost" data-action="close">Cancel</button></div>`);
+}
+// Weekly reflection: the week's numbers, the identity votes, and three short questions.
+function openReflect(wk) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(wk || '') || !S.habits.length) return;
+  const st = weekStats(wk), ex = S.reflections.find(r => r.week === wk) || {};
+  const rows = st.rows.filter(r => r.due > 0).map(r => `<div class="kv"><span>${esc(r.h.name)}</span><b>${r.done} / ${r.due}</b></div>`).join('');
+  const votes = st.rows.filter(r => r.h.identity && r.done > 0).map(r => esc(r.h.identity) + ' · ' + r.done + ' vote' + (r.done === 1 ? '' : 's')).join('<br>');
+  showModal(`
+    <div class="wtag"><span class="tag">Habsys</span></div>
+    <h3>Weekly reflection</h3>
+    <p class="sub">${esc(weekRange(wk))}</p>
+    <div class="reward"><b>Your week</b>${st.rate === null ? 'No tracked days yet' : st.rate + '% · ' + st.done + ' of ' + st.due + ' days done'}${st.perfect.length ? '<br>Perfect week: ' + st.perfect.map(esc).join(', ') : ''}</div>
+    ${votes ? `<div class="reward"><b>Identity votes</b>${votes}</div>` : ''}
+    ${rows ? `<div class="grp">${rows}</div>` : ''}
+    <label class="field"><span>What went well?</span><textarea class="input sm" id="rwin" maxlength="${MAX_REF}" placeholder="A win, big or small">${esc(ex.win || '')}</textarea></label>
+    <label class="field"><span>What got in the way?</span><textarea class="input sm" id="rhard" maxlength="${MAX_REF}" placeholder="Be honest, not harsh">${esc(ex.hard || '')}</textarea></label>
+    <label class="field"><span>My one focus for next week</span><textarea class="input sm" id="rfocus" maxlength="${MAX_REF}" placeholder="One clear thing">${esc(ex.focus || '')}</textarea></label>
+    <div class="actions">
+      <button class="btn" data-action="savereflect" data-week="${wk}">Save reflection</button>
+      <button class="btn ghost" data-action="close">Cancel</button>
+    </div>`);
+}
+function saveReflect(wk) {
+  const g = id => ($(id).value || '').trim().slice(0, MAX_REF);
+  const st = weekStats(wk);
+  const rec = {week: wk, win: g('#rwin'), hard: g('#rhard'), focus: g('#rfocus'), rate: st.rate || 0, at: new Date().toISOString()};
+  S.reflections = S.reflections.filter(r => r.week !== wk);
+  if (rec.win || rec.hard || rec.focus) S.reflections.push(rec);
+  S.reflections.sort((a, b) => a.week < b.week ? 1 : -1);
+  S.reflections = S.reflections.slice(0, 156);
+  save(); closeModal(); render();
+  toast(rec.win || rec.hard || rec.focus ? 'Reflection saved.' : 'Reflection cleared.');
 }
 function confirmBox(title, text, action, label, data) {
   showModal(`
@@ -1392,12 +1709,14 @@ function markDone(id, k, lite) {
   const h = findHabit(id); if (!h) return;
   const tk = dkey(new Date()), yk = dkey(addDays(new Date(), -1));
   if ((k !== tk && k !== yk) || h.done[k]) return;
+  const bounced = wasMissed(h, prevSchedKey(h, parseKey(k)));   // coming straight back after a miss
   const before = claimableCount(h);
   h.done[k] = 1;
   if (!h.lite) h.lite = {};
   if (lite) h.lite[k] = true; else delete h.lite[k];
   afterChange(id, before);
   if (lite) toast('2-minute version done. Streak kept alive.');
+  celebrate(id, k, bounced);
 }
 function useSaver(id, k) {
   const h = findHabit(id); if (!h) return;
@@ -1446,9 +1765,16 @@ const actions = {
   add: () => { if (S.habits.length >= MAX_HABITS) return; openHabitForm(null); },
   edit: el => openHabitForm(el.dataset.id),
   extras: el => openExtras(el.dataset.id),
+  xid: el => openIdentity(el.dataset.id),
   xmini: el => openMini(el.dataset.id),
   xnote: el => openNote(el.dataset.id),
   xdays: el => openDays(el.dataset.id),
+  saveidentity: el => {
+    const h = findHabit(el.dataset.id); if (!h) return;
+    h.identity = ($('#hid').value || '').trim().slice(0, MAX_ID);
+    save(); closeModal(); render();
+    toast(h.identity ? 'Identity saved. Every done day is a vote for it.' : 'Identity removed.');
+  },
   savemini: el => {
     const h = findHabit(el.dataset.id); if (!h) return;
     h.mini = ($('#hmini').value || '').trim().slice(0, MAX_MINI);
@@ -1466,6 +1792,8 @@ const actions = {
     setDays(el.dataset.id, a);
   },
   alldays: el => setDays(el.dataset.id, []),
+  reflect: el => openReflect(el.dataset.week),
+  savereflect: el => saveReflect(el.dataset.week),
   close: closeModal,
   savehabit: el => {
     const name = ($('#hname').value || '').trim().slice(0, 30);
@@ -1475,7 +1803,8 @@ const actions = {
     else {
       if (S.habits.length >= MAX_HABITS) return;
       const picked = Array.from(document.querySelectorAll('#overlay .dchip.on')).map(c => Number(c.dataset.d)).sort((a, b) => a - b);
-      S.habits.push({id: uid(), name, created: dkey(new Date()), done: {}, lite: {}, mini: '', note: '', days: picked.length === 7 ? [] : picked, claimed: 0});
+      const idEl = $('#hid'), identity = idEl ? (idEl.value || '').trim().slice(0, MAX_ID) : '';
+      S.habits.push({id: uid(), name, created: dkey(new Date()), done: {}, lite: {}, mini: '', note: '', identity: identity, days: picked.length === 7 ? [] : picked, claimed: 0});
       S.bigMoment = true; askPersist();
     }
     save(); closeModal(); render();
@@ -1484,7 +1813,13 @@ const actions = {
   delete: el => { S.habits = S.habits.filter(h => h.id !== el.dataset.id); save(); closeModal(); render(); },
   claim: el => openClaim(el.dataset.id),
   doclaim: el => doClaim(el.dataset.id),
-  afterclaim: el => { closeModal(); const h = findHabit(el.dataset.id); if (h && claimableCount(h) > 0) openClaim(h.id); },
+  afterclaim: el => {
+    closeModal();
+    const h = findHabit(el.dataset.id);
+    if (h && claimableCount(h) > 0) { openClaim(h.id); return; }
+    const p = ui.pend; ui.pend = null;   // a celebration that was waiting behind the quest popup (kept for 10 minutes)
+    if (p && Date.now() - p.t < 600000) celebrate(p.id, p.k, p.bounced);
+  },
   editreward: el => openRewardEdit(Number(el.dataset.tier)),
   saveReward: el => { const v = ($('#rtext').value || '').trim().slice(0, 160); const n = Number(el.dataset.tier); if (v) S.rewardText[n] = v; else delete S.rewardText[n]; save(); closeModal(); render(); },
   resetReward: el => { delete S.rewardText[Number(el.dataset.tier)]; save(); closeModal(); render(); },
@@ -1538,7 +1873,8 @@ function adoptNewer() {
 }
 document.addEventListener('visibilitychange', () => {
   if (document.hidden) { flush(); return; }
-  adoptNewer(); refreshIfNewDay(); render();
+  adoptNewer(); refreshIfNewDay();
+  if (!$('#overlay').classList.contains('show')) render();   // do not redraw underneath an open popup
 });
 window.addEventListener('pagehide', flush);
 setInterval(refreshIfNewDay, 60000);
