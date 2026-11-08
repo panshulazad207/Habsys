@@ -13,7 +13,7 @@
 <link rel="apple-touch-icon" href="icon-180.png?v=199">
 <link rel="icon" type="image/png" href="icon-192.png?v=199">
 <style>
-/* ===== Habsys 2.0.5: arrange habits (new) on top of 2.0.0: Today ring, never-miss-twice, weekly reflection, identity statements, celebrations ===== */
+/* ===== Habsys 2.1.0: reward feel (tick effect, confetti, level-up and quest celebrations) + smoother, more premium UI, on top of 2.0.5 (arrange habits) ===== */
 :root{
   color-scheme:dark;
   --bg0:#0a0b10;
@@ -73,6 +73,10 @@ h2.sec{font-family:var(--head);font-size:25px;letter-spacing:-.02em;color:var(--
   background:radial-gradient(130% 150% at 105% -10%,rgba(255,255,255,.28),transparent 48%),radial-gradient(90% 120% at -5% 110%,rgba(30,20,120,.38),transparent 60%),linear-gradient(135deg,#3552ee 0%,#5845ec 55%,#7b40e4 100%);
   box-shadow:inset 0 1px 0 rgba(255,255,255,.32),inset 0 -1px 0 rgba(0,0,0,.12),0 26px 50px -22px rgba(80,80,240,.75)}
 .player::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;background:linear-gradient(180deg,rgba(255,255,255,.1),rgba(255,255,255,0) 38%)}
+/* a soft light sweep across the hero card whenever a tab opens */
+.player::before{content:"";position:absolute;top:-10%;bottom:-10%;left:-60%;width:38%;pointer-events:none;opacity:0;z-index:1;background:linear-gradient(100deg,transparent,rgba(255,255,255,.24),transparent);transform:skewX(-18deg)}
+#view.v-in .player::before{animation:sweep 1.4s .4s var(--ease) 1}
+@keyframes sweep{0%{left:-60%;opacity:1}100%{left:130%;opacity:1}}
 .rank{width:64px;height:72px;flex:none;display:grid;place-items:center;
   clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);
   background:linear-gradient(160deg,#ffffff 0%,#cfdaff 100%);
@@ -81,9 +85,12 @@ h2.sec{font-family:var(--head);font-size:25px;letter-spacing:-.02em;color:var(--
 .p-name{font-family:var(--head);font-weight:800;font-size:24px;letter-spacing:-.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#fff}
 .p-sub{font-family:var(--body);font-weight:600;font-size:13px;color:rgba(255,255,255,.76);margin:2px 0 14px}
 .bar{height:8px;background:rgba(255,255,255,.09);border-radius:999px;overflow:hidden;box-shadow:inset 0 1px 2px rgba(0,0,0,.35)}
-.bar i{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,color-mix(in srgb,var(--ac) 72%,#000),var(--ac));box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 0 14px -2px color-mix(in srgb,var(--ac) 70%,transparent);transition:width .7s var(--ease)}
+.bar i{position:relative;overflow:hidden;display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,color-mix(in srgb,var(--ac) 72%,#000),var(--ac));box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 0 14px -2px color-mix(in srgb,var(--ac) 70%,transparent);transition:width .9s var(--ease)}
+.bar i::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.42),transparent);transform:translateX(-100%);animation:shimmer 3.6s ease-in-out infinite}
+@keyframes shimmer{0%,55%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
 .player .bar{background:rgba(255,255,255,.22);box-shadow:inset 0 1px 2px rgba(0,0,0,.18)}
 .player .bar i{background:#fff;box-shadow:0 0 14px rgba(255,255,255,.5)}
+.player .bar i::after{background:linear-gradient(90deg,transparent,rgba(120,140,255,.45),transparent)}
 .xp-txt{font-family:var(--body);font-weight:600;font-size:12.5px;color:rgba(255,255,255,.82);margin-top:9px;font-variant-numeric:tabular-nums}
 .sv-line{display:flex;align-items:center;gap:7px;font-family:var(--body);font-weight:600;font-size:12.5px;color:#fff;margin-top:7px}
 .sv-line svg{width:14px;height:14px;flex:none}
@@ -98,8 +105,11 @@ h2.sec{font-family:var(--head);font-size:25px;letter-spacing:-.02em;color:var(--
 .ring svg{width:100%;height:100%;transform:rotate(-90deg);display:block}
 .ring circle{fill:none;stroke-width:10}
 .ring .rt{stroke:rgba(255,255,255,.09)}
-.ring .rp{stroke:var(--blue2);stroke-linecap:round;transition:stroke-dashoffset .8s var(--ease),stroke .4s;filter:drop-shadow(0 0 8px rgba(91,140,255,.55))}
-.ring.full .rp{stroke:#25c795;filter:drop-shadow(0 0 8px rgba(37,199,149,.6))}
+.ring .rp{stroke:var(--blue2);stroke-linecap:round;transition:stroke-dashoffset .9s var(--ease),stroke .4s;filter:drop-shadow(0 0 8px rgba(91,140,255,.55))}
+.ring.full .rp{stroke:#25c795;filter:drop-shadow(0 0 10px rgba(37,199,149,.7))}
+.ring.full .rc span{color:#6ee7b7}
+.ring.celeb{animation:ringpop .85s var(--spring)}
+@keyframes ringpop{0%{transform:scale(1)}35%{transform:scale(1.14)}100%{transform:scale(1)}}
 .ring .rc{position:absolute;inset:0;display:grid;place-content:center;text-align:center;font-family:var(--head);font-weight:800;font-size:28px;font-variant-numeric:tabular-nums;line-height:1}
 .ring .rc small{display:block;font-family:var(--body);font-weight:700;font-size:9.5px;letter-spacing:.16em;color:var(--muted);margin-top:6px}
 .t-msg{min-width:0}
@@ -110,7 +120,7 @@ h2.sec{font-family:var(--head);font-size:25px;letter-spacing:-.02em;color:var(--
 .t-list{display:grid;gap:8px;margin-top:18px;padding-top:16px;border-top:1px solid var(--hair)}
 .t-row{display:flex;align-items:center;gap:14px;width:100%;min-height:58px;padding:8px 14px 8px 12px;border-radius:18px;background:var(--surface2);border:1px solid var(--hair);text-align:left;transition:transform .22s var(--spring),background .25s}
 .t-row:active{transform:scale(.98)}
-.t-dot{width:30px;height:30px;flex:none;border-radius:50%;border:2px solid var(--ac);display:grid;place-items:center;color:#fff;transition:background .3s,box-shadow .3s}
+.t-dot{position:relative;width:30px;height:30px;flex:none;border-radius:50%;border:2px solid var(--ac);display:grid;place-items:center;color:#fff;transition:background .3s,box-shadow .3s}
 .t-row.on .t-dot{background:var(--ac);box-shadow:0 6px 12px -6px var(--ac)}
 .t-dot .ck{width:58%;height:58%}
 .t-txt{flex:1;min-width:0;display:grid}
@@ -155,7 +165,9 @@ h2.sec{font-family:var(--head);font-size:25px;letter-spacing:-.02em;color:var(--
 .h-more:active{background:var(--surface3);color:var(--white);transform:scale(.9)}
 .streak{text-align:right;flex:none;padding-left:4px;min-width:50px}
 .streak small{display:block;font-family:var(--body);font-weight:700;font-size:9.5px;letter-spacing:.16em;color:var(--muted)}
-.streak b{font-family:var(--head);font-weight:800;font-size:36px;line-height:1.02;letter-spacing:-.02em;font-variant-numeric:tabular-nums;color:var(--white)}
+.streak b{display:inline-block;font-family:var(--head);font-weight:800;font-size:36px;line-height:1.02;letter-spacing:-.02em;font-variant-numeric:tabular-nums;color:var(--white);transform-origin:100% 60%}
+.streak b.bump{animation:bump .65s var(--spring)}
+@keyframes bump{0%{transform:scale(1)}35%{transform:scale(1.38);color:var(--ac)}100%{transform:scale(1)}}
 /* optional extras (identity, days, 2-minute version, note): only drawn when the habit has them */
 .extras{display:grid;gap:10px;margin:-4px 0 18px}
 .x-line{display:flex;align-items:baseline;gap:10px;font-size:14px;color:var(--white)}
@@ -196,6 +208,17 @@ h2.sec{font-family:var(--head);font-size:25px;letter-spacing:-.02em;color:var(--
 .yrow .box{width:46px;height:46px;max-width:none;aspect-ratio:auto;margin:0;flex:none}
 @keyframes pulse{0%,100%{box-shadow:0 0 0 0 color-mix(in srgb,var(--ac) 0%,transparent)}50%{box-shadow:0 0 0 6px color-mix(in srgb,var(--ac) 20%,transparent)}}
 
+/* the satisfying tick: the circle pops, the check draws itself, a ring ripples out */
+.box.done .ck path,.t-dot .ck path,.cel-ic .ck path{stroke-dasharray:26;stroke-dashoffset:0}
+.box.pop,.t-row.pop .t-dot{animation:popbox .6s var(--spring)}
+.box.pop::after,.t-row.pop .t-dot::after{content:"";position:absolute;inset:-2px;border-radius:50%;border:2px solid var(--ac);pointer-events:none;animation:ringout .7s var(--ease) forwards}
+.box.pop .ck path,.t-row.pop .ck path{animation:draw .45s .1s var(--ease) backwards}
+.t-row.pop{animation:rowflash .9s ease-out}
+@keyframes popbox{0%{transform:scale(.7)}50%{transform:scale(1.22)}75%{transform:scale(.95)}100%{transform:scale(1)}}
+@keyframes ringout{from{transform:scale(1);opacity:.95}to{transform:scale(1.8);opacity:0}}
+@keyframes draw{from{stroke-dashoffset:26}to{stroke-dashoffset:0}}
+@keyframes rowflash{0%{background:color-mix(in srgb,var(--ac) 24%,var(--surface2))}100%{background:var(--surface2)}}
+
 .quest{margin-top:auto;padding-top:17px;border-top:1px solid var(--hair)}
 .q-row{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:11px}
 .q-lbl{font-family:var(--body);font-weight:600;font-size:13px;color:var(--muted)}
@@ -216,7 +239,7 @@ h2.sec{font-family:var(--head);font-size:25px;letter-spacing:-.02em;color:var(--
 .empty .stack{margin-top:22px;text-align:left}
 .empty p + p{margin-top:12px}
 
-/* arrange habits (new in 2.0.5) */
+/* arrange habits */
 .arrbar{display:flex;justify-content:flex-end;margin:-4px 0 14px}
 .arr-list{display:grid;gap:8px;margin-bottom:14px}
 .arr-row{display:flex;align-items:center;gap:12px;min-height:60px;padding:8px 8px 8px 16px;border-radius:18px;background:var(--surface2);border:1px solid var(--hair)}
@@ -230,6 +253,7 @@ h2.sec{font-family:var(--head);font-size:25px;letter-spacing:-.02em;color:var(--
 
 /* buttons */
 .btn{
+  position:relative;overflow:hidden;
   display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:54px;padding:10px 22px;border-radius:18px;
   font-family:var(--head);font-weight:700;font-size:16.5px;letter-spacing:0;
   border:0;color:#fff;background:linear-gradient(180deg,#6c97ff 0%,#4a6cf5 100%);
@@ -242,7 +266,9 @@ h2.sec{font-family:var(--head);font-size:25px;letter-spacing:-.02em;color:var(--
 .btn.block{display:flex;width:100%}
 .btn.sm{min-height:38px;padding:6px 16px;font-size:14px;border-radius:13px}
 .btn.claim{width:100%;margin-top:0;background:linear-gradient(180deg,#ffdd85 0%,#ffa94d 100%);color:#3a2300;box-shadow:inset 0 1px 0 rgba(255,255,255,.55),0 12px 26px -12px rgba(255,166,70,.9);animation:glow 2.6s ease-in-out infinite}
+.btn.claim::after{content:"";position:absolute;top:-10%;bottom:-10%;left:-60%;width:36%;pointer-events:none;background:linear-gradient(100deg,transparent,rgba(255,255,255,.6),transparent);transform:skewX(-18deg);animation:shine 3.2s 1s ease-in-out infinite}
 @keyframes glow{0%,100%{box-shadow:inset 0 1px 0 rgba(255,255,255,.55),0 8px 20px -12px rgba(255,166,70,.5)}50%{box-shadow:inset 0 1px 0 rgba(255,255,255,.55),0 12px 30px -8px rgba(255,166,70,1)}}
+@keyframes shine{0%{left:-60%}45%,100%{left:130%}}
 
 /* vault + settings */
 .ladder{display:grid;gap:12px}
@@ -288,13 +314,17 @@ textarea.input.sm{min-height:76px}
 .rescuing .tabs{display:none}
 .rescuing #app{padding-bottom:calc(env(safe-area-inset-bottom) + 32px)}
 
-/* popups: native-style bottom sheet */
+/* popups: native-style bottom sheet, with a soft exit */
 #overlay{position:fixed;inset:0;z-index:50;display:none;flex-direction:column;padding:12px 12px calc(env(safe-area-inset-bottom) + 12px);background:rgba(0,0,0,.55);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);overflow-y:auto;-webkit-overflow-scrolling:touch}
 #overlay.show{display:flex;animation:fadeIn .28s ease}
+#overlay.leaving{display:flex;pointer-events:none;animation:fadeOut .2s ease forwards}
+#overlay.leaving .win{animation:sheetOut .2s ease-in forwards}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes fadeOut{to{opacity:0}}
 .win{width:100%;max-width:520px;margin:auto auto 0;padding:34px 22px 22px;border-radius:34px;border:1px solid var(--hair2);background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,0) 30%),#1a1d28;box-shadow:inset 0 1px 0 rgba(255,255,255,.07),0 -10px 60px -10px rgba(0,0,0,.7);animation:sheet .5s cubic-bezier(.16,1,.3,1)}
 .win::before{content:"";position:absolute;left:50%;top:10px;width:40px;height:5px;border-radius:3px;background:rgba(255,255,255,.24);transform:translateX(-50%)}
 @keyframes sheet{from{transform:translateY(80px);opacity:0}to{transform:none;opacity:1}}
+@keyframes sheetOut{to{transform:translateY(60px);opacity:0}}
 .win .wtag{display:none}
 .win h3{font-family:var(--head);font-weight:800;font-size:27px;letter-spacing:-.02em;margin:0 0 4px}
 .win .sub{font-family:var(--body);font-weight:600;font-size:14.5px;color:var(--blue2);margin:0 0 18px}
@@ -310,15 +340,35 @@ textarea.input.sm{min-height:76px}
 .win .hint{margin:-6px 0 16px;font-size:13px;line-height:1.45;color:var(--muted)}
 .kv.here{color:var(--white)}
 .kv.here b{color:var(--blue2)}
-/* celebration sheet */
-.cel-ic{width:76px;height:84px;margin:0 auto 16px;display:grid;place-items:center;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);background:linear-gradient(160deg,#ffdd85,#ff9f4a);color:#3a2300;animation:pop .6s var(--spring)}
-.cel-ic .ck{width:44%;height:44%}
-.win.cel{text-align:center}
+
+/* celebration sheets: glowing hexagon, light sweep, count-up numbers */
+.win.cel{text-align:center;overflow:hidden}
 .win.cel .reward{text-align:left}
+.win.cel .sub{color:var(--gold)}
+.cel-hero{position:relative;width:124px;height:136px;margin:0 auto 10px;display:grid;place-items:center}
+.cel-hero::before{content:"";position:absolute;inset:-34px;border-radius:50%;background:radial-gradient(circle,rgba(255,207,110,.5),rgba(255,159,74,.18) 45%,transparent 70%);animation:breathe 2.6s ease-in-out infinite}
+.cel-hero.lvl::before{background:radial-gradient(circle,rgba(148,178,255,.6),rgba(123,64,228,.22) 45%,transparent 70%)}
+@keyframes breathe{0%,100%{transform:scale(.92);opacity:.75}50%{transform:scale(1.12);opacity:1}}
+.cel-ic{position:relative;width:88px;height:98px;display:grid;place-items:center;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);background:linear-gradient(160deg,#ffe9a8,#ffb04f 55%,#ff9f4a);color:#3a2300;animation:pop .7s var(--spring)}
+.cel-ic.big{width:112px;height:124px;background:linear-gradient(160deg,#c9d8ff,#7f9cff 50%,#6a4be8);color:#fff}
+.cel-ic::after{content:"";position:absolute;top:-10%;bottom:-10%;left:-60%;width:38%;pointer-events:none;background:linear-gradient(100deg,transparent,rgba(255,255,255,.7),transparent);transform:skewX(-18deg);animation:shine 1.9s .6s ease-in-out 2}
+.cel-ic .ck{width:46%;height:46%}
+.cel-ic .num{font-family:var(--head);font-weight:800;font-size:42px;line-height:1;font-variant-numeric:tabular-nums}
+.cel-ic.big .num{font-size:54px}
+.cel-lbl{font-family:var(--body);font-weight:700;font-size:11.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:6px}
+.win.cel .xpbox{text-align:center}
+.xpg{display:block;font-family:var(--head);font-weight:800;font-size:32px;line-height:1.1;color:var(--white);font-variant-numeric:tabular-nums;margin:0 0 12px}
+.xpl{display:flex;justify-content:space-between;gap:10px;font-family:var(--body);font-weight:600;font-size:12.5px;color:var(--muted);margin-top:9px;font-variant-numeric:tabular-nums}
+.win.cel .bar{--ac:#ffcf6e}
+.win.cel .bar i{transition:width 1s var(--ease)}
 @keyframes pop{from{transform:scale(.4);opacity:0}to{transform:none;opacity:1}}
+
+/* effects layer: confetti and sparks are drawn by script (Web Animations) */
 .fx{position:fixed;inset:0;z-index:80;pointer-events:none;overflow:hidden}
-.fx i{position:absolute;top:-16px;width:9px;height:15px;border-radius:2px;opacity:0;animation:fall linear forwards}
-@keyframes fall{0%{opacity:1;transform:translate(0,0) rotate(0)}100%{opacity:1;transform:translate(var(--dx),108vh) rotate(var(--r))}}
+.fx i{position:absolute;display:block;will-change:transform,opacity}
+.fx i.sp{border-radius:50%}
+.fx i.rg{border:2px solid;border-radius:50%;background:none}
+
 /* weekday picker for flexible habits */
 .dchips{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px;margin-bottom:16px}
 .dchip{min-height:50px;border:0;border-radius:15px;background:rgba(255,255,255,.07);color:var(--muted);font-family:var(--head);font-weight:700;font-size:13px;transition:background .25s var(--ease),color .25s,box-shadow .25s,transform .22s var(--spring)}
@@ -329,11 +379,19 @@ textarea.input.sm{min-height:76px}
 #toast.show{opacity:1;transform:translateX(-50%)}
 #toast div{padding:12px 20px;border:1px solid var(--hair2);background:rgba(36,39,53,.92);-webkit-backdrop-filter:blur(20px) saturate(160%);backdrop-filter:blur(20px) saturate(160%);border-radius:999px;font-family:var(--body);font-weight:600;font-size:14px;text-align:center;box-shadow:inset 0 1px 0 rgba(255,255,255,.07),0 16px 36px -10px rgba(0,0,0,.85)}
 
-/* smooth switching between tabs */
+/* smooth switching between tabs; cards rise in one after another */
 #view{transition:opacity .13s ease,transform .13s ease}
 #view.v-out{opacity:0;transform:translateX(calc(var(--dx,0px) * -1))}
 #view.v-in{animation:viewIn .42s var(--ease) backwards}
 @keyframes viewIn{from{opacity:0;transform:translateX(var(--dx,0px)) scale(.992)}to{opacity:1;transform:none}}
+#view.v-in .today,#view.v-in .habit{animation:rise .65s var(--ease) backwards}
+#view.v-in .today{animation-delay:.05s}
+#view.v-in .habits>.habit:nth-child(1){animation-delay:.1s}
+#view.v-in .habits>.habit:nth-child(2){animation-delay:.16s}
+#view.v-in .habits>.habit:nth-child(3){animation-delay:.22s}
+#view.v-in .habits>.habit:nth-child(4){animation-delay:.28s}
+#view.v-in .habits>.habit:nth-child(n+5){animation-delay:.34s}
+@keyframes rise{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
 
 /* streak savers */
 .sv-row{display:flex;align-items:center;gap:16px}
@@ -452,7 +510,7 @@ textarea.input.sm{min-height:76px}
 'use strict';
 
 /* ============ constants ============ */
-const APP_VERSION = '2.0.5';
+const APP_VERSION = '2.1.0';
 const MAX_HABITS = 10;
 const MAX_NOTE = 200, MAX_MINI = 60, MAX_ID = 60, MAX_REF = 200;   // length limits: note, 2-minute version, identity, reflection answers
 // Backup reminders: the banner shows when this many changes (or days with any change) have passed since the last backup.
@@ -462,6 +520,8 @@ const SNAP_KEEP = 5;   // how many daily safety copies and how many event safety
 const MILESTONES = [3, 7, 14, 21, 30, 50, 60, 75, 90, 100, 150, 200, 250, 300, 365];
 // Same ten colours as the habit cards (by list position), used by the Today list.
 const HCOL = ['#5b8cff', '#ff6b5e', '#25c795', '#f5a524', '#a46bff', '#3db8f5', '#ff5f9e', '#84cc3b', '#ff8a3d', '#1fc3bc'];
+// Confetti colours.
+const FXC = ['#5b8cff', '#ff6b5e', '#25c795', '#f5a524', '#a46bff', '#3db8f5', '#ff5f9e', '#ffdd85'];
 // Quest ladder. "savers" = streak savers given as a bonus when the quest is claimed.
 const TIERS = [
   {n:1,  days:2,   xp:25,   savers:0, title:'Awakened',    reward:'A small treat: your favourite drink or snack'},
@@ -979,7 +1039,8 @@ function backupInfo() {
 
 /* ============ UI state + render ============ */
 const TABS = ['habits', 'vault', 'records', 'system'];
-const ui = { tab: 'habits', day: dkey(new Date()), rec: null, rescue: null, pend: null };  // rescue: null | 'fresh' | 'damaged' | 'unreadable'
+// fx = which habit/day was just ticked (set only for the moment the screen is redrawn, so the tick effects play once).
+const ui = { tab: 'habits', day: dkey(new Date()), rec: null, rescue: null, pend: null, fx: null };  // rescue: null | 'fresh' | 'damaged' | 'unreadable'
 
 function renderNav() {
   document.querySelectorAll('.tab').forEach(t => {
@@ -989,20 +1050,36 @@ function renderNav() {
   });
   $('.tabs .in').style.setProperty('--i', String(TABS.indexOf(ui.tab)));
 }
+// Bars and the Today ring carry data-k. When the screen is redrawn, they start from their old size and glide to the new one.
 function renderView() {
   const now = new Date();
+  const old = {};
+  document.querySelectorAll('#view [data-k]').forEach(e => { old[e.dataset.k] = e.dataset.off !== undefined ? e.style.strokeDashoffset : e.style.width; });
   $('#today-label').innerHTML = esc(now.toLocaleDateString(undefined, {weekday:'short'})) + '<br>' + esc(now.toLocaleDateString(undefined, {day:'2-digit', month:'short'}));
   $('#view').innerHTML = ui.rescue ? viewRescue() : ui.tab === 'habits' ? viewHabits() : ui.tab === 'vault' ? viewVault() : ui.tab === 'records' ? viewRecords() : viewSystem();
+  if (reduceMotion()) return;
+  document.querySelectorAll('#view [data-k]').forEach(e => {
+    const o = old[e.dataset.k];
+    if (o === undefined || o === '') return;
+    const p = e.dataset.off !== undefined ? 'strokeDashoffset' : 'width', to = e.style[p];
+    if (o === to) return;
+    e.style.transition = 'none'; e.style[p] = o;
+    void e.getBoundingClientRect();
+    e.style.transition = ''; e.style[p] = to;
+  });
 }
 function render() { document.body.classList.toggle('rescuing', !!ui.rescue); renderNav(); renderView(); }
 
-// Smooth fade/slide for the content area.
+// Smooth fade/slide for the content area. The "entering" class is removed afterwards so later redraws do not replay it.
+let inTimer;
 function playIn(dx) {
   const v = $('#view');
   v.style.setProperty('--dx', dx + 'px');
   v.classList.remove('v-in', 'v-out');
   void v.offsetWidth;
   v.classList.add('v-in');
+  clearTimeout(inTimer);
+  inTimer = setTimeout(() => v.classList.remove('v-in'), 1200);
 }
 const reduceMotion = () => !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
 let swapTimer;
@@ -1070,15 +1147,16 @@ function todayPanel() {
   const focus = currentFocus();
   const rows = due.map(h => {
     const d = !!h.done[tk], nm = d ? null : nmtInfo(h), col = HCOL[S.habits.indexOf(h) % HCOL.length];
+    const pop = d && ui.fx && ui.fx.id === h.id && ui.fx.day === tk;
     const sub = nm ? '<small class="nm">Never miss twice</small>' : h.identity ? '<small>' + esc(h.identity) + '</small>' : '';
-    return `<button class="t-row${d ? ' on' : ''}" style="--ac:${col}" data-action="tick" data-id="${esc(h.id)}" data-day="${tk}" aria-label="${d ? 'Unmark ' : 'Mark '}${esc(h.name)} today" aria-pressed="${d}">
+    return `<button class="t-row${d ? ' on' : ''}${pop ? ' pop' : ''}" style="--ac:${col}" data-action="tick" data-id="${esc(h.id)}" data-day="${tk}" aria-label="${d ? 'Unmark ' : 'Mark '}${esc(h.name)} today" aria-pressed="${d}">
       <span class="t-dot">${d ? CHECK : ''}</span><span class="t-txt"><b>${esc(h.name)}</b>${sub}</span><span class="t-st">${currentStreak(h)}<small>STREAK</small></span></button>`;
   }).join('');
   return `
   <section class="panel today">
     <div class="t-top">
-      <div class="ring${full ? ' full' : ''}" role="img" aria-label="${done} of ${n} habits done today">
-        <svg viewBox="0 0 112 112"><circle class="rt" cx="56" cy="56" r="46"/><circle class="rp" cx="56" cy="56" r="46" stroke-dasharray="${C.toFixed(1)}" stroke-dashoffset="${off}"/></svg>
+      <div class="ring${full ? ' full' : ''}${full && ui.fx ? ' celeb' : ''}" role="img" aria-label="${done} of ${n} habits done today">
+        <svg viewBox="0 0 112 112"><circle class="rt" cx="56" cy="56" r="46"/><circle class="rp" data-k="ring" data-off="1" cx="56" cy="56" r="46" stroke-dasharray="${C.toFixed(1)}" stroke-dashoffset="${off}" style="stroke-dashoffset:${off}"/></svg>
         <div class="rc"><span>${n ? done + '/' + n : '–'}</span><small>TODAY</small></div>
       </div>
       <div class="t-msg"><h3>${title}</h3><p>${esc(msg)}</p>${focus ? `<div class="t-focus"><b>This week's focus</b>${esc(focus)}</div>` : ''}</div>
@@ -1098,7 +1176,7 @@ function viewHabits() {
     <div class="p-info">
       <div class="p-name">${esc(S.player.name)}</div>
       <div class="p-sub">Title · ${esc(title)}</div>
-      <div class="bar"><i style="width:${pct}%"></i></div>
+      <div class="bar"><i data-k="xp" style="width:${pct}%"></i></div>
       <div class="xp-txt">XP ${S.player.xp.toLocaleString()} / ${b.toLocaleString()}</div>
       <div class="sv-line">${SHIELD}Streak savers · ${S.savers}</div>
     </div>
@@ -1143,6 +1221,7 @@ function extrasHtml(h) {
 function habitCard(h) {
   const tk = dkey(new Date()), yk = dkey(addDays(new Date(), -1));
   const cur = currentStreak(h), cl = claimableCount(h), next = TIERS[h.claimed];
+  const fxOn = !!(ui.fx && ui.fx.id === h.id);
   const boxBtn = d => {
     const k = dkey(d), v = h.done[k], done = v === 1, saved = v === 2, future = k > tk, open = (k === tk || k === yk);
     const lite = done && !!(h.lite && h.lite[k]);
@@ -1154,6 +1233,7 @@ function habitCard(h) {
     if (future) cls.push('future');
     if (open) cls.push('open');
     if (k < h.created && !v) cls.push('pre');
+    if (done && fxOn && ui.fx.day === k) cls.push('pop');
     const label = (open ? (done ? 'Unmark ' : saved ? 'Return streak saver for ' : 'Mark ') : '') + d.toDateString() + (lite ? ', done with the 2-minute version' : done ? ', done' : saved ? ', protected by a streak saver' : '');
     return `<button class="${cls.join(' ')}" data-action="tick" data-id="${esc(h.id)}" data-day="${k}" aria-label="${esc(label)}" aria-pressed="${done}">${done ? CHECK + (lite ? '<b class="mb" aria-hidden="true">2</b>' : '') : saved ? SHIELD_CK : '<span>' + d.getDate() + '</span>'}</button>`;
   };
@@ -1173,7 +1253,7 @@ function habitCard(h) {
     quest = `<button class="btn claim" data-action="claim" data-id="${esc(h.id)}">Quest complete · Claim reward</button>`;
   } else if (next) {
     const shown = Math.min(cur, next.days), p = Math.round(shown / next.days * 100);
-    quest = `<div class="q-row"><span class="q-lbl">Next quest · Lv.${next.n} · ${next.days}-day streak</span><span class="q-val">${shown}/${next.days}</span></div><div class="bar"><i style="width:${p}%"></i></div>`;
+    quest = `<div class="q-row"><span class="q-lbl">Next quest · Lv.${next.n} · ${next.days}-day streak</span><span class="q-val">${shown}/${next.days}</span></div><div class="bar"><i data-k="q${esc(h.id)}" style="width:${p}%"></i></div>`;
   } else {
     quest = `<div class="q-row"><span class="q-lbl">All quests cleared · Legend</span></div>`;
   }
@@ -1183,7 +1263,7 @@ function habitCard(h) {
     <div class="h-head">
       <button class="h-name" data-action="edit" data-id="${esc(h.id)}" aria-label="Edit ${esc(h.name)}"><span>${esc(h.name)}</span>${PENCIL}</button>
       <button class="h-more" data-action="extras" data-id="${esc(h.id)}" aria-label="Options for ${esc(h.name)}: identity, 2-minute habit, note, flexible days">${DOTS}</button>
-      <div class="streak"><small>STREAK</small><b>${cur}</b></div>
+      <div class="streak"><small>STREAK</small><b${fxOn ? ' class="bump"' : ''}>${cur}</b></div>
     </div>
     ${extrasHtml(h)}${nmt}
     <div class="week${flex ? ' flex' : ''}"${flex ? ` style="grid-template-columns:repeat(${vis.length},minmax(0,1fr))"` : ''}>${boxes}</div>${rest}${yrow}
@@ -1367,35 +1447,113 @@ function viewSystem() {
   </section>`;
 }
 
-/* ============ modals + toast + celebrations ============ */
+/* ============ modals + toast + effects + celebrations ============ */
+let leaveTimer;
 function showModal(inner, cls) {
   const o = $('#overlay');
+  clearTimeout(leaveTimer); o.classList.remove('leaving');
+  if (cls === 'cel') { clearTimeout(toastTimer); $('#toast').classList.remove('show'); }   // a celebration sheet is never covered by a toast
   o.innerHTML = `<div class="panel win${cls ? ' ' + cls : ''}">${inner}</div>`;
   o.classList.add('show');
   const f = o.querySelector('input,textarea');
   if (f) setTimeout(() => { try { f.focus(); } catch (e) {} }, 60);
 }
-function closeModal() { const o = $('#overlay'); o.classList.remove('show'); o.innerHTML = ''; }
+// Sheets slide away softly. "show" is removed at once, so the rest of the app already treats the popup as closed.
+function closeModal() {
+  const o = $('#overlay');
+  if (!o.classList.contains('show')) return;
+  o.classList.remove('show');
+  if (reduceMotion()) { o.innerHTML = ''; return; }
+  o.classList.add('leaving');
+  clearTimeout(leaveTimer);
+  leaveTimer = setTimeout(() => { o.classList.remove('leaving'); o.innerHTML = ''; }, 200);
+}
 let toastTimer;
 function toast(msg) {
   const t = $('#toast'); t.firstElementChild.textContent = msg; t.classList.add('show');
   clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('show'), 2600);
 }
-// A short burst of confetti. Skipped when the device asks for reduced motion.
-function confetti() {
-  if (reduceMotion()) return;
-  const cols = ['#5b8cff', '#ff6b5e', '#25c795', '#f5a524', '#a46bff', '#3db8f5', '#ff5f9e', '#ffdd85'];
-  let h = '';
-  for (let i = 0; i < 44; i++) {
-    const x = Math.random() * 100, dx = Math.round(Math.random() * 160 - 80), r = Math.round(Math.random() * 720 - 360);
-    const t = (1.8 + Math.random() * 1.4).toFixed(2), dl = (Math.random() * .35).toFixed(2);
-    h += `<i style="left:${x.toFixed(1)}%;background:${cols[i % cols.length]};--dx:${dx}px;--r:${r}deg;animation-duration:${t}s;animation-delay:${dl}s"></i>`;
-  }
+
+/* ---- effects (all skipped when the device asks for reduced motion) ---- */
+const canFx = () => !reduceMotion() && !!(document.body && document.body.animate);
+function fxLayer(ms) {
   const w = document.createElement('div');
-  w.className = 'fx'; w.setAttribute('aria-hidden', 'true'); w.innerHTML = h;
+  w.className = 'fx'; w.setAttribute('aria-hidden', 'true');
   document.body.appendChild(w);
-  setTimeout(() => w.remove(), 3800);
+  setTimeout(() => w.remove(), ms);
+  return w;
 }
+// Confetti. Normal: pieces rain from the top with a gentle sway. big: two cannons fire from the bottom corners.
+function confetti(n, big) {
+  if (!canFx()) return;
+  n = n || 60;
+  const W = window.innerWidth, H = window.innerHeight, w = fxLayer(4800);
+  for (let i = 0; i < n; i++) {
+    const el = document.createElement('i');
+    const sz = 7 + Math.random() * 7, round = Math.random() < .3;
+    el.style.cssText = 'opacity:0;width:' + sz.toFixed(1) + 'px;height:' + (round ? sz : sz * 1.7).toFixed(1) + 'px;background:' + FXC[i % FXC.length] + ';border-radius:' + (round ? '50%' : '2px');
+    const spin = Math.round(Math.random() * 900 - 450), dur = 1900 + Math.random() * 1500, delay = Math.random() * (big ? 450 : 300);
+    let x0, y0, kf;
+    if (big) {
+      const left = i % 2 === 0, dx = (left ? 1 : -1) * (40 + Math.random() * W * .42), up = H * (.35 + Math.random() * .4);
+      x0 = left ? W * .08 : W * .92; y0 = H * .9;
+      kf = [
+        {transform:'translate(0,0) rotate(0deg)', opacity:1, easing:'cubic-bezier(.12,.6,.3,1)'},
+        {transform:'translate(' + (dx * .6) + 'px,' + (-up) + 'px) rotate(' + (spin / 2) + 'deg)', opacity:1, offset:.42, easing:'cubic-bezier(.4,0,.8,.6)'},
+        {transform:'translate(' + dx + 'px,' + (H * .15) + 'px) rotate(' + spin + 'deg)', opacity:0}
+      ];
+    } else {
+      const sway = Math.random() * 120 - 60;
+      x0 = Math.random() * W; y0 = -20;
+      kf = [
+        {transform:'translate(0,0) rotate(0deg)', opacity:1},
+        {transform:'translate(' + sway + 'px,' + (H * .55) + 'px) rotate(' + (spin / 2) + 'deg)', opacity:1, offset:.6},
+        {transform:'translate(' + (-sway / 2) + 'px,' + (H + 30) + 'px) rotate(' + spin + 'deg)', opacity:.9}
+      ];
+    }
+    el.style.left = x0 + 'px'; el.style.top = y0 + 'px';
+    w.appendChild(el);
+    el.animate(kf, {duration:dur, delay:delay, fill:'forwards', easing:'cubic-bezier(.3,.6,.5,1)'});
+  }
+}
+// A small ripple and ring of sparks around a tapped tick.
+function spark(el, color) {
+  if (!el || !canFx()) return;
+  const r = el.getBoundingClientRect();
+  if (!r.width || r.bottom < 0 || r.top > window.innerHeight) return;
+  const cx = r.left + r.width / 2, cy = r.top + r.height / 2, w = fxLayer(1300);
+  const ring = document.createElement('i');
+  ring.className = 'rg';
+  ring.style.cssText = 'left:' + (cx - r.width / 2) + 'px;top:' + (cy - r.width / 2) + 'px;width:' + r.width + 'px;height:' + r.width + 'px;border-color:' + color;
+  w.appendChild(ring);
+  ring.animate([{transform:'scale(.7)', opacity:.9}, {transform:'scale(2)', opacity:0}], {duration:650, easing:'cubic-bezier(.2,.7,.3,1)', fill:'forwards'});
+  const n = 11;
+  for (let i = 0; i < n; i++) {
+    const a = (i / n) * Math.PI * 2 + Math.random() * .5, d = r.width * (.8 + Math.random() * .6), s = 4 + Math.random() * 4;
+    const p = document.createElement('i');
+    p.className = 'sp';
+    p.style.cssText = 'left:' + (cx - s / 2) + 'px;top:' + (cy - s / 2) + 'px;width:' + s + 'px;height:' + s + 'px;background:' + (i % 3 === 0 ? '#fff' : color);
+    w.appendChild(p);
+    p.animate([{transform:'translate(0,0) scale(1)', opacity:1}, {transform:'translate(' + (Math.cos(a) * d) + 'px,' + (Math.sin(a) * d) + 'px) scale(.2)', opacity:0}], {duration:520 + Math.random() * 240, easing:'cubic-bezier(.15,.7,.3,1)', fill:'forwards'});
+  }
+}
+// Numbers that roll up to their value.
+function countUp(el, from, to, ms) {
+  if (!el) return;
+  if (reduceMotion() || from === to) { el.textContent = to; return; }
+  const t0 = performance.now();
+  (function step(t) {
+    const p = Math.min(1, (t - t0) / ms), e = 1 - Math.pow(1 - p, 3);
+    el.textContent = Math.round(from + (to - from) * e);
+    if (p < 1 && document.body.contains(el)) requestAnimationFrame(step);
+  })(t0);
+}
+// A quick scale pulse on an element (used when the level number lands).
+function pulse(el) {
+  if (!el || !canFx()) return;
+  el.animate([{transform:'scale(1)'}, {transform:'scale(1.25)'}, {transform:'scale(1)'}], {duration:550, easing:'cubic-bezier(.3,1.35,.5,1)'});
+}
+
 // Called after a habit is marked done. Shows the celebration that fits: day complete, streak milestone, or a comeback.
 // If another popup is open (a quest to claim), it waits and runs when that popup is closed.
 function celebrate(id, k, bounced) {
@@ -1417,12 +1575,13 @@ function celebrate(id, k, bounced) {
   if (ms) body += `<div class="reward"><b>${ms}-day streak</b>${esc(h.name)}: ${ms} real days in a row. ${h.identity ? esc(h.identity) + '. You are proving it.' : 'This is no longer luck. It is who you are.'}</div>`;
   if (bounced) body += `<div class="reward"><b>Never missed twice</b>You came straight back after a miss. That is the skill that matters most.</div>`;
   showModal(`
-    <div class="cel-ic">${CHECK}</div>
+    <div class="cel-hero"><div class="cel-ic">${all ? CHECK : '<span class="num">' + ms + '</span>'}</div></div>
+    <div class="cel-lbl">${all ? 'Every habit done' : 'Streak milestone'}</div>
     <h3>${all ? 'Day complete' : ms + '-day streak'}</h3>
     <p class="sub">${all ? 'All ' + dueToday().length + ' habits done' : esc(h.name)}</p>
     ${body}
     <div class="actions"><button class="btn" data-action="close">Keep going</button></div>`, 'cel');
-  confetti();
+  confetti(ms >= 30 ? 110 : 64, ms >= 30);
 }
 
 function openHabitForm(id) {
@@ -1441,7 +1600,7 @@ function openHabitForm(id) {
     </div>`);
 }
 
-/* ---- arrange habits (new in 2.0.5) ---- */
+/* ---- arrange habits ---- */
 // The order of S.habits is the order on the Habits tab AND in the Today card. Each tap on an arrow swaps two
 // neighbours, saves, and redraws the screen underneath. Only the list inside the sheet is redrawn, so the sheet stays still.
 function arrRows() {
@@ -1554,23 +1713,28 @@ function setDays(id, arr) {
   afterChange(id, before);
   toast(h.days.length ? 'Days saved: ' + daysLabel(h.days) : 'This habit now runs every day.');
 }
+// Quest complete: the sheet opens with a glowing tier badge and a small burst of confetti.
 function openClaim(id) {
   const h = findHabit(id); if (!h) return;
   const t = TIERS[h.claimed];
   if (!t || longestStreak(h) < t.days) return;
   showModal(`
     <div class="wtag"><span class="tag">Habsys</span></div>
-    <h3>Quest complete</h3>
+    <div class="cel-hero"><div class="cel-ic"><span class="num">${t.n}</span></div></div>
+    <div class="cel-lbl">Quest complete</div>
+    <h3>${esc(t.title)}</h3>
     <p class="sub">${esc(h.name)} · ${t.days}-day streak</p>
     <div class="reward"><b>You receive</b>+${t.xp} XP · Title: ${esc(t.title)}${t.savers ? ' · +' + t.savers + ' streak saver' + (t.savers > 1 ? 's' : '') : ''}</div>
     <div class="reward"><b>Your reward</b>${esc(rewardTextFor(t))}</div>
-    <div class="actions"><button class="btn" data-action="doclaim" data-id="${esc(h.id)}">Claim reward</button><button class="btn ghost" data-action="close">Later</button></div>`);
+    <div class="actions"><button class="btn" data-action="doclaim" data-id="${esc(h.id)}">Claim reward</button><button class="btn ghost" data-action="close">Later</button></div>`, 'cel');
+  confetti(34);
 }
+// Claim: the XP rolls up, the bar fills, and on a level up the bar overflows, the level number rolls and the confetti cannons fire.
 function doClaim(id) {
   const h = findHabit(id); if (!h) return;
   const t = TIERS[h.claimed];
   if (!t || longestStreak(h) < t.days) { closeModal(); return; }
-  const oldL = levelOf(S.player.xp);
+  const oldXp = S.player.xp, oldL = levelOf(oldXp);
   h.claimed += 1;
   S.player.xp += t.xp;
   S.savers += t.savers || 0;
@@ -1578,19 +1742,43 @@ function doClaim(id) {
   S.bigMoment = true;
   save();
   snapshot('claim');
-  const newL = levelOf(S.player.xp);
+  const newXp = S.player.xp, newL = levelOf(newXp);
   render();
   const more = claimableCount(h) > 0;
+  const leveled = newL > oldL, rankUp = rankOf(newL) !== rankOf(oldL);
+  const pctOf = (xp, L) => Math.round(Math.max(0, xp - lvlStart(L)) / (lvlStart(L + 1) - lvlStart(L)) * 100);
+  const pOld = pctOf(oldXp, oldL), pNew = pctOf(newXp, newL);
   showModal(`
     <div class="wtag"><span class="tag">Habsys</span></div>
-    <h3>Reward claimed</h3>
-    <p class="sub">+${t.xp} XP · ${esc(t.title)}</p>
-    ${newL > oldL ? `<div class="reward"><b>Level up</b>LV ${oldL} → LV ${newL} · Rank ${rankOf(newL)}${rankOf(newL) !== rankOf(oldL) ? ' · New rank!' : ''}</div>` : ''}
+    <div class="cel-hero${leveled ? ' lvl' : ''}"><div class="cel-ic${leveled ? ' big' : ''}"><span class="num" id="celnum">${leveled ? oldL : t.n}</span></div></div>
+    <div class="cel-lbl">${leveled ? (rankUp ? 'Rank up' : 'Level up') : 'Reward claimed'}</div>
+    <h3>${leveled ? 'Level ' + newL : esc(t.title)}</h3>
+    <p class="sub">${esc(t.title)} · ${esc(h.name)}</p>
+    <div class="reward xpbox"><b>XP earned</b><span class="xpg">+<span id="celxp">0</span> XP</span>
+      <div class="bar"><i id="celbar" style="width:${pOld}%"></i></div>
+      <div class="xpl"><span id="cellv">LV ${oldL}</span><span>${newXp.toLocaleString()} / ${lvlStart(newL + 1).toLocaleString()} XP</span></div></div>
+    ${leveled ? `<div class="reward"><b>Level up</b>LV ${oldL} → LV ${newL} · Rank ${rankOf(newL)}${rankUp ? ' · New rank!' : ''}</div>` : ''}
     ${t.savers ? `<div class="reward"><b>Streak savers</b>+${t.savers} · you now have ${S.savers}</div>` : ''}
     <div class="reward"><b>Go enjoy it</b>${esc(S.rewards[0].text)}</div>
     <p style="color:var(--muted);font-size:14px">Mark it as enjoyed in the Vault once you have had it. Then save a backup on the Habits tab to lock in this win.</p>
-    <div class="actions"><button class="btn" data-action="afterclaim" data-id="${esc(h.id)}">${more ? 'Next reward' : 'Continue'}</button></div>`);
-  confetti();
+    <div class="actions"><button class="btn" data-action="afterclaim" data-id="${esc(h.id)}">${more ? 'Next reward' : 'Continue'}</button></div>`, 'cel');
+  confetti(leveled ? 50 : 70);
+  setTimeout(() => {
+    countUp($('#celxp'), 0, t.xp, 900);
+    const bar = $('#celbar'); if (!bar) return;
+    if (!leveled) { bar.style.width = pNew + '%'; return; }
+    bar.style.width = '100%';                       // fill to the top of the old level ...
+    setTimeout(() => {
+      const b2 = $('#celbar'); if (!b2) return;
+      countUp($('#celnum'), oldL, newL, 450);       // ... the level number rolls up ...
+      pulse($('.cel-ic'));
+      b2.style.transition = 'none'; b2.style.width = '0%';
+      void b2.offsetWidth;
+      b2.style.transition = ''; b2.style.width = pNew + '%';   // ... and the bar refills for the new level
+      const lv = $('#cellv'); if (lv) lv.textContent = 'LV ' + newL;
+      confetti(120, true);
+    }, 1000);
+  }, 450);
 }
 function openRewardEdit(n) {
   const t = TIERS.find(x => x.n === n); if (!t) return;
@@ -1757,6 +1945,7 @@ function afterChange(id, before) {
   if (h && claimableCount(h) > before) openClaim(id);
 }
 // lite = true: the day was done with the 2-minute version (still a real done day).
+// The tick effect: ui.fx is set only while the screen is redrawn, so the pop, the drawing check and the streak bump play once.
 function markDone(id, k, lite) {
   const h = findHabit(id); if (!h) return;
   const tk = dkey(new Date()), yk = dkey(addDays(new Date(), -1));
@@ -1766,7 +1955,15 @@ function markDone(id, k, lite) {
   h.done[k] = 1;
   if (!h.lite) h.lite = {};
   if (lite) h.lite[k] = true; else delete h.lite[k];
+  ui.fx = {id: id, day: k};
   afterChange(id, before);
+  ui.fx = null;
+  try { if (navigator.vibrate) navigator.vibrate(14); } catch (e) {}
+  const col = HCOL[Math.max(0, S.habits.indexOf(h)) % HCOL.length];
+  requestAnimationFrame(() => {
+    spark(document.querySelector('#view .box[data-id="' + id + '"][data-day="' + k + '"]'), col);
+    if (k === dkey(new Date())) spark(document.querySelector('#view .t-row[data-id="' + id + '"] .t-dot'), col);
+  });
   if (lite) toast('2-minute version done. Streak kept alive.');
   celebrate(id, k, bounced);
 }
