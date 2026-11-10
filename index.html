@@ -13,7 +13,7 @@
 <link rel="apple-touch-icon" href="icon-180.png?v=199">
 <link rel="icon" type="image/png" href="icon-192.png?v=199">
 <style>
-/* ===== Habsys 2.1.0: reward feel (tick effect, confetti, level-up and quest celebrations) + smoother, more premium UI, on top of 2.0.5 (arrange habits) ===== */
+/* ===== Habsys 2.2.0: bug-fix and performance release (no new features, no look changes), on top of 2.1.0 ===== */
 :root{
   color-scheme:dark;
   --bg0:#0a0b10;
@@ -35,15 +35,17 @@ html{background:var(--bg0);-webkit-text-size-adjust:100%}
 body{
   margin:0;min-height:100vh;color:var(--white);font-family:var(--body);font-size:16px;line-height:1.4;
   -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
+  -webkit-user-select:none;user-select:none;-webkit-touch-callout:none;
+  overscroll-behavior-y:none;
+}
+/* the page glow lives on its own fixed layer: scrolling no longer repaints big gradients (smoother on iPad) */
+body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
   background:
     radial-gradient(1000px 520px at 50% -180px,rgba(91,110,255,.26),transparent 70%),
     radial-gradient(640px 460px at 100% 38%,rgba(150,90,255,.07),transparent 70%),
     radial-gradient(560px 420px at 0% 78%,rgba(60,120,255,.05),transparent 70%),
     linear-gradient(180deg,#0d0f16 0%,#0a0b10 100%);
-  background-attachment:fixed;
-  -webkit-user-select:none;user-select:none;-webkit-touch-callout:none;
-  overscroll-behavior-y:none;
-}
+  transform:translateZ(0)}
 button,input,textarea{font:inherit;color:inherit;touch-action:manipulation}
 button{cursor:pointer;border:0;background:none;padding:0}
 input,textarea{-webkit-user-select:text;user-select:text;caret-color:var(--blue2)}
@@ -73,10 +75,10 @@ h2.sec{font-family:var(--head);font-size:25px;letter-spacing:-.02em;color:var(--
   background:radial-gradient(130% 150% at 105% -10%,rgba(255,255,255,.28),transparent 48%),radial-gradient(90% 120% at -5% 110%,rgba(30,20,120,.38),transparent 60%),linear-gradient(135deg,#3552ee 0%,#5845ec 55%,#7b40e4 100%);
   box-shadow:inset 0 1px 0 rgba(255,255,255,.32),inset 0 -1px 0 rgba(0,0,0,.12),0 26px 50px -22px rgba(80,80,240,.75)}
 .player::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;background:linear-gradient(180deg,rgba(255,255,255,.1),rgba(255,255,255,0) 38%)}
-/* a soft light sweep across the hero card whenever a tab opens */
-.player::before{content:"";position:absolute;top:-10%;bottom:-10%;left:-60%;width:38%;pointer-events:none;opacity:0;z-index:1;background:linear-gradient(100deg,transparent,rgba(255,255,255,.24),transparent);transform:skewX(-18deg)}
+/* a soft light sweep across the hero card whenever a tab opens (moved with transform, not left: no layout work) */
+.player::before{content:"";position:absolute;top:-10%;bottom:-10%;left:0;width:38%;pointer-events:none;opacity:0;z-index:1;background:linear-gradient(100deg,transparent,rgba(255,255,255,.24),transparent);transform:translateX(-200%) skewX(-18deg)}
 #view.v-in .player::before{animation:sweep 1.4s .4s var(--ease) 1}
-@keyframes sweep{0%{left:-60%;opacity:1}100%{left:130%;opacity:1}}
+@keyframes sweep{0%{transform:translateX(-200%) skewX(-18deg);opacity:1}100%{transform:translateX(400%) skewX(-18deg);opacity:1}}
 .rank{width:64px;height:72px;flex:none;display:grid;place-items:center;
   clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);
   background:linear-gradient(160deg,#ffffff 0%,#cfdaff 100%);
@@ -193,20 +195,25 @@ h2.sec{font-family:var(--head);font-size:25px;letter-spacing:-.02em;color:var(--
 .box.open{cursor:pointer}
 .box.open:active{transform:scale(.88)}
 .box:not(.open){cursor:default;pointer-events:none}
-.box.today:not(.done){border-color:var(--ac);color:var(--white);background:color-mix(in srgb,var(--ac) 14%,var(--surface2));animation:pulse 2.8s ease-in-out infinite}
+.box.today:not(.done){border-color:var(--ac);color:var(--white);background:color-mix(in srgb,var(--ac) 14%,var(--surface2))}
+/* the soft pulse is a ring that fades (opacity only): it no longer repaints the card every frame */
+.box.today:not(.done)::after{content:"";position:absolute;inset:0;border-radius:50%;pointer-events:none;box-shadow:0 0 0 6px color-mix(in srgb,var(--ac) 20%,transparent);opacity:0;animation:pulse 2.8s ease-in-out infinite}
 .box.done{
   background:linear-gradient(180deg,rgba(255,255,255,.28),rgba(255,255,255,0) 62%),var(--ac);
   border-color:transparent;color:#fff;
   box-shadow:0 10px 18px -8px color-mix(in srgb,var(--ac) 85%,transparent),inset 0 1px 0 rgba(255,255,255,.34),inset 0 -2px 4px rgba(0,0,0,.1);
 }
 .box.saved{background:color-mix(in srgb,var(--ac) 14%,var(--surface2));border-color:color-mix(in srgb,var(--ac) 70%,transparent);color:var(--ac)}
-.box .ck{width:50%;height:50%;filter:drop-shadow(0 1px 1px rgba(0,0,0,.22))}
+/* FIX 2.2.0: the tick is placed with fixed insets inside the circle, so its size no longer depends on how the browser sizes the grid (it could come out tiny) */
+.box .ck{position:absolute;left:25%;top:25%;width:50%;height:50%;filter:drop-shadow(0 1px 1px rgba(0,0,0,.22))}
 .box.saved .ck{filter:none}
 .box .mb{position:absolute;right:-3px;bottom:-3px;width:18px;height:18px;display:grid;place-items:center;border-radius:50%;background:#fff;color:#14161f;font-family:var(--body);font-weight:800;font-size:10.5px;line-height:1;box-shadow:0 2px 6px rgba(0,0,0,.4)}
 .yrow{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:16px;padding-top:14px;border-top:1px solid var(--hair)}
 .yrow .dl{font-size:13px}
 .yrow .box{width:46px;height:46px;max-width:none;aspect-ratio:auto;margin:0;flex:none}
-@keyframes pulse{0%,100%{box-shadow:0 0 0 0 color-mix(in srgb,var(--ac) 0%,transparent)}50%{box-shadow:0 0 0 6px color-mix(in srgb,var(--ac) 20%,transparent)}}
+/* FIX 2.2.0: the Sunday tick (shown on Mondays in this smaller box) was tiny. It now has the same size as the other days' ticks. */
+.yrow .box .ck{left:16%;top:16%;width:68%;height:68%}
+@keyframes pulse{0%,100%{opacity:0}50%{opacity:1}}
 
 /* the satisfying tick: the circle pops, the check draws itself, a ring ripples out */
 .box.done .ck path,.t-dot .ck path,.cel-ic .ck path{stroke-dasharray:26;stroke-dashoffset:0}
@@ -266,9 +273,9 @@ h2.sec{font-family:var(--head);font-size:25px;letter-spacing:-.02em;color:var(--
 .btn.block{display:flex;width:100%}
 .btn.sm{min-height:38px;padding:6px 16px;font-size:14px;border-radius:13px}
 .btn.claim{width:100%;margin-top:0;background:linear-gradient(180deg,#ffdd85 0%,#ffa94d 100%);color:#3a2300;box-shadow:inset 0 1px 0 rgba(255,255,255,.55),0 12px 26px -12px rgba(255,166,70,.9);animation:glow 2.6s ease-in-out infinite}
-.btn.claim::after{content:"";position:absolute;top:-10%;bottom:-10%;left:-60%;width:36%;pointer-events:none;background:linear-gradient(100deg,transparent,rgba(255,255,255,.6),transparent);transform:skewX(-18deg);animation:shine 3.2s 1s ease-in-out infinite}
+.btn.claim::after{content:"";position:absolute;top:-10%;bottom:-10%;left:0;width:36%;pointer-events:none;background:linear-gradient(100deg,transparent,rgba(255,255,255,.6),transparent);transform:translateX(-200%) skewX(-18deg);animation:shine 3.2s 1s ease-in-out infinite}
 @keyframes glow{0%,100%{box-shadow:inset 0 1px 0 rgba(255,255,255,.55),0 8px 20px -12px rgba(255,166,70,.5)}50%{box-shadow:inset 0 1px 0 rgba(255,255,255,.55),0 12px 30px -8px rgba(255,166,70,1)}}
-@keyframes shine{0%{left:-60%}45%,100%{left:130%}}
+@keyframes shine{0%{transform:translateX(-200%) skewX(-18deg)}45%,100%{transform:translateX(400%) skewX(-18deg)}}
 
 /* vault + settings */
 .ladder{display:grid;gap:12px}
@@ -315,7 +322,7 @@ textarea.input.sm{min-height:76px}
 .rescuing #app{padding-bottom:calc(env(safe-area-inset-bottom) + 32px)}
 
 /* popups: native-style bottom sheet, with a soft exit */
-#overlay{position:fixed;inset:0;z-index:50;display:none;flex-direction:column;padding:12px 12px calc(env(safe-area-inset-bottom) + 12px);background:rgba(0,0,0,.55);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);overflow-y:auto;-webkit-overflow-scrolling:touch}
+#overlay{position:fixed;inset:0;z-index:50;display:none;flex-direction:column;padding:12px 12px calc(env(safe-area-inset-bottom) + 12px);background:rgba(0,0,0,.55);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
 #overlay.show{display:flex;animation:fadeIn .28s ease}
 #overlay.leaving{display:flex;pointer-events:none;animation:fadeOut .2s ease forwards}
 #overlay.leaving .win{animation:sheetOut .2s ease-in forwards}
@@ -351,7 +358,7 @@ textarea.input.sm{min-height:76px}
 @keyframes breathe{0%,100%{transform:scale(.92);opacity:.75}50%{transform:scale(1.12);opacity:1}}
 .cel-ic{position:relative;width:88px;height:98px;display:grid;place-items:center;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);background:linear-gradient(160deg,#ffe9a8,#ffb04f 55%,#ff9f4a);color:#3a2300;animation:pop .7s var(--spring)}
 .cel-ic.big{width:112px;height:124px;background:linear-gradient(160deg,#c9d8ff,#7f9cff 50%,#6a4be8);color:#fff}
-.cel-ic::after{content:"";position:absolute;top:-10%;bottom:-10%;left:-60%;width:38%;pointer-events:none;background:linear-gradient(100deg,transparent,rgba(255,255,255,.7),transparent);transform:skewX(-18deg);animation:shine 1.9s .6s ease-in-out 2}
+.cel-ic::after{content:"";position:absolute;top:-10%;bottom:-10%;left:0;width:38%;pointer-events:none;background:linear-gradient(100deg,transparent,rgba(255,255,255,.7),transparent);transform:translateX(-200%) skewX(-18deg);animation:shine 1.9s .6s ease-in-out 2}
 .cel-ic .ck{width:46%;height:46%}
 .cel-ic .num{font-family:var(--head);font-weight:800;font-size:42px;line-height:1;font-variant-numeric:tabular-nums}
 .cel-ic.big .num{font-size:54px}
@@ -365,7 +372,7 @@ textarea.input.sm{min-height:76px}
 
 /* effects layer: confetti and sparks are drawn by script (Web Animations) */
 .fx{position:fixed;inset:0;z-index:80;pointer-events:none;overflow:hidden}
-.fx i{position:absolute;display:block;will-change:transform,opacity}
+.fx i{position:absolute;display:block}
 .fx i.sp{border-radius:50%}
 .fx i.rg{border:2px solid;border-radius:50%;background:none}
 
@@ -510,7 +517,7 @@ textarea.input.sm{min-height:76px}
 'use strict';
 
 /* ============ constants ============ */
-const APP_VERSION = '2.1.0';
+const APP_VERSION = '2.2.0';
 const MAX_HABITS = 10;
 const MAX_NOTE = 200, MAX_MINI = 60, MAX_ID = 60, MAX_REF = 200;   // length limits: note, 2-minute version, identity, reflection answers
 // Backup reminders: the banner shows when this many changes (or days with any change) have passed since the last backup.
@@ -630,7 +637,8 @@ function normalize(raw) {
       claimed: Math.min(TIERS.length, Math.max(0, Math.floor(Number(h && h.claimed) || 0)))
     };
   });
-  s.rewards = (Array.isArray(raw.rewards) ? raw.rewards : []).slice(0, 500).map(r => ({
+  // FIX 2.2.0: an empty entry in the rewards list no longer stops the app from loading.
+  s.rewards = (Array.isArray(raw.rewards) ? raw.rewards : []).filter(r => r && typeof r === 'object').slice(0, 500).map(r => ({
     id: String(r.id || uid()), habitId: String(r.habitId || ''), habitName: String(r.habitName || 'Habit').slice(0, 30),
     tier: Math.min(TIERS.length, Math.max(1, Math.floor(Number(r.tier) || 1))), title: String(r.title || '').slice(0, 30),
     xp: Math.max(0, Math.floor(Number(r.xp) || 0)), text: String(r.text || '').slice(0, 160),
@@ -746,13 +754,25 @@ function updateNote() {
   storageNote = ok === 0 ? 'Could not save to this device. Save a backup file now.'
     : ok < vals.length ? 'One storage area is unavailable. Your data is still saved in the others.' : '';
 }
+// localStorage is written at once (so nothing is lost if the app is closed). The slower IndexedDB and Cache Storage writes
+// run one at a time, always with the NEWEST data: quick repeated taps no longer start a pile of overlapping writes,
+// and an older copy can no longer finish after (and replace) a newer one.
+let wBusy = false, wNext = null, lsOk = false;
 function writeAll(rec) {
   const str = JSON.stringify(rec);
-  let ls = false;
-  try { localStorage.setItem(LS_KEY, str); ls = true; } catch (e) {}
-  const a = withTimeout(idbSet(DB_KEY, rec), 8000).then(() => true, () => { dbPromise = null; return false; });
-  const b = window.caches ? withTimeout(cachePut('state', str), 8000).then(() => true, () => false) : Promise.resolve(null);
-  Promise.all([a, b]).then(r => { health = {idb:r[0], ls:ls, cache:r[1]}; updateNote(); });
+  try { localStorage.setItem(LS_KEY, str); lsOk = true; } catch (e) { lsOk = false; }
+  wNext = {rec: rec, str: str};
+  pumpWrites();
+}
+function pumpWrites() {
+  if (wBusy || !wNext) return;
+  const job = wNext; wNext = null; wBusy = true;
+  const a = withTimeout(idbSet(DB_KEY, job.rec), 8000).then(() => true, () => { dbPromise = null; return false; });
+  const b = window.caches ? withTimeout(cachePut('state', job.str), 8000).then(() => true, () => false) : Promise.resolve(null);
+  Promise.all([a, b]).then(r => {
+    health = {idb:r[0], ls:lsOk, cache:r[1]}; updateNote();
+    wBusy = false; pumpWrites();
+  });
 }
 // opts.noCount = this save is housekeeping, not a change the person made.
 function save(opts) {
@@ -1051,6 +1071,7 @@ function renderNav() {
   $('.tabs .in').style.setProperty('--i', String(TABS.indexOf(ui.tab)));
 }
 // Bars and the Today ring carry data-k. When the screen is redrawn, they start from their old size and glide to the new one.
+// FIX 2.2.0: all the bars are set up first and the browser measures the page ONCE (before it did that once per bar).
 function renderView() {
   const now = new Date();
   const old = {};
@@ -1058,17 +1079,21 @@ function renderView() {
   $('#today-label').innerHTML = esc(now.toLocaleDateString(undefined, {weekday:'short'})) + '<br>' + esc(now.toLocaleDateString(undefined, {day:'2-digit', month:'short'}));
   $('#view').innerHTML = ui.rescue ? viewRescue() : ui.tab === 'habits' ? viewHabits() : ui.tab === 'vault' ? viewVault() : ui.tab === 'records' ? viewRecords() : viewSystem();
   if (reduceMotion()) return;
+  const moves = [];
   document.querySelectorAll('#view [data-k]').forEach(e => {
     const o = old[e.dataset.k];
     if (o === undefined || o === '') return;
     const p = e.dataset.off !== undefined ? 'strokeDashoffset' : 'width', to = e.style[p];
     if (o === to) return;
     e.style.transition = 'none'; e.style[p] = o;
-    void e.getBoundingClientRect();
-    e.style.transition = ''; e.style[p] = to;
+    moves.push([e, p, to]);
   });
+  if (!moves.length) return;
+  void document.body.offsetHeight;
+  moves.forEach(m => { m[0].style.transition = ''; m[0].style[m[1]] = m[2]; });
 }
-function render() { document.body.classList.toggle('rescuing', !!ui.rescue); renderNav(); renderView(); }
+// FIX 2.2.0: an ordinary redraw (a tick, a save) clears the "tab is opening" class, so the cards do not rise in again when you tap soon after opening a tab.
+function render() { document.body.classList.toggle('rescuing', !!ui.rescue); renderNav(); $('#view').classList.remove('v-in'); renderView(); }
 
 // Smooth fade/slide for the content area. The "entering" class is removed afterwards so later redraws do not replay it.
 let inTimer;
@@ -1152,10 +1177,12 @@ function todayPanel() {
     return `<button class="t-row${d ? ' on' : ''}${pop ? ' pop' : ''}" style="--ac:${col}" data-action="tick" data-id="${esc(h.id)}" data-day="${tk}" aria-label="${d ? 'Unmark ' : 'Mark '}${esc(h.name)} today" aria-pressed="${d}">
       <span class="t-dot">${d ? CHECK : ''}</span><span class="t-txt"><b>${esc(h.name)}</b>${sub}</span><span class="t-st">${currentStreak(h)}<small>STREAK</small></span></button>`;
   }).join('');
+  // FIX 2.2.0: the ring only pops when TODAY was just completed (ticking yesterday no longer makes it pop).
+  const celeb = full && ui.fx && ui.fx.day === tk;
   return `
   <section class="panel today">
     <div class="t-top">
-      <div class="ring${full ? ' full' : ''}${full && ui.fx ? ' celeb' : ''}" role="img" aria-label="${done} of ${n} habits done today">
+      <div class="ring${full ? ' full' : ''}${celeb ? ' celeb' : ''}" role="img" aria-label="${done} of ${n} habits done today">
         <svg viewBox="0 0 112 112"><circle class="rt" cx="56" cy="56" r="46"/><circle class="rp" data-k="ring" data-off="1" cx="56" cy="56" r="46" stroke-dasharray="${C.toFixed(1)}" stroke-dashoffset="${off}" style="stroke-dashoffset:${off}"/></svg>
         <div class="rc"><span>${n ? done + '/' + n : '–'}</span><small>TODAY</small></div>
       </div>
