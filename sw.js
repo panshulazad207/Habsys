@@ -1,5 +1,5 @@
 // Habsys offline worker. Bump CACHE when releasing a new version.
-const CACHE = 'habsys-v2.3.0';
+const CACHE = 'habsys-v2.3.5';
 const SHELL = ['./', 'index.html', 'manifest.webmanifest', 'icon-180.png', 'icon-192.png', 'icon-512.png'];
 const NET_WAIT = 4000;   // 2.2.0: on a weak connection, give the network 4 seconds, then open the saved copy instead of hanging
 
