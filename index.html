@@ -13,7 +13,7 @@
 <link rel="apple-touch-icon" href="icon-180.png?v=199">
 <link rel="icon" type="image/png" href="icon-192.png?v=199">
 <style>
-/* ===== Habsys 2.2.0: bug-fix and performance release (no new features, no look changes), on top of 2.1.0 ===== */
+/* ===== Habsys 2.3.0: charts in Records, smart insights, mood/energy check-in and a daily journal line, on top of 2.2.0 (no other changes) ===== */
 :root{
   color-scheme:dark;
   --bg0:#0a0b10;
@@ -436,6 +436,54 @@ textarea.input.sm{min-height:76px}
 .c.s svg{display:block;width:58%;height:58%}
 .c.t{outline:2px solid var(--white);outline-offset:2px}
 
+/* NEW 2.3.0: daily check-in (mood + energy + one journal line) on the Habits tab */
+.ci{margin-bottom:18px;padding:20px 22px}
+.ci-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+.ci-head h3{margin:0;font-family:var(--head);font-weight:800;font-size:21px;letter-spacing:-.015em}
+.ci-row{display:flex;align-items:center;gap:12px;margin-top:14px}
+.ci-lbl{flex:none;width:58px;font-family:var(--body);font-weight:700;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.ci-pick{flex:1;min-width:0;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
+.ci-b{min-height:48px;border-radius:15px;background:rgba(255,255,255,.07);border:1px solid var(--hair);color:var(--muted);font-family:var(--head);font-weight:800;font-size:17px;font-variant-numeric:tabular-nums;transition:background .25s var(--ease),color .25s,box-shadow .25s,transform .22s var(--spring)}
+.ci-b:active{transform:scale(.92)}
+.ci-b.on{color:#fff;border-color:transparent;background:linear-gradient(180deg,#6c97ff,#4a6cf5);box-shadow:0 8px 16px -8px rgba(74,108,245,.9),inset 0 1px 0 rgba(255,255,255,.28)}
+.ci-b.en.on{color:#3a2300;background:linear-gradient(180deg,#ffdd85,#ffa94d);box-shadow:0 8px 16px -8px rgba(255,166,70,.9),inset 0 1px 0 rgba(255,255,255,.5)}
+.ci-ends{display:flex;justify-content:space-between;margin:7px 0 0 70px;font-family:var(--body);font-weight:600;font-size:11px;color:var(--dim)}
+.ci-j{margin:16px 0 0}
+
+/* NEW 2.3.0: charts in Records (plain bars drawn with CSS: no library) */
+.chart{display:flex;align-items:flex-end;gap:5px;margin-top:6px;--ac:var(--blue)}
+.cc{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:5px}
+.cc .v{height:14px;font-family:var(--body);font-weight:700;font-size:10.5px;line-height:14px;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+.cc .tr{width:100%;height:96px;display:flex;align-items:flex-end;justify-content:center}
+.cc .tr i{display:block;width:100%;max-width:30px;min-height:3px;border-radius:9px 9px 4px 4px;background:linear-gradient(180deg,var(--ac),color-mix(in srgb,var(--ac) 55%,#000))}
+.cc.none .tr i{background:rgba(255,255,255,.08)}
+.cc.best .tr i{background:linear-gradient(180deg,#ffdd85,#ff9f4a);box-shadow:0 0 14px -2px rgba(255,166,70,.7)}
+.cc.best .v{color:var(--gold)}
+.cc .x{font-family:var(--body);font-weight:600;font-size:10.5px;color:var(--dim);font-variant-numeric:tabular-nums}
+.chart-cap{margin:12px 0 0;font-size:13.5px;line-height:1.45;color:var(--muted)}
+.chart-cap b{color:var(--white);font-weight:700}
+.panel-t{display:block;margin-bottom:10px;font-family:var(--head);font-weight:800;font-size:17px;letter-spacing:-.01em;color:var(--white)}
+.hr-row{margin-bottom:14px}
+.hr-row:last-child{margin-bottom:0}
+.hr-h{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:7px;font-size:14.5px}
+.hr-h span:first-child{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:var(--head);font-weight:700}
+.hr-h span:last-child{flex:none;font-size:12.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+.hb{height:8px;border-radius:999px;background:rgba(255,255,255,.09);overflow:hidden}
+.hb i{display:block;height:100%;border-radius:999px;background:var(--ac)}
+
+/* NEW 2.3.0: smart insights */
+.ins{padding:16px 18px;border-radius:20px;border-color:rgba(148,178,255,.3);background:linear-gradient(135deg,rgba(91,140,255,.14),rgba(123,64,228,.06)),var(--surface)}
+.ins .tag{display:block;margin-bottom:5px;font-weight:700;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--blue2)}
+.ins p{margin:0 0 12px;font-size:15px;line-height:1.5;color:var(--white);overflow-wrap:anywhere}
+.ins p:last-child{margin-bottom:0}
+
+/* NEW 2.3.0: journal list */
+.jlist{display:grid;gap:8px}
+.jr{display:block;width:100%;padding:13px 16px;border-radius:18px;background:var(--surface2);border:1px solid var(--hair);text-align:left;transition:transform .22s var(--spring),background .25s}
+.jr:active{transform:scale(.98)}
+.jr small{display:block;margin-bottom:4px;font-family:var(--body);font-weight:600;font-size:12px;color:var(--blue2)}
+.jr p{margin:0;font-size:15px;line-height:1.45;color:var(--white);overflow-wrap:anywhere}
+
 /* trackpad / mouse on iPad: gentle hover feedback (does nothing on touch) */
 @media (hover:hover){
   .btn:hover{filter:brightness(1.08)}
@@ -447,6 +495,8 @@ textarea.input.sm{min-height:76px}
   .add:hover:not(.full){background:rgba(255,255,255,.035)}
   .t-row:hover{background:var(--surface3)}
   .arr-btn:hover:not(:disabled){background:rgba(255,255,255,.14)}
+  .ci-b:hover:not(.on){background:rgba(255,255,255,.12);color:var(--white)}
+  .jr:hover{background:var(--surface3)}
 }
 @media (min-width:700px){
   #app{padding-left:26px;padding-right:26px}
@@ -474,6 +524,10 @@ textarea.input.sm{min-height:76px}
   .ring{width:96px;height:96px}
   .ring .rc{font-size:24px}
   .t-top{gap:16px}
+  .ci-lbl{width:50px;font-size:10px}
+  .ci-ends{margin-left:62px}
+  .ci-pick{gap:6px}
+  .chart{gap:3px}
 }
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
@@ -517,9 +571,10 @@ textarea.input.sm{min-height:76px}
 'use strict';
 
 /* ============ constants ============ */
-const APP_VERSION = '2.2.0';
+const APP_VERSION = '2.3.0';
 const MAX_HABITS = 10;
 const MAX_NOTE = 200, MAX_MINI = 60, MAX_ID = 60, MAX_REF = 200;   // length limits: note, 2-minute version, identity, reflection answers
+const MAX_JOURNAL = 160;   // one sentence about the day
 // Backup reminders: the banner shows when this many changes (or days with any change) have passed since the last backup.
 const BACKUP_CHANGES = 10, BACKUP_DAYS = 3;
 const SNAP_KEEP = 5;   // how many daily safety copies and how many event safety copies the app keeps
@@ -551,6 +606,8 @@ const RANKS = [{min:1,l:'E'},{min:50,l:'D'},{min:100,l:'C'},{min:150,l:'B'},{min
 const LV_BASE = 25, LV_STEP = 2;
 const DAY_LETTERS = 'MTWTFSS';
 const DAY_SHORT = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];   // weekday index 0 = Monday ... 6 = Sunday
+const DAY_LONG = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+const DAY_PLURAL = ['Mondays', 'Tuesdays', 'Wednesdays', 'Thursdays', 'Fridays', 'Saturdays', 'Sundays'];
 const DB_NAME = 'habsys', STORE = 'kv', DB_KEY = 'state', LS_KEY = 'habsys_state_v1';
 const CACHE_NAME = 'habsys-data';   // third storage area (Cache Storage). sw.js must never delete it.
 const CHECK = '<svg class="ck" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
@@ -602,9 +659,10 @@ function sum53(str) {
 // habit.days = weekdays the habit is followed on (0 = Monday ... 6 = Sunday, sorted). [] = every day (a normal habit).
 // The order of S.habits IS the order shown on the Habits tab and in the Today card (changed with "Arrange habits").
 // reflections = weekly reflections {week (Monday key), win, hard, focus, rate, at}. cel = celebrations already shown. allDay = last day the "day complete" celebration was shown.
+// checkins (new in 2.3) = {dayKey: {m: mood 1-5 or 0, e: energy 1-5 or 0}}. journal (new in 2.3) = {dayKey: one line of text}.
 // changes = number of edits since the last backup. bigMoment = a quest/habit milestone happened since the last backup.
 function defaultState() {
-  return { v:2, player:{name:'Player', xp:0}, savers:0, habits:[], rewards:[], rewardText:{}, reflections:[], cel:{}, allDay:'', lastBackup:null, changes:0, bigMoment:false, updatedAt:0 };
+  return { v:2, player:{name:'Player', xp:0}, savers:0, habits:[], rewards:[], rewardText:{}, reflections:[], cel:{}, allDay:'', checkins:{}, journal:{}, lastBackup:null, changes:0, bigMoment:false, updatedAt:0 };
 }
 function validState(s) { return !!s && typeof s === 'object' && Array.isArray(s.habits); }
 function normalize(raw) {
@@ -663,6 +721,21 @@ function normalize(raw) {
   // Celebrations already shown (new in 2.0).
   if (raw.cel && typeof raw.cel === 'object') {
     for (const k of Object.keys(raw.cel).slice(-400)) if (raw.cel[k] && k.length <= 60) s.cel[k] = 1;
+  }
+  // Daily check-ins and journal lines (new in 2.3). Old data and old backups simply have none.
+  const okDay = k => /^\d{4}-\d{2}-\d{2}$/.test(k);
+  const ci = raw.checkins && typeof raw.checkins === 'object' ? raw.checkins : {};
+  for (const k of Object.keys(ci).slice(-4000)) {
+    const c = ci[k];
+    if (!okDay(k) || !c || typeof c !== 'object') continue;
+    const m = Math.min(5, Math.max(0, Math.floor(Number(c.m) || 0))), e = Math.min(5, Math.max(0, Math.floor(Number(c.e) || 0)));
+    if (m || e) s.checkins[k] = {m: m, e: e};
+  }
+  const jn = raw.journal && typeof raw.journal === 'object' ? raw.journal : {};
+  for (const k of Object.keys(jn).slice(-4000)) {
+    if (!okDay(k)) continue;
+    const t = String(jn[k] == null ? '' : jn[k]).replace(/\s+/g, ' ').trim().slice(0, MAX_JOURNAL);
+    if (t) s.journal[k] = t;
   }
   s.allDay = /^\d{4}-\d{2}-\d{2}$/.test(raw.allDay) ? raw.allDay : '';
   s.lastBackup = typeof raw.lastBackup === 'string' ? raw.lastBackup : null;
@@ -783,7 +856,8 @@ function save(opts) {
   maybeSnap();
 }
 // Re-write the current copy when the app goes to the background, in case a write was still in flight.
-function flush() { if (!writesLocked && !ui.rescue) { writeAll(makeRec(S)); maybeSnap(); } }
+// (2.3: a journal line that is still being typed is saved first.)
+function flush() { if (!writesLocked && !ui.rescue) { commitInput(); writeAll(makeRec(S)); maybeSnap(); } }
 
 /* ---- safety copies (invisible: used only for automatic recovery) ---- */
 // 'snaps' = one copy per day (last 5). 'events' = copies taken at key moments (upgrade, quest claimed; last 5).
@@ -1057,10 +1131,109 @@ function backupInfo() {
   return {due:due, msg:msg, changes:ch, days:days, ago:ago};
 }
 
+/* ---- NEW 2.3.0: patterns, trends and insights ---- */
+// Per weekday (0 = Monday): days the habit was due or done (due) and days it was missed (miss), over the last "span" days.
+// A day protected by a streak saver counts as neither. Today only counts when it is already done.
+function weekdayCounts(h, span) {
+  const today = new Date(), tk = dkey(today);
+  const end = h.done[tk] ? today : addDays(today, -1);
+  let start = addDays(end, -(span - 1));
+  const cr = parseKey(h.created);
+  if (start < cr) start = cr;
+  const due = [0, 0, 0, 0, 0, 0, 0], miss = [0, 0, 0, 0, 0, 0, 0];
+  for (let d = start; d <= end; d = addDays(d, 1)) {
+    const v = h.done[dkey(d)], w = wdOf(d);
+    if (v === 1) due[w]++;
+    else if (v === 2) continue;
+    else if (isSched(h, d)) { due[w]++; miss[w]++; }
+  }
+  return {due: due, miss: miss};
+}
+// A weekday that really stands out as the habit's hardest: enough days, missed at least 40% of the time and
+// at least 20 points worse than the habit's overall miss rate. Returns null when there is no clear pattern.
+function toughDay(h) {
+  const c = weekdayCounts(h, 120);
+  const tot = c.due.reduce((a, b) => a + b, 0), miss = c.miss.reduce((a, b) => a + b, 0);
+  if (tot < 21) return null;
+  const base = miss / tot;
+  let best = null;
+  for (let w = 0; w < 7; w++) {
+    if (c.due[w] < 4 || c.miss[w] < 3) continue;
+    const r = c.miss[w] / c.due[w];
+    if (r >= 0.4 && r - base >= 0.2 && (!best || r > best.rate)) best = {wd: w, miss: c.miss[w], due: c.due[w], rate: r};
+  }
+  return best;
+}
+// Average mood (field "m") or energy (field "e") on days the habit was done, against days it was not.
+// Needs at least 3 check-in days of each kind. Today only counts once the habit is done (today is still open).
+function moodLift(h, field) {
+  const tk = dkey(new Date());
+  let a = 0, an = 0, b = 0, bn = 0;
+  for (const k of Object.keys(S.checkins)) {
+    const v = S.checkins[k][field], dv = h.done[k];
+    if (!v || k < h.created || dv === 2) continue;
+    if (dv === 1) { a += v; an++; }
+    else if (k !== tk && isSchedKey(h, k)) { b += v; bn++; }
+  }
+  if (an < 3 || bn < 3) return null;
+  return {lift: a / an - b / bn, avgDone: a / an, avgNot: b / bn};
+}
+// Completion of all habits in the week that starts on Monday key wk. A day that is still open (today) is not counted yet.
+function trendWeek(wk) {
+  const tk = dkey(new Date()), mon = parseKey(wk);
+  let due = 0, done = 0;
+  S.habits.forEach(h => {
+    for (let i = 0; i < 7; i++) {
+      const d = addDays(mon, i), k = dkey(d), v = h.done[k];
+      if (k > tk) break;
+      if (k < h.created && !v) continue;
+      if (k === tk && !v) continue;
+      if (v === 1) { due++; done++; }
+      else if (v === 2) continue;
+      else if (isSched(h, d)) due++;
+    }
+  });
+  return {due: due, done: done};
+}
+// Weekday totals over all habits (last 365 days).
+function weekdayAll() {
+  const due = [0, 0, 0, 0, 0, 0, 0], miss = [0, 0, 0, 0, 0, 0, 0];
+  S.habits.forEach(h => {
+    const c = weekdayCounts(h, 365);
+    for (let w = 0; w < 7; w++) { due[w] += c.due[w]; miss[w] += c.miss[w]; }
+  });
+  return {due: due, miss: miss};
+}
+// The insight cards shown in Records: hardest days (with the offer of a 2-minute version) and what lifts mood and energy.
+function insights() {
+  const found = [];
+  S.habits.forEach(h => {
+    const t = toughDay(h);
+    if (t) found.push({tag: 'Hardest day', rate: t.rate, hid: h.id, offer: !h.mini,
+      text: 'You miss ' + h.name + ' most on ' + DAY_PLURAL[t.wd] + ' (' + t.miss + ' of ' + t.due + '). '
+        + (h.mini ? 'Your 2-minute version counts on those days: ' + h.mini + '.' : 'Want to set a 2-minute version you can use on ' + DAY_PLURAL[t.wd] + '?')});
+  });
+  found.sort((a, b) => b.rate - a.rate);
+  const list = found.slice(0, 3);
+  [['m', 'mood', 'Mood lift'], ['e', 'energy', 'Energy lift']].forEach(f => {
+    let best = null;
+    S.habits.forEach(h => { const l = moodLift(h, f[0]); if (l && l.lift >= 0.5 && (!best || l.lift > best.l.lift)) best = {h: h, l: l}; });
+    if (best) list.push({tag: f[2], text: 'Your ' + f[1] + ' averages ' + best.l.avgDone.toFixed(1) + ' on days you do ' + best.h.name + ', against ' + best.l.avgNot.toFixed(1) + ' on days you do not. It is a pattern, not proof, but worth protecting on low days.'});
+  });
+  return list;
+}
+// Simple bar chart drawn with plain HTML. cols: [{v: number or null, show, label, best}]. max = the value that fills a whole bar.
+function chartHtml(cols, max) {
+  return '<div class="chart">' + cols.map(c => {
+    const p = c.v == null ? 0 : Math.max(0, Math.min(100, c.v / max * 100));
+    return `<div class="cc${c.best ? ' best' : ''}${c.v == null ? ' none' : ''}"><span class="v">${esc(c.show == null ? '' : c.show)}</span><div class="tr"><i style="height:${p.toFixed(1)}%"></i></div><span class="x">${esc(c.label)}</span></div>`;
+  }).join('') + '</div>';
+}
+
 /* ============ UI state + render ============ */
 const TABS = ['habits', 'vault', 'records', 'system'];
 // fx = which habit/day was just ticked (set only for the moment the screen is redrawn, so the tick effects play once).
-const ui = { tab: 'habits', day: dkey(new Date()), rec: null, rescue: null, pend: null, fx: null };  // rescue: null | 'fresh' | 'damaged' | 'unreadable'
+const ui = { tab: 'habits', day: dkey(new Date()), rec: null, rescue: null, pend: null, fx: null, jq: '' };  // rescue: null | 'fresh' | 'damaged' | 'unreadable'. jq = journal search text.
 
 function renderNav() {
   document.querySelectorAll('.tab').forEach(t => {
@@ -1093,7 +1266,7 @@ function renderView() {
   moves.forEach(m => { m[0].style.transition = ''; m[0].style[m[1]] = m[2]; });
 }
 // FIX 2.2.0: an ordinary redraw (a tick, a save) clears the "tab is opening" class, so the cards do not rise in again when you tap soon after opening a tab.
-function render() { document.body.classList.toggle('rescuing', !!ui.rescue); renderNav(); $('#view').classList.remove('v-in'); renderView(); }
+function render() { commitInput(); document.body.classList.toggle('rescuing', !!ui.rescue); renderNav(); $('#view').classList.remove('v-in'); renderView(); }
 
 // Smooth fade/slide for the content area. The "entering" class is removed afterwards so later redraws do not replay it.
 let inTimer;
@@ -1111,6 +1284,7 @@ let swapTimer;
 function switchTab(name) {
   if (TABS.indexOf(name) < 0 || ui.rescue) return;
   if (name === ui.tab) { window.scrollTo(0, 0); return; }
+  commitInput();   // a journal line that is still being typed is saved before the screen changes
   const dir = TABS.indexOf(name) > TABS.indexOf(ui.tab) ? 1 : -1;
   ui.tab = name;
   renderNav();
@@ -1173,7 +1347,11 @@ function todayPanel() {
   const rows = due.map(h => {
     const d = !!h.done[tk], nm = d ? null : nmtInfo(h), col = HCOL[S.habits.indexOf(h) % HCOL.length];
     const pop = d && ui.fx && ui.fx.id === h.id && ui.fx.day === tk;
-    const sub = nm ? '<small class="nm">Never miss twice</small>' : h.identity ? '<small>' + esc(h.identity) + '</small>' : '';
+    // 2.3.0: on the weekday this habit is usually missed, the row says so (and reminds you of the 2-minute version).
+    const tg = !d && !nm ? toughDay(h) : null, tough = !!tg && tg.wd === wdOf(new Date());
+    const sub = nm ? '<small class="nm">Never miss twice</small>'
+      : tough ? '<small class="nm">' + esc(h.mini ? 'Tough day: your 2-minute version counts' : 'Tough day for this one: start small') + '</small>'
+      : h.identity ? '<small>' + esc(h.identity) + '</small>' : '';
     return `<button class="t-row${d ? ' on' : ''}${pop ? ' pop' : ''}" style="--ac:${col}" data-action="tick" data-id="${esc(h.id)}" data-day="${tk}" aria-label="${d ? 'Unmark ' : 'Mark '}${esc(h.name)} today" aria-pressed="${d}">
       <span class="t-dot">${d ? CHECK : ''}</span><span class="t-txt"><b>${esc(h.name)}</b>${sub}</span><span class="t-st">${currentStreak(h)}<small>STREAK</small></span></button>`;
   }).join('');
@@ -1189,6 +1367,22 @@ function todayPanel() {
       <div class="t-msg"><h3>${title}</h3><p>${esc(msg)}</p>${focus ? `<div class="t-focus"><b>This week's focus</b>${esc(focus)}</div>` : ''}</div>
     </div>
     ${rows ? `<div class="t-list">${rows}</div>` : ''}
+  </section>`;
+}
+
+// NEW 2.3.0: the daily check-in. Mood and energy are one tap each (1 to 5, tap again to clear). The journal line is saved
+// by itself when you leave the field (and a moment after you stop typing).
+function checkinPanel() {
+  if (!S.habits.length) return '';
+  const tk = dkey(new Date()), c = S.checkins[tk] || {m: 0, e: 0};
+  const pick = f => [1, 2, 3, 4, 5].map(n => `<button class="ci-b${c[f] === n ? ' on' : ''}${f === 'e' ? ' en' : ''}" data-action="ci" data-f="${f}" data-v="${n}" aria-pressed="${c[f] === n}" aria-label="${f === 'm' ? 'Mood' : 'Energy'} ${n} of 5">${n}</button>`).join('');
+  return `
+  <section class="panel ci">
+    <div class="ci-head"><h3>Check-in</h3><span class="tag">${c.m && c.e ? 'Done for today' : '5 seconds'}</span></div>
+    <div class="ci-row"><span class="ci-lbl">Mood</span><div class="ci-pick">${pick('m')}</div></div>
+    <div class="ci-row"><span class="ci-lbl">Energy</span><div class="ci-pick">${pick('e')}</div></div>
+    <div class="ci-ends"><span>1 low</span><span>5 high</span></div>
+    <label class="field ci-j"><span>One line about your day</span><input class="input" id="jtoday" maxlength="${MAX_JOURNAL}" placeholder="e.g. Tough morning, strong finish" value="${esc(S.journal[tk] || '')}" autocomplete="off"></label>
   </section>`;
 }
 
@@ -1210,6 +1404,7 @@ function viewHabits() {
     <div class="p-lv"><small>LV</small><b>${L}</b></div>
   </section>`;
   html += todayPanel();
+  html += checkinPanel();
   const rw = reflectDueWeek();
   if (rw) {
     html += `<section class="panel banner ref"><p><span class="tag">Weekly reflection</span><br>Your week of ${esc(weekRange(rw))} is ready to review. It takes two minutes and sets your focus.</p><button class="btn sm" data-action="reflect" data-week="${rw}">Reflect</button></section>`;
@@ -1376,15 +1571,123 @@ function monthPanel(h, y, m, st, tk) {
   const name = new Date(y, m, 1).toLocaleDateString(undefined, {month:'long', year:'numeric'});
   return `<section class="panel"><div class="m-head"><h4>${esc(name)}</h4><span class="tag">${nDone} done${pct}</span></div><div class="m-grid">${DAY_LETTERS.split('').map(l => `<span class="wd">${l}</span>`).join('')}${cells}</div></section>`;
 }
+
+/* ---- NEW 2.3.0: Records sections (insights, trends, mood and energy, journal) ---- */
+function insightsSection() {
+  const list = insights();
+  const head = '<h2 class="sec">Insights</h2>';
+  if (!list.length) {
+    return head + '<section class="panel"><p class="note" style="margin:0">No clear patterns yet. Keep ticking your habits and checking in. After about three weeks, Habsys starts to spot your hardest days and what lifts your mood and energy.</p></section>';
+  }
+  return head + '<div class="stack">' + list.map(i => `<section class="panel ins"><span class="tag">${esc(i.tag)}</span><p>${esc(i.text)}</p>${i.offer ? `<button class="btn sm" data-action="xmini" data-id="${esc(i.hid)}">Set a 2-minute version</button>` : ''}</section>`).join('') + '</div>';
+}
+function trendsSection() {
+  // 1. weekly completion trend (all habits, last 12 weeks)
+  const mon = parseKey(weekKey(new Date())), wk = [];
+  for (let i = 11; i >= 0; i--) { const d = addDays(mon, -7 * i); wk.push(Object.assign({d: d}, trendWeek(dkey(d)))); }
+  const cols = wk.map(w => { const v = w.due ? Math.round(w.done / w.due * 100) : null; return {v: v, show: v == null ? '' : v, label: String(w.d.getDate()), best: false}; });
+  const sum = a => a.reduce((n, w) => ({due: n.due + w.due, done: n.done + w.done}), {due: 0, done: 0});
+  const rc = sum(wk.slice(8)), pr = sum(wk.slice(4, 8));
+  let cap = 'Your weekly completion rate builds here as you track.';
+  if (rc.due) {
+    const a = Math.round(rc.done / rc.due * 100);
+    cap = 'Last 4 weeks: <b>' + a + '%</b>.';
+    if (pr.due >= 5) {
+      const dl = a - Math.round(pr.done / pr.due * 100);
+      cap += ' ' + (dl > 0 ? 'Up ' + dl + ' points' : dl < 0 ? 'Down ' + (-dl) + ' points' : 'Level') + ' on the 4 weeks before.';
+    }
+  }
+  const p1 = `<section class="panel"><span class="panel-t">Weekly completion</span>${chartHtml(cols, 100)}<p class="chart-cap">${cap} Each bar is a week, labelled by its Monday.</p></section>`;
+  // 2. best weekday (all habits, last year)
+  const wd = weekdayAll(), tot = wd.due.reduce((a, b) => a + b, 0);
+  const rates = wd.due.map((n, w) => n >= 2 ? Math.round((n - wd.miss[w]) / n * 100) : null);
+  let p2;
+  if (tot < 21 || rates.filter(r => r != null).length < 2) {
+    p2 = '<section class="panel"><span class="panel-t">Best weekday</span><p class="note" style="margin:0">Needs about three weeks of tracking before it can tell your strong days from your hard ones.</p></section>';
+  } else {
+    let best = -1, worst = -1;
+    rates.forEach((r, w) => { if (r == null) return; if (best < 0 || r > rates[best]) best = w; if (worst < 0 || r < rates[worst]) worst = w; });
+    const dcols = rates.map((r, w) => ({v: r, show: r == null ? '' : r, label: DAY_SHORT[w], best: w === best && best !== worst}));
+    const dcap = best !== worst
+      ? 'Your strongest day is <b>' + DAY_LONG[best] + '</b> (' + rates[best] + '%). Your hardest is <b>' + DAY_LONG[worst] + '</b> (' + rates[worst] + '%).'
+      : 'Your days are all very even.';
+    p2 = `<section class="panel"><span class="panel-t">Best weekday</span>${chartHtml(dcols, 100)}<p class="chart-cap">${dcap} Share of days done, all habits, last year.</p></section>`;
+  }
+  // 3. best streaks of every habit
+  const ls = S.habits.map(longestStreak), mx = Math.max(1, ...ls);
+  const p3 = '<section class="panel"><span class="panel-t">Best streaks</span>' + S.habits.map((h, i) =>
+    `<div class="hr-row" style="--ac:${HCOL[i % HCOL.length]}"><div class="hr-h"><span>${esc(h.name)}</span><span>Best ${ls[i]} · Now ${currentStreak(h)}</span></div><div class="hb"><i style="width:${(ls[i] / mx * 100).toFixed(1)}%"></i></div></div>`).join('') + '</section>';
+  return '<h2 class="sec">Trends</h2><div class="stack">' + p1 + p2 + p3 + '</div>';
+}
+function moodSection() {
+  let html = '<h2 class="sec">Mood &amp; energy</h2><section class="panel">';
+  const keys = Object.keys(S.checkins);
+  if (!keys.length) {
+    return html + '<p class="note" style="margin:0">Tap your mood and energy (1 to 5) in the Check-in card on the Habits tab. After a few weeks, Habsys shows which habits lift you.</p></section>';
+  }
+  const now = new Date(), cols = [];
+  let sm = 0, cm = 0, se = 0, ce = 0;
+  for (let i = 13; i >= 0; i--) { const d = addDays(now, -i), c = S.checkins[dkey(d)]; cols.push({v: c && c.m ? c.m : null, show: c && c.m ? c.m : '', label: String(d.getDate()), best: false}); }
+  for (let i = 0; i < 30; i++) { const c = S.checkins[dkey(addDays(now, -i))]; if (c && c.m) { sm += c.m; cm++; } if (c && c.e) { se += c.e; ce++; } }
+  const avg = (s, n) => n ? (s / n).toFixed(1) : '–';
+  const tile = (l, v) => `<div class="stat"><small>${l}</small><b>${v}</b></div>`;
+  html += '<div class="stats">' + tile('Mood, 30 days', avg(sm, cm)) + tile('Energy, 30 days', avg(se, ce)) + tile('Check-ins', keys.length) + tile('Journal lines', Object.keys(S.journal).length) + '</div>';
+  html += '<span class="panel-t" style="margin:20px 0 4px">Mood, last 14 days</span>' + chartHtml(cols, 5);
+  const rows = S.habits.map(h => ({h: h, m: moodLift(h, 'm'), e: moodLift(h, 'e')})).filter(r => r.m || r.e)
+    .sort((a, b) => (b.m ? b.m.lift : -9) - (a.m ? a.m.lift : -9));
+  const fmt = l => l ? (l.lift >= 0 ? '+' : '−') + Math.abs(l.lift).toFixed(1) : '–';
+  html += '<span class="panel-t" style="margin:20px 0 4px">What lifts you</span>';
+  if (rows.length) {
+    html += '<div class="grp">' + rows.map(r => `<div class="kv"><span>${esc(r.h.name)}</span><b>${fmt(r.m)} mood · ${fmt(r.e)} energy</b></div>`).join('') + '</div>'
+      + '<p class="chart-cap" style="margin-top:4px">The difference in your average score on days you did the habit, against days you did not. A pattern to notice, not proof of cause.</p>';
+  } else {
+    html += '<p class="chart-cap" style="margin-top:4px">Not enough days yet to compare. Habsys needs at least 3 check-in days with a habit done, and 3 without it.</p>';
+  }
+  return html + '</section>';
+}
+const journalKeys = () => Object.keys(S.journal).sort().reverse();
+// The journal list, filtered by the search text. Redrawn on its own while you type, so the keyboard stays open.
+function journalList() {
+  const q = (ui.jq || '').trim().toLowerCase();
+  let ks = journalKeys();
+  if (q) ks = ks.filter(k => S.journal[k].toLowerCase().indexOf(q) >= 0 || fmtKey(k).toLowerCase().indexOf(q) >= 0);
+  if (!ks.length) {
+    return `<p class="note" style="margin:0">${q ? 'No lines match "' + esc(ui.jq.trim()) + '".' : 'No journal lines yet. Write one on the Habits tab, under Check-in.'}</p>`;
+  }
+  const out = ks.slice(0, 60).map(k => {
+    const c = S.checkins[k], tg = c ? ' · ' + [c.m ? 'Mood ' + c.m : '', c.e ? 'Energy ' + c.e : ''].filter(Boolean).join(' · ') : '';
+    return `<button class="jr" data-action="jedit" data-day="${k}"><small>${esc(fmtKey(k) + tg)}</small><p>${esc(S.journal[k])}</p></button>`;
+  }).join('');
+  return out + (ks.length > 60 ? `<p class="note" style="margin:4px 0 0">Showing the newest 60 of ${ks.length}. Search to narrow it down.</p>` : '');
+}
+function journalSection() {
+  const n = journalKeys().length;
+  return `<h2 class="sec">Journal</h2><section class="panel">${n ? `<label class="field"><span>Search your ${n} line${n === 1 ? '' : 's'}</span><input class="input" id="jsearch" type="text" enterkeyhint="search" placeholder="A word or a month" value="${esc(ui.jq || '')}" autocomplete="off"></label>` : ''}<div class="jlist" id="jlist">${journalList()}</div></section>`;
+}
+// Streak of one habit at the end of each of the last 12 weeks.
+function streakTimeHtml(h) {
+  const today = new Date(), tk = dkey(today), mon = parseKey(weekKey(today)), vals = [];
+  for (let i = 11; i >= 0; i--) {
+    const sun = addDays(mon, -7 * i + 6);
+    if (dkey(sun) < h.created) { vals.push(null); continue; }
+    vals.push(runBack(h, dkey(sun) >= tk ? (h.done[tk] ? today : addDays(today, -1)) : sun));
+  }
+  const mx = Math.max(1, ...vals.map(v => v == null ? 0 : v));
+  const cols = vals.map((v, i) => ({v: v, show: v == null ? '' : v, label: String(addDays(mon, -7 * (11 - i)).getDate()), best: v != null && v > 0 && v === mx}));
+  return `<section class="panel" style="margin-top:12px"><span class="panel-t">Streak over time</span>${chartHtml(cols, mx)}<p class="chart-cap">Streak at the end of each of the last 12 weeks. Longest ever: <b>${longestStreak(h)}</b>.</p></section>`;
+}
+
 function viewRecords() {
   let html = '<h2 class="sec">Records</h2>';
   if (!S.habits.length) {
-    return html + '<section class="panel empty"><div class="tag">Habsys</div><h3>No history yet</h3><p>Add a habit in the Habits tab. Every day you complete will be recorded here.</p></section>';
+    html += '<section class="panel empty"><div class="tag">Habsys</div><h3>No history yet</h3><p>Add a habit in the Habits tab. Every day you complete will be recorded here.</p></section>';
+    return html + (journalKeys().length ? journalSection() : '');
   }
+  html += insightsSection() + trendsSection() + moodSection() + journalSection();
   // weekly reflection
   const thisWk = weekKey(new Date()), lastWk = weekKey(addDays(new Date(), -7));
   const has = wk => S.reflections.some(r => r.week === wk);
-  html += `<section class="panel"><p class="note">Once a week, look back: what worked, what got in the way, and the one thing you will focus on next. Reflection turns streaks into learning.</p>
+  html += `<h2 class="sec">Weekly reflection</h2><section class="panel"><p class="note">Once a week, look back: what worked, what got in the way, and the one thing you will focus on next. Reflection turns streaks into learning.</p>
     <div class="stack">
       <button class="btn block" data-action="reflect" data-week="${thisWk}">${has(thisWk) ? 'Edit this week' : 'Reflect on this week'}</button>
       <button class="btn ghost block" data-action="reflect" data-week="${lastWk}">${has(lastWk) ? 'Edit last week' : 'Reflect on last week'}</button>
@@ -1416,7 +1719,8 @@ function viewRecords() {
     + (st.nLite ? tile('2-minute days', st.nLite) : '')
     + tile('Quests cleared', h.claimed + ' / ' + TIERS.length)
     + tile('Tracking since', esc(fmtKey(st.startKey)), 'sm')
-    + '</div></section>';
+    + '</div></section>'
+    + streakTimeHtml(h);
   const rw = S.rewards.filter(r => r.habitId === h.id);
   html += '<h2 class="sec">Quests cleared</h2>';
   html += rw.length
@@ -1899,6 +2203,20 @@ function openInfo() {
     <p class="small">Streak savers are explained in the Vault tab.</p>
     <div class="actions"><button class="btn" data-action="close">Got it</button></div>`);
 }
+// NEW 2.3.0: edit or clear a past day's journal line (opened from the Journal list in Records).
+function openJournalEdit(k) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(k || '')) return;
+  showModal(`
+    <div class="wtag"><span class="tag">Habsys</span></div>
+    <h3>Journal line</h3>
+    <p class="sub">${esc(fmtKey(k))}</p>
+    <label class="field"><span>One line about the day</span><input class="input" id="jedit" maxlength="${MAX_JOURNAL}" value="${esc(S.journal[k] || '')}" autocomplete="off"></label>
+    <p class="hint">Leave it empty and save to remove this line.</p>
+    <div class="actions">
+      <button class="btn" data-action="savejedit" data-day="${k}">Save</button>
+      <button class="btn ghost" data-action="close">Cancel</button>
+    </div>`);
+}
 
 /* ============ backup / restore ============ */
 // A backup file carries a fingerprint of its data. On restore the fingerprint is checked, so a damaged or
@@ -1906,6 +2224,7 @@ function openInfo() {
 const backupSumOk = j => !!j && typeof j.checksum === 'string' && sum53(JSON.stringify(j.data)) === j.checksum;
 async function doBackup() {
   if (ui.rescue) return;
+  commitInput();
   const payload = {app:'habsys', backupVersion:2, appVersion:APP_VERSION, exportedAt:new Date().toISOString(), checksum:sum53(JSON.stringify(S)), data:S};
   const name = 'habsys-backup-' + dkey(new Date()) + '.json';
   const text = JSON.stringify(payload, null, 2);
@@ -1963,6 +2282,37 @@ function handleRestoreFile(file) {
   };
   r.onerror = () => toast('Could not read that file.');
   r.readAsText(file);
+}
+
+/* ============ NEW 2.3.0: check-in + journal ============ */
+// Mood / energy: one tap sets it, tapping the same number again clears it.
+function setCheckin(f, v) {
+  if (f !== 'm' && f !== 'e') return;
+  v = Math.min(5, Math.max(1, Math.floor(Number(v) || 0)));
+  commitInput();
+  const tk = dkey(new Date()), c = S.checkins[tk] || {m: 0, e: 0};
+  c[f] = c[f] === v ? 0 : v;
+  if (c.m || c.e) S.checkins[tk] = c; else delete S.checkins[tk];
+  save(); render();
+  try { if (navigator.vibrate) navigator.vibrate(8); } catch (e) {}
+}
+// Saves the journal line that is typed in the Check-in card (if it changed). Safe to call at any time.
+let jTimer;
+function commitInput() {
+  clearTimeout(jTimer);
+  const el = document.getElementById('jtoday');
+  if (!el || ui.rescue || writesLocked) return;
+  const tk = dkey(new Date()), v = (el.value || '').replace(/\s+/g, ' ').trim().slice(0, MAX_JOURNAL);
+  if ((S.journal[tk] || '') === v) return;
+  if (v) S.journal[tk] = v; else delete S.journal[tk];
+  save();
+}
+function saveJournalEdit(k) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(k || '')) return;
+  const v = ($('#jedit').value || '').replace(/\s+/g, ' ').trim().slice(0, MAX_JOURNAL);
+  if (v) S.journal[k] = v; else delete S.journal[k];
+  save(); closeModal(); render();
+  toast(v ? 'Journal line saved.' : 'Journal line removed.');
 }
 
 /* ============ actions ============ */
@@ -2034,6 +2384,9 @@ const actions = {
   tab: el => switchTab(el.dataset.tab),
   tick: el => toggleDay(el.dataset.id, el.dataset.day),
   rec: el => { ui.rec = el.dataset.id; renderView(); playIn(0); },
+  ci: el => setCheckin(el.dataset.f, el.dataset.v),
+  jedit: el => openJournalEdit(el.dataset.day),
+  savejedit: el => saveJournalEdit(el.dataset.day),
   info: openInfo,
   arrange: openArrange,
   moveup: el => moveHabit(el.dataset.id, -1),
@@ -2118,7 +2471,7 @@ const actions = {
   retry: () => { boot(); },
   askfresh: () => confirmBox('Start fresh?', 'The damaged copy on this device will be replaced by an empty start. If you have a backup file, use Restore instead.', 'startfresh', 'Start fresh'),
   startfresh: startFresh,
-  erase: () => confirmBox('Erase everything?', 'All habits, XP and rewards on this device will be deleted, including the app\'s automatic safety copies. <b>Save a backup first</b> if you may want them back.', 'doerase', 'Erase all'),
+  erase: () => confirmBox('Erase everything?', 'All habits, XP, rewards, check-ins and journal lines on this device will be deleted, including the app\'s automatic safety copies. <b>Save a backup first</b> if you may want them back.', 'doerase', 'Erase all'),
   doerase: () => { S = defaultState(); clearSnaps(); save({noCount:true}); closeModal(); ui.tab = 'habits'; render(); toast('All data erased.'); }
 };
 
@@ -2134,16 +2487,25 @@ document.addEventListener('click', e => {
 document.addEventListener('change', e => {
   if (e.target.id === 'pname') { S.player.name = (e.target.value || '').trim().slice(0, 24) || 'Player'; save(); toast('Name saved.'); }
   if (e.target.id === 'restoreFile') handleRestoreFile(e.target.files && e.target.files[0]);
+  if (e.target.id === 'jtoday') commitInput();
 });
+// The journal line saves a moment after you stop typing. The Journal search only redraws its own list, so the keyboard stays open.
+document.addEventListener('input', e => {
+  if (e.target.id === 'jtoday') { clearTimeout(jTimer); jTimer = setTimeout(commitInput, 900); }
+  if (e.target.id === 'jsearch') { ui.jq = e.target.value || ''; const l = $('#jlist'); if (l) l.innerHTML = journalList(); }
+});
+document.addEventListener('focusout', e => { if (e.target.id === 'jtoday') commitInput(); });
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') closeModal();
   if (e.key === 'Enter' && e.target.id === 'hname') { const b = document.querySelector('[data-action="savehabit"]'); if (b) b.click(); }
+  if (e.key === 'Enter' && (e.target.id === 'jtoday' || e.target.id === 'jsearch')) e.target.blur();
+  if (e.key === 'Enter' && e.target.id === 'jedit') { const b = document.querySelector('[data-action="savejedit"]'); if (b) b.click(); }
 });
 
 /* new day / back to app => refresh */
 function refreshIfNewDay() {
   const k = dkey(new Date());
-  if (k !== ui.day) { ui.day = k; if (!ui.rescue) { snapshot('daily'); } render(); }
+  if (k !== ui.day) { commitInput(); ui.day = k; if (!ui.rescue) { snapshot('daily'); } render(); }
 }
 // If another window of the app saved newer data, take it instead of overwriting it with old data.
 function adoptNewer() {
