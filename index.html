@@ -13,7 +13,7 @@
 <link rel="apple-touch-icon" href="icon-180.png?v=199">
 <link rel="icon" type="image/png" href="icon-192.png?v=199">
 <style>
-/* ===== Habsys 2.3.5: Check-in is now a button with a pop-up (mood as faces), Records reordered, mood and journal data behind a button. Everything else as in 2.3.0 ===== */
+/* ===== Habsys 2.4.0: new "Daily task" habit type (a note-only habit whose task clears when you tick it). Everything else as in 2.3.5 ===== */
 :root{
   color-scheme:dark;
   --bg0:#0a0b10;
@@ -304,6 +304,7 @@ textarea.input.sm{min-height:76px}
 .stack{display:grid;gap:12px}
 .kv{display:flex;justify-content:space-between;gap:12px;font-size:15px;padding:13px 0;border-bottom:1px solid var(--hair)}
 .kv:last-of-type{border-bottom:0}
+.kv span{min-width:0;overflow-wrap:anywhere}
 .kv b{font-family:var(--body);font-weight:600;font-size:14px;text-align:right}
 
 /* tab bar: floating glass pill with sliding highlight */
@@ -382,6 +383,14 @@ textarea.input.sm{min-height:76px}
 .dchip:active{transform:scale(.92)}
 .dchip.on{color:#fff;background:linear-gradient(180deg,#6c97ff,#4a6cf5);box-shadow:0 8px 16px -8px rgba(74,108,245,.9),inset 0 1px 0 rgba(255,255,255,.28)}
 
+/* NEW 2.4.0: habit type chooser in the New habit pop-up (Regular habit / Daily task) and the task line on a Daily task card */
+.tpick{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px}
+.tchip{min-height:52px;border:0;border-radius:15px;background:rgba(255,255,255,.07);color:var(--muted);font-family:var(--head);font-weight:700;font-size:15px;transition:background .25s var(--ease),color .25s,box-shadow .25s,transform .22s var(--spring)}
+.tchip:active{transform:scale(.96)}
+.tchip.on{color:#fff;background:linear-gradient(180deg,#6c97ff,#4a6cf5);box-shadow:0 8px 16px -8px rgba(74,108,245,.9),inset 0 1px 0 rgba(255,255,255,.28)}
+.x-task{width:100%;text-align:left;padding:0;min-height:32px}
+.x-task.empty span:last-child{color:var(--gold);font-weight:600}
+
 #toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 108px);transform:translateX(-50%) translateY(18px) scale(.97);z-index:90;opacity:0;pointer-events:none;transition:opacity .3s var(--ease),transform .4s var(--spring);max-width:calc(100% - 32px)}
 #toast.show{opacity:1;transform:translateX(-50%)}
 #toast div{padding:12px 20px;border:1px solid var(--hair2);background:rgba(36,39,53,.92);-webkit-backdrop-filter:blur(20px) saturate(160%);backdrop-filter:blur(20px) saturate(160%);border-radius:999px;font-family:var(--body);font-weight:600;font-size:14px;text-align:center;box-shadow:inset 0 1px 0 rgba(255,255,255,.07),0 16px 36px -10px rgba(0,0,0,.85)}
@@ -436,7 +445,7 @@ textarea.input.sm{min-height:76px}
 .c.s svg{display:block;width:58%;height:58%}
 .c.t{outline:2px solid var(--white);outline-offset:2px}
 
-/* NEW 2.3.5: the Check-in is one slim button (Habits tab) that opens a pop-up. The same button style opens the Mood & journal data in Records. */
+/* 2.3.5: the Check-in is one slim button (Habits tab) that opens a pop-up. The same button style opens the Mood & journal data in Records. */
 .cibtn{display:flex;align-items:center;gap:14px;width:100%;margin-bottom:18px;padding:13px 18px 13px 14px;border-radius:22px;text-align:left;transition:transform .22s var(--spring),background .25s}
 .cibtn:active{transform:scale(.985)}
 .cib-ic{flex:none;width:46px;height:46px;display:grid;place-items:center;border-radius:15px;background:rgba(255,255,255,.07);font-size:25px;line-height:1}
@@ -457,7 +466,7 @@ textarea.input.sm{min-height:76px}
 .ci-b.en.on{color:#3a2300;background:linear-gradient(180deg,#ffdd85,#ffa94d);box-shadow:0 8px 16px -8px rgba(255,166,70,.9),inset 0 1px 0 rgba(255,255,255,.5)}
 .ci-ends{display:flex;justify-content:space-between;margin:7px 2px 0;font-family:var(--body);font-weight:600;font-size:11px;color:var(--dim)}
 
-/* NEW 2.3.0: charts in Records (plain bars drawn with CSS: no library) */
+/* 2.3.0: charts in Records (plain bars drawn with CSS: no library) */
 .chart{display:flex;align-items:flex-end;gap:5px;margin-top:6px;--ac:var(--blue)}
 .cc{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:5px}
 .cc .v{height:14px;font-family:var(--body);font-weight:700;font-size:10.5px;line-height:14px;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
@@ -478,20 +487,20 @@ textarea.input.sm{min-height:76px}
 .hb{height:8px;border-radius:999px;background:rgba(255,255,255,.09);overflow:hidden}
 .hb i{display:block;height:100%;border-radius:999px;background:var(--ac)}
 
-/* NEW 2.3.0: smart insights */
+/* 2.3.0: smart insights */
 .ins{padding:16px 18px;border-radius:20px;border-color:rgba(148,178,255,.3);background:linear-gradient(135deg,rgba(91,140,255,.14),rgba(123,64,228,.06)),var(--surface)}
 .ins .tag{display:block;margin-bottom:5px;font-weight:700;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--blue2)}
 .ins p{margin:0 0 12px;font-size:15px;line-height:1.5;color:var(--white);overflow-wrap:anywhere}
 .ins p:last-child{margin-bottom:0}
 
-/* NEW 2.3.0: journal list */
+/* 2.3.0: journal list */
 .jlist{display:grid;gap:8px}
 .jr{display:block;width:100%;padding:13px 16px;border-radius:18px;background:var(--surface2);border:1px solid var(--hair);text-align:left;transition:transform .22s var(--spring),background .25s}
 .jr:active{transform:scale(.98)}
 .jr small{display:block;margin-bottom:4px;font-family:var(--body);font-weight:600;font-size:12px;color:var(--blue2)}
 .jr p{margin:0;font-size:15px;line-height:1.45;color:var(--white);overflow-wrap:anywhere}
 
-/* NEW 2.3.5: the mood and journal data sheet (opened from Records) uses the same blocks inside a pop-up */
+/* 2.3.5: the mood and journal data sheet (opened from Records) uses the same blocks inside a pop-up */
 .win .stats{grid-template-columns:repeat(2,minmax(0,1fr))}
 .win .chart-cap,.win .note{margin:10px 0 0;font-size:13.5px;line-height:1.45;color:var(--muted)}
 .win .note{margin:0}
@@ -584,7 +593,7 @@ textarea.input.sm{min-height:76px}
 'use strict';
 
 /* ============ constants ============ */
-const APP_VERSION = '2.3.5';
+const APP_VERSION = '2.4.0';
 const MAX_HABITS = 10;
 const MAX_NOTE = 200, MAX_MINI = 60, MAX_ID = 60, MAX_REF = 200;   // length limits: note, 2-minute version, identity, reflection answers
 const MAX_JOURNAL = 160;   // one sentence about the day
@@ -673,6 +682,9 @@ function sum53(str) {
 // habit.mini = text of the 2-minute version ('' = none). habit.note = free note ('' = none).
 // habit.identity = identity statement, for example "I am a reader" ('' = none).
 // habit.days = weekdays the habit is followed on (0 = Monday ... 6 = Sunday, sorted). [] = every day (a normal habit).
+// NEW 2.4: habit.task = true marks a "Daily task" habit. Its habit.note IS today's task (required). When today is ticked, the task text is
+// moved into habit.tlog[dayKey] (history) and the note is cleared so the next day's task can be written. A Daily task habit never has
+// a 2-minute version, an identity or flexible days.
 // The order of S.habits IS the order shown on the Habits tab and in the Today card (changed with "Arrange habits").
 // reflections = weekly reflections {week (Monday key), win, hard, focus, rate, at}. cel = celebrations already shown. allDay = last day the "day complete" celebration was shown.
 // checkins (new in 2.3) = {dayKey: {m: mood 1-5 or 0, e: energy 1-5 or 0}}. journal (new in 2.3) = {dayKey: one line of text}.
@@ -698,16 +710,26 @@ function normalize(raw) {
     }
     // Flexible habit days: only whole numbers 0 to 6, no repeats, sorted. All 7 days means "every day" = [].
     const days = [...new Set((Array.isArray(h && h.days) ? h.days : []).map(Number).filter(n => Number.isInteger(n) && n >= 0 && n <= 6))].sort((a, b) => a - b);
+    // NEW 2.4: Daily task habits. History of finished tasks {dayKey: text}; only kept for task habits.
+    const task = !!(h && h.task), tlog = {};
+    if (task && h.tlog && typeof h.tlog === 'object') {
+      for (const k of Object.keys(h.tlog).sort().slice(-400)) {
+        const t = String(h.tlog[k] == null ? '' : h.tlog[k]).trim().slice(0, MAX_NOTE);
+        if (/^\d{4}-\d{2}-\d{2}$/.test(k) && t) tlog[k] = t;
+      }
+    }
     return {
       id: String((h && h.id) || uid()),
       name: String((h && h.name) || 'Habit').trim().slice(0, 30) || 'Habit',
       created: /^\d{4}-\d{2}-\d{2}$/.test(h && h.created) ? h.created : dkey(new Date()),
       done: done,
-      lite: lite,
-      mini: String((h && h.mini) || '').trim().slice(0, MAX_MINI),
+      lite: task ? {} : lite,
+      mini: task ? '' : String((h && h.mini) || '').trim().slice(0, MAX_MINI),
       note: String((h && h.note) || '').trim().slice(0, MAX_NOTE),
-      identity: String((h && h.identity) || '').trim().slice(0, MAX_ID),
-      days: days.length === 7 ? [] : days,
+      identity: task ? '' : String((h && h.identity) || '').trim().slice(0, MAX_ID),
+      days: task ? [] : (days.length === 7 ? [] : days),
+      task: task,
+      tlog: tlog,
       claimed: Math.min(TIERS.length, Math.max(0, Math.floor(Number(h && h.claimed) || 0)))
     };
   });
@@ -1083,7 +1105,7 @@ function dayWord(k) {
   return k === yk ? 'yesterday' : parseKey(k).toLocaleDateString(undefined, {weekday:'long'});
 }
 function nmtText(h, n) {
-  const tail = h.mini ? 'Your 2-minute version counts: ' + h.mini + '.' : 'Do a small version. Showing up beats perfect.';
+  const tail = h.mini ? 'Your 2-minute version counts: ' + h.mini + '.' : h.task ? 'Do today\'s task, even in a smaller way. Showing up beats perfect.' : 'Do a small version. Showing up beats perfect.';
   return n.twice
     ? 'You missed ' + dayWord(n.key) + ' and the day before. A new run starts with one done day, so make today that day. ' + tail
     : 'You missed ' + dayWord(n.key) + '. One miss is an accident, two is the start of a new habit. Do it today. ' + tail;
@@ -1221,13 +1243,16 @@ function weekdayAll() {
   return {due: due, miss: miss};
 }
 // The insight cards shown in Records: hardest days (with the offer of a 2-minute version) and what lifts mood and energy.
+// 2.4: a Daily task habit has no 2-minute version, so its card suggests planning a lighter task for that weekday instead.
 function insights() {
   const found = [];
   S.habits.forEach(h => {
     const t = toughDay(h);
-    if (t) found.push({tag: 'Hardest day', rate: t.rate, hid: h.id, offer: !h.mini,
-      text: 'You miss ' + h.name + ' most on ' + DAY_PLURAL[t.wd] + ' (' + t.miss + ' of ' + t.due + '). '
-        + (h.mini ? 'Your 2-minute version counts on those days: ' + h.mini + '.' : 'Want to set a 2-minute version you can use on ' + DAY_PLURAL[t.wd] + '?')});
+    if (!t) return;
+    const base = 'You miss ' + h.name + ' most on ' + DAY_PLURAL[t.wd] + ' (' + t.miss + ' of ' + t.due + '). ';
+    if (h.task) found.push({tag: 'Hardest day', rate: t.rate, hid: h.id, offer: false, text: base + 'Try planning a lighter task for ' + DAY_PLURAL[t.wd] + '.'});
+    else found.push({tag: 'Hardest day', rate: t.rate, hid: h.id, offer: !h.mini,
+      text: base + (h.mini ? 'Your 2-minute version counts on those days: ' + h.mini + '.' : 'Want to set a 2-minute version you can use on ' + DAY_PLURAL[t.wd] + '?')});
   });
   found.sort((a, b) => b.rate - a.rate);
   const list = found.slice(0, 3);
@@ -1366,9 +1391,12 @@ function todayPanel() {
     const pop = d && ui.fx && ui.fx.id === h.id && ui.fx.day === tk;
     // 2.3.0: on the weekday this habit is usually missed, the row says so (and reminds you of the 2-minute version).
     const tg = !d && !nm ? toughDay(h) : null, tough = !!tg && tg.wd === wdOf(new Date());
+    // 2.4: a Daily task habit shows its task under the name (or what you did, once it is ticked).
+    const taskSub = !h.task ? '' : d ? (h.tlog[tk] ? '<small>' + esc(h.tlog[tk]) + '</small>' : '')
+      : '<small' + (h.note ? '' : ' class="nm"') + '>' + esc(h.note || 'Write today\'s task') + '</small>';
     const sub = nm ? '<small class="nm">Never miss twice</small>'
       : tough ? '<small class="nm">' + esc(h.mini ? 'Tough day: your 2-minute version counts' : 'Tough day for this one: start small') + '</small>'
-      : h.identity ? '<small>' + esc(h.identity) + '</small>' : '';
+      : h.identity ? '<small>' + esc(h.identity) + '</small>' : taskSub;
     return `<button class="t-row${d ? ' on' : ''}${pop ? ' pop' : ''}" style="--ac:${col}" data-action="tick" data-id="${esc(h.id)}" data-day="${tk}" aria-label="${d ? 'Unmark ' : 'Mark '}${esc(h.name)} today" aria-pressed="${d}">
       <span class="t-dot">${d ? CHECK : ''}</span><span class="t-txt"><b>${esc(h.name)}</b>${sub}</span><span class="t-st">${currentStreak(h)}<small>STREAK</small></span></button>`;
   }).join('');
@@ -1387,7 +1415,7 @@ function todayPanel() {
   </section>`;
 }
 
-// NEW 2.3.5: the Check-in is ONE slim button on the Habits tab. It shows today's mood face and energy once you have checked in,
+// 2.3.5: the Check-in is ONE slim button on the Habits tab. It shows today's mood face and energy once you have checked in,
 // and opens the Check-in pop-up (mood faces, energy 1 to 5, one line about the day).
 function checkinButton() {
   if (!S.habits.length) return '';
@@ -1448,7 +1476,14 @@ function viewHabits() {
 }
 
 // The identity, days, 2-minute version and note are drawn only when the habit has them. No empty placeholders.
+// 2.4: a Daily task habit shows ONE tappable line instead: today's task (tag "Today"), or, once today is ticked, the task
+// written for tomorrow (tag "Next"). When it is empty it asks you to write the task, so the habit never goes without one.
 function extrasHtml(h) {
+  if (h.task) {
+    const isDone = !!h.done[dkey(new Date())];
+    const txt = h.note || (isDone ? 'Write tomorrow\'s task' : 'Write today\'s task');
+    return `<div class="extras"><button class="x-line x-task${h.note ? '' : ' empty'}" data-action="xnote" data-id="${esc(h.id)}" aria-label="Edit the task of ${esc(h.name)}"><span class="x-tag">${isDone ? 'Next' : 'Today'}</span><span>${esc(txt)}</span></button></div>`;
+  }
   let x = '';
   if (h.identity) x += `<div class="x-line"><span class="x-tag">Identity</span><span>${esc(h.identity)}</span></div>`;
   if (h.days && h.days.length) x += `<div class="x-line"><span class="x-tag">Days</span><span>${esc(daysLabel(h.days))}</span></div>`;
@@ -1501,7 +1536,7 @@ function habitCard(h) {
   <section class="panel habit">
     <div class="h-head">
       <button class="h-name" data-action="edit" data-id="${esc(h.id)}" aria-label="Edit ${esc(h.name)}"><span>${esc(h.name)}</span>${PENCIL}</button>
-      <button class="h-more" data-action="extras" data-id="${esc(h.id)}" aria-label="Options for ${esc(h.name)}: identity, 2-minute habit, note, flexible days">${DOTS}</button>
+      <button class="h-more" data-action="extras" data-id="${esc(h.id)}" aria-label="${h.task ? 'Write the task for ' + esc(h.name) : 'Options for ' + esc(h.name) + ': identity, 2-minute habit, note, flexible days'}">${DOTS}</button>
       <div class="streak"><small>STREAK</small><b${fxOn ? ' class="bump"' : ''}>${cur}</b></div>
     </div>
     ${extrasHtml(h)}${nmt}
@@ -1704,8 +1739,18 @@ function streakTimeHtml(h) {
   const cols = vals.map((v, i) => ({v: v, show: v == null ? '' : v, label: String(addDays(mon, -7 * (11 - i)).getDate()), best: v != null && v > 0 && v === mx}));
   return `<section class="panel" style="margin-top:12px"><span class="panel-t">Streak over time</span>${chartHtml(cols, mx)}<p class="chart-cap">Streak at the end of each of the last 12 weeks. Longest ever: <b>${longestStreak(h)}</b>.</p></section>`;
 }
+// NEW 2.4: the finished tasks of a Daily task habit (newest first), shown under its stats in Records.
+function taskLogHtml(h) {
+  if (!h.task) return '';
+  const ks = Object.keys(h.tlog || {}).sort().reverse();
+  const body = ks.length
+    ? ks.slice(0, 30).map(k => `<div class="kv"><span>${esc(h.tlog[k])}</span><b>${esc(fmtKey(k))}</b></div>`).join('')
+      + (ks.length > 30 ? `<p class="note" style="margin:8px 0 0">Showing the newest 30 of ${ks.length}.</p>` : '')
+    : '<p class="note" style="margin:0">Every task you finish is saved here.</p>';
+  return `<section class="panel" style="margin-top:12px"><span class="panel-t">Tasks completed</span>${body}</section>`;
+}
 
-// NEW 2.3.5 order in Records: Weekly reflection, Habit history (with quests cleared and the full calendar), Insights, Trends, then the Mood & journal button.
+// 2.3.5 order in Records: Weekly reflection, Habit history (with quests cleared and the full calendar), Insights, Trends, then the Mood & journal button.
 function viewRecords() {
   let html = '<h2 class="sec">Records</h2>';
   const hasMood = Object.keys(S.checkins).length || journalKeys().length;
@@ -1750,7 +1795,7 @@ function viewRecords() {
     + tile('Quests cleared', h.claimed + ' / ' + TIERS.length)
     + tile('Tracking since', esc(fmtKey(st.startKey)), 'sm')
     + '</div></section>'
-    + streakTimeHtml(h);
+    + streakTimeHtml(h) + taskLogHtml(h);
   const rw = S.rewards.filter(r => r.habitId === h.id);
   html += '<h2 class="sec">Quests cleared</h2>';
   html += rw.length
@@ -1950,15 +1995,20 @@ function celebrate(id, k, bounced) {
   confetti(ms >= 30 ? 110 : 64, ms >= 30);
 }
 
+// 2.4: the New habit pop-up first asks for the TYPE: Regular habit (identity + flexible days, as before) or Daily task
+// (only a name and today's task). The two sets of fields live in #f-reg and #f-task; the type buttons switch between them.
 function openHabitForm(id) {
   const h = id ? findHabit(id) : null;
   showModal(`
     <div class="wtag"><span class="tag">Habsys</span></div>
     <h3>${h ? 'Edit habit' : 'New habit'}</h3>
     <p class="sub">${h ? 'Rename or remove' : 'Slot ' + (S.habits.length + 1) + ' of ' + MAX_HABITS}</p>
+    ${h ? '' : `<div class="tpick"><button class="tchip on" data-action="ftype" data-t="reg" aria-pressed="true">Regular habit</button><button class="tchip" data-action="ftype" data-t="task" aria-pressed="false">Daily task</button></div>`}
     <label class="field"><span>Habit name</span><input class="input" id="hname" maxlength="30" placeholder="e.g. Read 10 pages" value="${h ? esc(h.name) : ''}" autocomplete="off"></label>
-    ${h ? '' : `<label class="field"><span>Who are you becoming? (optional)</span><input class="input" id="hid" maxlength="${MAX_ID}" placeholder="e.g. I am a reader" autocomplete="off"></label>
-    <div class="field"><span>Flexible days (optional)</span><div class="dchips" style="margin-bottom:6px">${DAY_SHORT.map((n, i) => `<button class="dchip" data-action="toggleday" data-d="${i}" aria-pressed="false">${n}</button>`).join('')}</div><p class="hint" style="margin:0 0 6px">Leave all days unselected for an every-day habit. You can change this later with the three-dot button.</p></div>`}
+    ${h ? '' : `<div id="f-reg"><label class="field"><span>Who are you becoming? (optional)</span><input class="input" id="hid" maxlength="${MAX_ID}" placeholder="e.g. I am a reader" autocomplete="off"></label>
+    <div class="field"><span>Flexible days (optional)</span><div class="dchips" style="margin-bottom:6px">${DAY_SHORT.map((n, i) => `<button class="dchip" data-action="toggleday" data-d="${i}" aria-pressed="false">${n}</button>`).join('')}</div><p class="hint" style="margin:0 0 6px">Leave all days unselected for an every-day habit. You can change this later with the three-dot button.</p></div></div>
+    <div id="f-task" style="display:none"><label class="field"><span>Today's task</span><textarea class="input sm" id="htask" maxlength="${MAX_NOTE}" placeholder="e.g. Finish chapter 3"></textarea></label>
+    <p class="hint" style="margin:0 0 16px">A Daily task habit has only this note. When you tick it as done, the task clears so you can write the task for the next day.</p></div>`}
     <div class="actions">
       <button class="btn" data-action="savehabit" data-id="${h ? esc(h.id) : ''}">Save</button>
       ${h ? `<button class="btn danger" data-action="delask" data-id="${esc(h.id)}">Delete habit</button>` : ''}
@@ -1997,8 +2047,10 @@ function moveHabit(id, dir) {
 }
 
 // Three-dot menu on a habit: four buttons. Each one opens its own small form. A tick on a button means it is already set.
+// (2.4: on a Daily task habit the three dots open the task editor straight away: it has no other options.)
 function openExtras(id) {
   const h = findHabit(id); if (!h) return;
+  if (h.task) { openNote(id); return; }
   const on = v => v ? ' ✓' : '';
   showModal(`
     <div class="wtag"><span class="tag">Habsys</span></div>
@@ -2014,7 +2066,7 @@ function openExtras(id) {
     <p class="hint" style="margin:14px 0 0">A tick means it is already set on this habit.</p>`);
 }
 function openIdentity(id) {
-  const h = findHabit(id); if (!h) return;
+  const h = findHabit(id); if (!h || h.task) return;
   showModal(`
     <div class="wtag"><span class="tag">Habsys</span></div>
     <h3>Identity statement</h3>
@@ -2027,7 +2079,7 @@ function openIdentity(id) {
     </div>`);
 }
 function openMini(id) {
-  const h = findHabit(id); if (!h) return;
+  const h = findHabit(id); if (!h || h.task) return;
   showModal(`
     <div class="wtag"><span class="tag">Habsys</span></div>
     <h3>2-minute habit</h3>
@@ -2039,8 +2091,23 @@ function openMini(id) {
       <button class="btn ghost" data-action="extras" data-id="${esc(h.id)}">Back</button>
     </div>`);
 }
-function openNote(id) {
+// Note. 2.4: on a Daily task habit this is the TASK editor (the task cannot be empty). next = shown right after today's task was ticked.
+function openNote(id, next) {
   const h = findHabit(id); if (!h) return;
+  if (h.task) {
+    const isDone = !!h.done[dkey(new Date())];
+    showModal(`
+    <div class="wtag"><span class="tag">Habsys</span></div>
+    <h3>${next ? 'Task done ✓' : isDone ? 'Next task' : 'Today\'s task'}</h3>
+    <p class="sub">${esc(h.name)}</p>
+    <label class="field"><span>${next || isDone ? 'What is the task for tomorrow?' : 'What is today\'s task?'}</span><textarea class="input" id="hnote" maxlength="${MAX_NOTE}" placeholder="Write the task">${esc(h.note)}</textarea></label>
+    <p class="hint">When you tick this habit as done, the task clears so you can write the next one.</p>
+    <div class="actions">
+      <button class="btn" data-action="savenote" data-id="${esc(h.id)}">Save</button>
+      <button class="btn ghost" data-action="close">${next ? 'Later' : 'Cancel'}</button>
+    </div>`);
+    return;
+  }
   showModal(`
     <div class="wtag"><span class="tag">Habsys</span></div>
     <h3>Note</h3>
@@ -2054,7 +2121,7 @@ function openNote(id) {
 }
 // Flexible habit: pick the weekdays this habit is followed on. On the other days it is hidden.
 function openDays(id) {
-  const h = findHabit(id); if (!h) return;
+  const h = findHabit(id); if (!h || h.task) return;
   const cur = h.days && h.days.length ? h.days : [];
   const chips = DAY_SHORT.map((n, i) => { const on = cur.indexOf(i) >= 0; return `<button class="dchip${on ? ' on' : ''}" data-action="toggleday" data-d="${i}" aria-pressed="${on}">${n}</button>`; }).join('');
   showModal(`
@@ -2071,7 +2138,7 @@ function openDays(id) {
     </div>`);
 }
 function setDays(id, arr) {
-  const h = findHabit(id); if (!h) return;
+  const h = findHabit(id); if (!h || h.task) return;
   const days = [...new Set(arr)].sort((a, b) => a - b);
   const before = claimableCount(h);
   h.days = days.length === 7 ? [] : days;
@@ -2239,7 +2306,7 @@ function openInfo() {
     <p class="small">Streak savers are explained in the Vault tab.</p>
     <div class="actions"><button class="btn" data-action="close">Got it</button></div>`);
 }
-// NEW 2.3.5: the Check-in pop-up (opened from the button on the Habits tab). Mood is five faces, energy is 1 to 5, and one line about the day.
+// 2.3.5: the Check-in pop-up (opened from the button on the Habits tab). Mood is five faces, energy is 1 to 5, and one line about the day.
 // Each tap saves at once. The keyboard does not open by itself.
 function ciPick(f) {
   const c = S.checkins[dkey(new Date())] || {m: 0, e: 0};
@@ -2260,7 +2327,7 @@ function openCheckin() {
     <p class="hint">Tap a face or number again to clear it. Everything saves by itself.</p>
     <div class="actions"><button class="btn" data-action="close">Done</button></div>`, '', true);
 }
-// NEW 2.3.5: the Mood, energy and journal data, opened from the button in Records.
+// 2.3.5: the Mood, energy and journal data, opened from the button in Records.
 function openMoodData() {
   showModal(`
     <div class="wtag"><span class="tag">Habsys</span></div>
@@ -2395,15 +2462,29 @@ function afterChange(id, before) {
 }
 // lite = true: the day was done with the 2-minute version (still a real done day).
 // The tick effect: ui.fx is set only while the screen is redrawn, so the pop, the drawing check and the streak bump play once.
+// 2.4: a Daily task habit. Ticking TODAY moves the written task into its history (tlog) and clears the note, so the next task can be written.
 function markDone(id, k, lite) {
   const h = findHabit(id); if (!h) return;
   const tk = dkey(new Date()), yk = dkey(addDays(new Date(), -1));
   if ((k !== tk && k !== yk) || h.done[k]) return;
+  if (h.task) {
+    lite = false;
+    if (k === tk && !h.note) { toast('Write today\'s task first.'); openNote(id); return; }
+  }
   const bounced = wasMissed(h, prevSchedKey(h, parseKey(k)));   // coming straight back after a miss
   const before = claimableCount(h);
   h.done[k] = 1;
-  if (!h.lite) h.lite = {};
-  if (lite) h.lite[k] = true; else delete h.lite[k];
+  let askNext = false;
+  if (h.task) {
+    if (!h.tlog) h.tlog = {};
+    if (k === tk) { h.tlog[k] = h.note; h.note = ''; askNext = true; }
+    else h.tlog[k] = h.tlog[k] || 'Done (task not written)';
+    const tks = Object.keys(h.tlog).sort();
+    for (let i = 0; i < tks.length - 400; i++) delete h.tlog[tks[i]];
+  } else {
+    if (!h.lite) h.lite = {};
+    if (lite) h.lite[k] = true; else delete h.lite[k];
+  }
   ui.fx = {id: id, day: k};
   afterChange(id, before);
   ui.fx = null;
@@ -2415,6 +2496,11 @@ function markDone(id, k, lite) {
   });
   if (lite) toast('2-minute version done. Streak kept alive.');
   celebrate(id, k, bounced);
+  // Ask for the next task, unless a celebration or reward sheet is already on screen (the card then shows "Write tomorrow's task").
+  if (askNext) setTimeout(() => {
+    const hh = findHabit(id);
+    if (hh && hh.task && !hh.note && hh.done[dkey(new Date())] && !$('#overlay').classList.contains('show')) openNote(id, true);
+  }, 500);
 }
 function useSaver(id, k) {
   const h = findHabit(id); if (!h) return;
@@ -2437,10 +2523,19 @@ function toggleDay(id, k) {
     const before = claimableCount(h);
     delete h.done[k];
     if (h.lite) delete h.lite[k];
+    // 2.4: unticking today's task puts it back as the note (unless a newer task was already written, which is kept).
+    let restored = false;
+    if (h.task && h.tlog) {
+      const t = h.tlog[k]; delete h.tlog[k];
+      if (k === tk && t && !h.note) { h.note = t; restored = true; }
+    }
     afterChange(id, before);
+    if (restored) toast('Unmarked. Your task is back.');
     return;
   }
   if (!isSchedKey(h, k)) return;   // rest day of a flexible habit: nothing to mark
+  // 2.4: a Daily task habit needs a written task before it can be ticked today.
+  if (h.task && k === tk && !h.note) { toast('Write today\'s task first.'); openNote(id); return; }
   // Empty day: ask only when there is a real choice (a 2-minute version exists and/or a streak saver can be used).
   // A habit without either behaves exactly as before: one tap marks it done.
   if (h.mini || saverOkFor(h, k)) { openDayChoice(id, k); return; }
@@ -2471,26 +2566,37 @@ const actions = {
   usesaver: el => { closeModal(); useSaver(el.dataset.id, el.dataset.day); },
   add: () => { if (S.habits.length >= MAX_HABITS) return; openHabitForm(null); },
   edit: el => openHabitForm(el.dataset.id),
+  // 2.4: the type buttons in the New habit pop-up switch between the Regular habit fields and the Daily task field.
+  ftype: el => {
+    const t = el.dataset.t === 'task' ? 'task' : 'reg';
+    document.querySelectorAll('#overlay .tchip').forEach(c => { const on = c.dataset.t === t; c.classList.toggle('on', on); c.setAttribute('aria-pressed', String(on)); });
+    const r = $('#f-reg'), k = $('#f-task');
+    if (r) r.style.display = t === 'reg' ? '' : 'none';
+    if (k) k.style.display = t === 'task' ? '' : 'none';
+  },
   extras: el => openExtras(el.dataset.id),
   xid: el => openIdentity(el.dataset.id),
   xmini: el => openMini(el.dataset.id),
   xnote: el => openNote(el.dataset.id),
   xdays: el => openDays(el.dataset.id),
   saveidentity: el => {
-    const h = findHabit(el.dataset.id); if (!h) return;
+    const h = findHabit(el.dataset.id); if (!h || h.task) return;
     h.identity = ($('#hid').value || '').trim().slice(0, MAX_ID);
     save(); closeModal(); render();
     toast(h.identity ? 'Identity saved. Every done day is a vote for it.' : 'Identity removed.');
   },
   savemini: el => {
-    const h = findHabit(el.dataset.id); if (!h) return;
+    const h = findHabit(el.dataset.id); if (!h || h.task) return;
     h.mini = ($('#hmini').value || '').trim().slice(0, MAX_MINI);
     save(); closeModal(); render();
   },
   savenote: el => {
     const h = findHabit(el.dataset.id); if (!h) return;
-    h.note = ($('#hnote').value || '').trim().slice(0, MAX_NOTE);
+    const v = ($('#hnote').value || '').trim().slice(0, MAX_NOTE);
+    if (h.task && !v) { toast('Write the task, or tap Cancel.'); return; }   // a Daily task habit always needs its note
+    h.note = v;
     save(); closeModal(); render();
+    if (h.task) toast(h.done[dkey(new Date())] ? 'Next task saved.' : 'Task saved.');
   },
   toggleday: el => { const on = !el.classList.contains('on'); el.classList.toggle('on', on); el.setAttribute('aria-pressed', String(on)); },
   savedays: el => {
@@ -2509,9 +2615,16 @@ const actions = {
     if (id) { const h = findHabit(id); if (h) h.name = name; }
     else {
       if (S.habits.length >= MAX_HABITS) return;
-      const picked = Array.from(document.querySelectorAll('#overlay .dchip.on')).map(c => Number(c.dataset.d)).sort((a, b) => a - b);
-      const idEl = $('#hid'), identity = idEl ? (idEl.value || '').trim().slice(0, MAX_ID) : '';
-      S.habits.push({id: uid(), name, created: dkey(new Date()), done: {}, lite: {}, mini: '', note: '', identity: identity, days: picked.length === 7 ? [] : picked, claimed: 0});
+      const isTask = !!document.querySelector('#overlay .tchip.on[data-t="task"]');
+      if (isTask) {
+        const te = $('#htask'), task = te ? (te.value || '').trim().slice(0, MAX_NOTE) : '';
+        if (!task) { toast('Write today\'s task.'); return; }
+        S.habits.push({id: uid(), name, created: dkey(new Date()), done: {}, lite: {}, mini: '', note: task, identity: '', days: [], claimed: 0, task: true, tlog: {}});
+      } else {
+        const picked = Array.from(document.querySelectorAll('#overlay .dchip.on')).map(c => Number(c.dataset.d)).sort((a, b) => a - b);
+        const idEl = $('#hid'), identity = idEl ? (idEl.value || '').trim().slice(0, MAX_ID) : '';
+        S.habits.push({id: uid(), name, created: dkey(new Date()), done: {}, lite: {}, mini: '', note: '', identity: identity, days: picked.length === 7 ? [] : picked, claimed: 0});
+      }
       S.bigMoment = true; askPersist();
     }
     save(); closeModal(); render();
