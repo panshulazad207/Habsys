@@ -13,7 +13,7 @@
 <link rel="apple-touch-icon" href="icon-180.png?v=199">
 <link rel="icon" type="image/png" href="icon-192.png?v=199">
 <style>
-/* ===== Habsys 2.4.0: new "Daily task" habit type (a note-only habit whose task clears when you tick it). Everything else as in 2.3.5 ===== */
+/* ===== Habsys 2.5.0: new Friends tab (your friend code, add a friend by code, a small leaderboard of player name, level and rank). Everything else as in 2.4.0 ===== */
 :root{
   color-scheme:dark;
   --bg0:#0a0b10;
@@ -307,10 +307,10 @@ textarea.input.sm{min-height:76px}
 .kv span{min-width:0;overflow-wrap:anywhere}
 .kv b{font-family:var(--body);font-weight:600;font-size:14px;text-align:right}
 
-/* tab bar: floating glass pill with sliding highlight */
+/* tab bar: floating glass pill with sliding highlight (2.5.0: five tabs) */
 .tabs{position:fixed;left:0;right:0;bottom:0;z-index:20;padding:10px 16px calc(env(safe-area-inset-bottom) + 10px);background:linear-gradient(180deg,rgba(10,11,16,0),rgba(10,11,16,.92) 55%);pointer-events:none}
-.tabs .in{pointer-events:auto;position:relative;max-width:520px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:6px;border:1px solid var(--hair2);border-radius:30px;background:rgba(26,28,39,.74);box-shadow:inset 0 1px 0 rgba(255,255,255,.07),0 1px 2px rgba(0,0,0,.3),0 24px 48px -16px rgba(0,0,0,.9);backdrop-filter:blur(28px) saturate(180%);-webkit-backdrop-filter:blur(28px) saturate(180%)}
-.tab-ind{position:absolute;top:6px;bottom:6px;left:6px;width:calc((100% - 30px) / 4);border-radius:24px;pointer-events:none;
+.tabs .in{pointer-events:auto;position:relative;max-width:560px;margin:0 auto;display:grid;grid-template-columns:repeat(5,1fr);gap:6px;padding:6px;border:1px solid var(--hair2);border-radius:30px;background:rgba(26,28,39,.74);box-shadow:inset 0 1px 0 rgba(255,255,255,.07),0 1px 2px rgba(0,0,0,.3),0 24px 48px -16px rgba(0,0,0,.9);backdrop-filter:blur(28px) saturate(180%);-webkit-backdrop-filter:blur(28px) saturate(180%)}
+.tab-ind{position:absolute;top:6px;bottom:6px;left:6px;width:calc((100% - 36px) / 5);border-radius:24px;pointer-events:none;
   background:linear-gradient(180deg,rgba(255,255,255,.15),rgba(255,255,255,.08));box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 4px 14px -6px rgba(0,0,0,.5);
   transform:translateX(calc(var(--i,0) * (100% + 6px)));transition:transform .5s cubic-bezier(.28,1.05,.3,1)}
 .tab{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:9px 4px 8px;border-radius:24px;color:var(--muted);font-family:var(--body);font-weight:600;font-size:11px;letter-spacing:.01em;transition:color .3s ease,transform .22s var(--spring)}
@@ -383,13 +383,31 @@ textarea.input.sm{min-height:76px}
 .dchip:active{transform:scale(.92)}
 .dchip.on{color:#fff;background:linear-gradient(180deg,#6c97ff,#4a6cf5);box-shadow:0 8px 16px -8px rgba(74,108,245,.9),inset 0 1px 0 rgba(255,255,255,.28)}
 
-/* NEW 2.4.0: habit type chooser in the New habit pop-up (Regular habit / Daily task) and the task line on a Daily task card */
+/* 2.4.0: habit type chooser in the New habit pop-up (Regular habit / Daily task) and the task line on a Daily task card */
 .tpick{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px}
 .tchip{min-height:52px;border:0;border-radius:15px;background:rgba(255,255,255,.07);color:var(--muted);font-family:var(--head);font-weight:700;font-size:15px;transition:background .25s var(--ease),color .25s,box-shadow .25s,transform .22s var(--spring)}
 .tchip:active{transform:scale(.96)}
 .tchip.on{color:#fff;background:linear-gradient(180deg,#6c97ff,#4a6cf5);box-shadow:0 8px 16px -8px rgba(74,108,245,.9),inset 0 1px 0 rgba(255,255,255,.28)}
 .x-task{width:100%;text-align:left;padding:0;min-height:32px}
 .x-task.empty span:last-child{color:var(--gold);font-weight:600}
+
+/* NEW 2.5.0: Friends tab. A big friend code, two buttons, an add box and a leaderboard of hexagon rank, name and level. */
+.fcode{display:block;margin:4px 0 16px;font-family:var(--head);font-weight:800;font-size:34px;letter-spacing:.12em;color:var(--white);text-align:center;font-variant-numeric:tabular-nums;-webkit-user-select:text;user-select:text}
+.fbtns{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.flist{display:grid;gap:8px}
+.frow{display:flex;align-items:center;gap:14px;min-height:66px;padding:10px 12px 10px 14px;border-radius:20px;background:var(--surface2);border:1px solid var(--hair)}
+.frow.me{border-color:rgba(148,178,255,.35);background:linear-gradient(135deg,rgba(91,140,255,.14),rgba(123,64,228,.06)),var(--surface2)}
+.f-rk{width:44px;height:50px;flex:none;display:grid;place-items:center;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);background:linear-gradient(160deg,#86a6ff,#4a63f0);font-family:var(--head);font-weight:800;font-size:20px;color:#fff}
+.f-nm{flex:1;min-width:0;display:grid}
+.f-nm b{font-family:var(--head);font-weight:700;font-size:16.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.f-nm small{font-size:12.5px;color:var(--muted)}
+.f-lv{flex:none;text-align:right;font-family:var(--head);font-weight:800;font-size:24px;line-height:1.05;font-variant-numeric:tabular-nums}
+.f-lv small{display:block;font-family:var(--body);font-weight:700;font-size:9px;letter-spacing:.14em;color:var(--muted)}
+.f-x{flex:none;width:40px;height:40px;display:grid;place-items:center;border-radius:50%;color:var(--muted);background:rgba(255,255,255,.06);transition:transform .2s var(--spring),background .2s}
+.f-x svg{width:17px;height:17px}
+.f-x:active{transform:scale(.9);background:rgba(255,255,255,.14)}
+.fstat{margin:14px 4px 0;font-size:13px;line-height:1.45;color:var(--muted)}
+.fstat.bad{color:var(--warn)}
 
 #toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 108px);transform:translateX(-50%) translateY(18px) scale(.97);z-index:90;opacity:0;pointer-events:none;transition:opacity .3s var(--ease),transform .4s var(--spring);max-width:calc(100% - 32px)}
 #toast.show{opacity:1;transform:translateX(-50%)}
@@ -550,6 +568,7 @@ textarea.input.sm{min-height:76px}
   .t-top{gap:16px}
   .ci-pick{gap:6px}
   .chart{gap:3px}
+  .fcode{font-size:28px}
 }
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
@@ -578,6 +597,9 @@ textarea.input.sm{min-height:76px}
     <button class="tab" data-action="tab" data-tab="records" aria-label="Records and history">
       <svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4M8.5 15l2.5 2.5 4.5-4.5"/></svg>Records
     </button>
+    <button class="tab" data-action="tab" data-tab="friends" aria-label="Friends">
+      <svg viewBox="0 0 24 24"><circle cx="9" cy="8.5" r="3.2"/><path d="M3 20c0-3.4 2.7-5.8 6-5.8s6 2.4 6 5.8"/><circle cx="17" cy="9.5" r="2.5"/><path d="M17.5 14.4c2.3.3 3.8 2.2 3.8 4.6"/></svg>Friends
+    </button>
     <button class="tab" data-action="tab" data-tab="system" aria-label="System settings">
       <svg viewBox="0 0 24 24"><path d="M12 2.5l8 4.5v10l-8 4.5-8-4.5V7z"/><circle cx="12" cy="12" r="3"/></svg>System
     </button>
@@ -593,7 +615,13 @@ textarea.input.sm{min-height:76px}
 'use strict';
 
 /* ============ constants ============ */
-const APP_VERSION = '2.4.0';
+const APP_VERSION = '2.5.0';
+// NEW 2.5.0: Friends. These two values come from your free Firebase project (they are an address, not a password).
+// While they still say PASTE..., the Friends tab explains that it is not switched on yet and the rest of the app works as before.
+const FB_API_KEY = 'AIzaSyCCW0tJgzxmgOoOf304Q6elV-D18ZyH0AM', FB_PROJECT = 'habsys-9977a';
+const FB_READY = !/PASTE/.test(FB_API_KEY + FB_PROJECT) && FB_API_KEY.length > 20 && FB_PROJECT.length > 3;
+const FB_LS = 'habsys_fb_auth', FB_CACHE = 'habsys_friend_cards';   // sign-in token and last seen friend cards (never part of backups)
+const MAX_FRIENDS = 20, CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789', CODE_RE = /^[A-Z2-9]{8}$/;
 const MAX_HABITS = 10;
 const MAX_NOTE = 200, MAX_MINI = 60, MAX_ID = 60, MAX_REF = 200;   // length limits: note, 2-minute version, identity, reflection answers
 const MAX_JOURNAL = 160;   // one sentence about the day
@@ -642,6 +670,7 @@ const SHIELD = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l7 3v5
 const SHIELD_CK = SHIELD.replace('<svg ', '<svg class="ck" ');
 const ARR_UP = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 15l6-6 6 6"/></svg>';
 const ARR_DOWN = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>';
+const CROSS = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>';
 
 /* ============ helpers ============ */
 const $ = s => document.querySelector(s);
@@ -678,19 +707,14 @@ function sum53(str) {
 
 /* ============ state ============ */
 // In habit.done: 1 = habit done, 2 = day protected by a streak saver.
-// habit.lite = days (keys) that were done with the 2-minute version. Those days are ALSO done = 1, so they count as real days.
-// habit.mini = text of the 2-minute version ('' = none). habit.note = free note ('' = none).
-// habit.identity = identity statement, for example "I am a reader" ('' = none).
-// habit.days = weekdays the habit is followed on (0 = Monday ... 6 = Sunday, sorted). [] = every day (a normal habit).
-// NEW 2.4: habit.task = true marks a "Daily task" habit. Its habit.note IS today's task (required). When today is ticked, the task text is
-// moved into habit.tlog[dayKey] (history) and the note is cleared so the next day's task can be written. A Daily task habit never has
-// a 2-minute version, an identity or flexible days.
-// The order of S.habits IS the order shown on the Habits tab and in the Today card (changed with "Arrange habits").
-// reflections = weekly reflections {week (Monday key), win, hard, focus, rate, at}. cel = celebrations already shown. allDay = last day the "day complete" celebration was shown.
-// checkins (new in 2.3) = {dayKey: {m: mood 1-5 or 0, e: energy 1-5 or 0}}. journal (new in 2.3) = {dayKey: one line of text}.
-// changes = number of edits since the last backup. bigMoment = a quest/habit milestone happened since the last backup.
+// habit.lite = days (keys) done with the 2-minute version (also done = 1). habit.mini = text of the 2-minute version. habit.note = free note.
+// habit.identity = identity statement. habit.days = weekdays followed (0 = Monday ... 6 = Sunday). [] = every day.
+// habit.task = true marks a "Daily task" habit (2.4): its note IS today's task; ticking moves it into habit.tlog[dayKey].
+// The order of S.habits IS the order shown on the Habits tab and in the Today card.
+// reflections, cel, allDay, checkins {dayKey:{m,e}}, journal {dayKey:text}, changes, bigMoment as in earlier versions.
+// NEW 2.5: friends = {code: your own 8-letter friend code ('' until the Friends tab is first opened), list: [friend codes]}.
 function defaultState() {
-  return { v:2, player:{name:'Player', xp:0}, savers:0, habits:[], rewards:[], rewardText:{}, reflections:[], cel:{}, allDay:'', checkins:{}, journal:{}, lastBackup:null, changes:0, bigMoment:false, updatedAt:0 };
+  return { v:2, player:{name:'Player', xp:0}, savers:0, habits:[], rewards:[], rewardText:{}, reflections:[], cel:{}, allDay:'', checkins:{}, journal:{}, friends:{code:'', list:[]}, lastBackup:null, changes:0, bigMoment:false, updatedAt:0 };
 }
 function validState(s) { return !!s && typeof s === 'object' && Array.isArray(s.habits); }
 function normalize(raw) {
@@ -710,7 +734,7 @@ function normalize(raw) {
     }
     // Flexible habit days: only whole numbers 0 to 6, no repeats, sorted. All 7 days means "every day" = [].
     const days = [...new Set((Array.isArray(h && h.days) ? h.days : []).map(Number).filter(n => Number.isInteger(n) && n >= 0 && n <= 6))].sort((a, b) => a - b);
-    // NEW 2.4: Daily task habits. History of finished tasks {dayKey: text}; only kept for task habits.
+    // Daily task habits (2.4). History of finished tasks {dayKey: text}; only kept for task habits.
     const task = !!(h && h.task), tlog = {};
     if (task && h.tlog && typeof h.tlog === 'object') {
       for (const k of Object.keys(h.tlog).sort().slice(-400)) {
@@ -775,6 +799,10 @@ function normalize(raw) {
     const t = String(jn[k] == null ? '' : jn[k]).replace(/\s+/g, ' ').trim().slice(0, MAX_JOURNAL);
     if (t) s.journal[k] = t;
   }
+  // Friends (new in 2.5). Old data and old backups simply have none. Only well-formed codes are kept.
+  const fr = raw.friends && typeof raw.friends === 'object' ? raw.friends : {};
+  s.friends.code = typeof fr.code === 'string' && CODE_RE.test(fr.code) ? fr.code : '';
+  s.friends.list = [...new Set((Array.isArray(fr.list) ? fr.list : []).map(String).filter(c => CODE_RE.test(c) && c !== s.friends.code))].slice(0, MAX_FRIENDS);
   s.allDay = /^\d{4}-\d{2}-\d{2}$/.test(raw.allDay) ? raw.allDay : '';
   s.lastBackup = typeof raw.lastBackup === 'string' ? raw.lastBackup : null;
   s.changes = Math.max(0, Math.floor(Number(raw.changes) || 0));
@@ -1272,7 +1300,7 @@ function chartHtml(cols, max) {
 }
 
 /* ============ UI state + render ============ */
-const TABS = ['habits', 'vault', 'records', 'system'];
+const TABS = ['habits', 'vault', 'records', 'friends', 'system'];
 // fx = which habit/day was just ticked (set only for the moment the screen is redrawn, so the tick effects play once).
 // jq = journal search text. jback = the journal line editor was opened from the Mood & journal sheet, so it returns there.
 const ui = { tab: 'habits', day: dkey(new Date()), rec: null, rescue: null, pend: null, fx: null, jq: '', jback: false };  // rescue: null | 'fresh' | 'damaged' | 'unreadable'.
@@ -1292,7 +1320,7 @@ function renderView() {
   const old = {};
   document.querySelectorAll('#view [data-k]').forEach(e => { old[e.dataset.k] = e.dataset.off !== undefined ? e.style.strokeDashoffset : e.style.width; });
   $('#today-label').innerHTML = esc(now.toLocaleDateString(undefined, {weekday:'short'})) + '<br>' + esc(now.toLocaleDateString(undefined, {day:'2-digit', month:'short'}));
-  $('#view').innerHTML = ui.rescue ? viewRescue() : ui.tab === 'habits' ? viewHabits() : ui.tab === 'vault' ? viewVault() : ui.tab === 'records' ? viewRecords() : viewSystem();
+  $('#view').innerHTML = ui.rescue ? viewRescue() : ui.tab === 'habits' ? viewHabits() : ui.tab === 'vault' ? viewVault() : ui.tab === 'records' ? viewRecords() : ui.tab === 'friends' ? viewFriends() : viewSystem();
   if (reduceMotion()) return;
   const moves = [];
   document.querySelectorAll('#view [data-k]').forEach(e => {
@@ -1330,6 +1358,7 @@ function switchTab(name) {
   const dir = TABS.indexOf(name) > TABS.indexOf(ui.tab) ? 1 : -1;
   ui.tab = name;
   renderNav();
+  if (name === 'friends') syncFriends();   // 2.5: opening the Friends tab refreshes the cards
   if (reduceMotion()) { renderView(); window.scrollTo(0, 0); return; }
   const v = $('#view');
   v.style.setProperty('--dx', (dir * 28) + 'px');
@@ -1739,7 +1768,7 @@ function streakTimeHtml(h) {
   const cols = vals.map((v, i) => ({v: v, show: v == null ? '' : v, label: String(addDays(mon, -7 * (11 - i)).getDate()), best: v != null && v > 0 && v === mx}));
   return `<section class="panel" style="margin-top:12px"><span class="panel-t">Streak over time</span>${chartHtml(cols, mx)}<p class="chart-cap">Streak at the end of each of the last 12 weeks. Longest ever: <b>${longestStreak(h)}</b>.</p></section>`;
 }
-// NEW 2.4: the finished tasks of a Daily task habit (newest first), shown under its stats in Records.
+// 2.4: the finished tasks of a Daily task habit (newest first), shown under its stats in Records.
 function taskLogHtml(h) {
   if (!h.task) return '';
   const ks = Object.keys(h.tlog || {}).sort().reverse();
@@ -1813,6 +1842,49 @@ function viewRecords() {
   html += '<div class="months">' + months.reverse().map(p => monthPanel(h, p[0], p[1], st, tk)).join('') + '</div>';
   // 3. insights, 4. trends (weekly completion, best weekday, best streaks), 5. mood and journal behind a button
   html += insightsSection() + trendsSection() + moodDataButton();
+  return html;
+}
+
+/* ---- NEW 2.5.0: the Friends tab. Only a player name, level and rank are ever shared. ---- */
+function fcardOf(code) { return fCards[code] && typeof fCards[code] === 'object' ? fCards[code] : null; }
+function friendRow(r) {
+  const known = r.name != null;
+  const rk = known ? esc(r.rank) : '–';
+  const nm = known ? esc(r.name) + (r.me ? ' (you)' : '') : 'Code ' + esc(r.code);
+  const sm = known ? 'Rank ' + esc(r.rank) : 'Not loaded yet';
+  return `<div class="frow${r.me ? ' me' : ''}"><span class="f-rk">${rk}</span><span class="f-nm"><b>${nm}</b><small>${sm}</small></span><span class="f-lv">${known ? r.level : '–'}<small>LEVEL</small></span>${r.me ? '' : `<button class="f-x" data-action="fdel" data-code="${esc(r.code)}" aria-label="Remove ${known ? esc(r.name) : 'this friend'}">${CROSS}</button>`}</div>`;
+}
+function friendStatus() {
+  if (fState.busy) return '<p class="fstat">Updating…</p>';
+  if (fState.err) return '<p class="fstat bad">' + esc(fState.err) + '</p>';
+  if (fState.last) return '<p class="fstat">Updated ' + esc(new Date(fState.last).toLocaleTimeString(undefined, {hour:'numeric', minute:'2-digit'})) + '.</p>';
+  return '';
+}
+function viewFriends() {
+  let html = '<h2 class="sec" style="margin-top:6px">Friends</h2>';
+  if (!FB_READY) {
+    return html + '<section class="panel"><p class="note" style="margin:0">Friends is not switched on yet. It needs a free online Firebase project (a one-time setup). Everything else in Habsys works as usual.</p></section>';
+  }
+  ensureCode();
+  const L = levelOf(S.player.xp);
+  const rows = [{me: true, code: S.friends.code, name: S.player.name, level: L, rank: rankOf(L)}]
+    .concat(S.friends.list.map(c => { const k = fcardOf(c); return k ? {me: false, code: c, name: k.name, level: k.level, rank: k.rank} : {me: false, code: c, name: null}; }));
+  rows.sort((a, b) => (b.name != null ? b.level : -1) - (a.name != null ? a.level : -1) || String(a.name).localeCompare(String(b.name)));
+  html += `<section class="panel">
+    <span class="panel-t">Your friend code</span>
+    <span class="fcode" id="fcodeShow">${esc(S.friends.code)}</span>
+    <div class="fbtns"><button class="btn ghost" data-action="fcopy">Copy code</button><button class="btn ghost" data-action="fsync">Refresh</button></div>
+    ${friendStatus()}
+    <p class="note" style="margin:12px 0 0">Send this code to a friend. Only your player name, level and rank are shared. Your habits, streaks, journal and mood never leave this device.</p>
+  </section>
+  <h2 class="sec">Add a friend</h2>
+  <section class="panel">
+    <label class="field"><span>Friend's code</span><input class="input" id="fcode" maxlength="12" autocomplete="off" autocapitalize="characters" autocorrect="off" spellcheck="false" placeholder="8 letters and numbers" style="text-transform:uppercase"></label>
+    <button class="btn block" data-action="fadd">Add friend</button>
+  </section>
+  <h2 class="sec">Leaderboard</h2>
+  <div class="flist">${rows.map(friendRow).join('')}</div>`;
+  if (!S.friends.list.length) html += '<p class="fstat">No friends yet. Add a code above, or send yours.</p>';
   return html;
 }
 
@@ -2164,6 +2236,7 @@ function openClaim(id) {
   confetti(34);
 }
 // Claim: the XP rolls up, the bar fills, and on a level up the bar overflows, the level number rolls and the confetti cannons fire.
+// 2.5: after a claim the new level is shared with friends (a quiet background update).
 function doClaim(id) {
   const h = findHabit(id); if (!h) return;
   const t = TIERS[h.claimed];
@@ -2178,6 +2251,7 @@ function doClaim(id) {
   snapshot('claim');
   const newXp = S.player.xp, newL = levelOf(newXp);
   render();
+  syncFriends(true);
   const more = claimableCount(h) > 0;
   const leveled = newL > oldL, rankUp = rankOf(newL) !== rankOf(oldL);
   const pctOf = (xp, L) => Math.round(Math.max(0, xp - lvlStart(L)) / (lvlStart(L + 1) - lvlStart(L)) * 100);
@@ -2355,7 +2429,7 @@ function openJournalEdit(k) {
 
 /* ============ backup / restore ============ */
 // A backup file carries a fingerprint of its data. On restore the fingerprint is checked, so a damaged or
-// half-copied file is rejected instead of overwriting good data.
+// half-copied file is rejected instead of overwriting good data. (2.5: the friend code and friend list are inside the backup too.)
 const backupSumOk = j => !!j && typeof j.checksum === 'string' && sum53(JSON.stringify(j.data)) === j.checksum;
 async function doBackup() {
   if (ui.rescue) return;
@@ -2452,6 +2526,154 @@ function saveJournalEdit(k) {
   save(); render();
   toast(v ? 'Journal line saved.' : 'Journal line removed.');
   if (ui.jback) { ui.jback = false; openMoodData(); } else closeModal();
+}
+
+/* ============ friends (2.5.0) ============ */
+// How it works: Habsys signs in to your free Firebase project anonymously (no email, no password: a hidden random ID).
+// It uploads ONE small card (player name, level, rank) under your friend code, and reads the cards of the codes in your list.
+// Nothing else is ever sent. The Firebase rules (set up once in the Firebase console) let anyone signed in read a card
+// and only its owner change it. All of this uses plain web requests: no library is loaded.
+let fCards = {};
+try {
+  const x = JSON.parse(localStorage.getItem(FB_CACHE) || '{}');
+  if (x && typeof x === 'object') for (const c of Object.keys(x)) {
+    const k = x[c];
+    if (CODE_RE.test(c) && k && typeof k.name === 'string' && Number(k.level) >= 1 && /^[EDCBAS]$/.test(String(k.rank))) fCards[c] = {name: k.name.slice(0, 24), level: Math.floor(Number(k.level)), rank: String(k.rank), upd: Number(k.upd) || 0};
+  }
+} catch (e) {}
+const fState = {busy: false, last: 0, err: '', adding: false, lastPush: '', lastPushAt: 0};
+function saveFCache() { try { localStorage.setItem(FB_CACHE, JSON.stringify(fCards)); } catch (e) {} }
+function newCode() {
+  const a = new Uint8Array(8);
+  if (window.crypto && crypto.getRandomValues) crypto.getRandomValues(a); else for (let i = 0; i < 8; i++) a[i] = Math.floor(Math.random() * 256);
+  let s = ''; for (let i = 0; i < 8; i++) s += CODE_CHARS[a[i] % CODE_CHARS.length];
+  return s;
+}
+function ensureCode() {
+  if (S.friends.code && CODE_RE.test(S.friends.code)) return;
+  S.friends.code = newCode();
+  S.friends.list = S.friends.list.filter(c => c !== S.friends.code);
+  if (!writesLocked && !ui.rescue) save({noCount: true});
+}
+const httpErr = st => { const e = new Error('http' + st); e.status = st; return e; };
+async function fbFetch(url, opts) {
+  const ctl = new AbortController(), t = setTimeout(() => ctl.abort(), 12000);
+  try { return await fetch(url, Object.assign({}, opts, {signal: ctl.signal})); } finally { clearTimeout(t); }
+}
+let fAuth = null;
+try { const a = JSON.parse(localStorage.getItem(FB_LS) || 'null'); if (a && typeof a === 'object' && a.refresh && a.uid) fAuth = a; } catch (e) {}
+const authSave = () => { try { localStorage.setItem(FB_LS, JSON.stringify(fAuth)); } catch (e) {} };
+// Returns a valid sign-in token. A network failure is passed on as it is (the old sign-in is kept, so your card keeps its owner).
+async function fbToken() {
+  if (fAuth && fAuth.id && fAuth.exp > Date.now() + 60000) return fAuth.id;
+  if (fAuth && fAuth.refresh) {
+    const r = await fbFetch('https://securetoken.googleapis.com/v1/token?key=' + encodeURIComponent(FB_API_KEY), {method: 'POST', headers: {'Content-Type': 'application/x-www-form-urlencoded'}, body: 'grant_type=refresh_token&refresh_token=' + encodeURIComponent(fAuth.refresh)});
+    if (r.ok) {
+      const j = await r.json();
+      fAuth = {id: j.id_token, refresh: j.refresh_token, uid: j.user_id, exp: Date.now() + Number(j.expires_in || 3600) * 1000};
+      authSave(); return fAuth.id;
+    }
+    if (r.status >= 500 || r.status === 429) throw httpErr(r.status);
+    // otherwise the old sign-in is no longer valid: make a new one below
+  }
+  const r = await fbFetch('https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=' + encodeURIComponent(FB_API_KEY), {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({returnSecureToken: true})});
+  if (!r.ok) { const e = new Error('auth'); e.auth = true; e.status = r.status; throw e; }
+  const j = await r.json();
+  fAuth = {id: j.idToken, refresh: j.refreshToken, uid: j.localId, exp: Date.now() + Number(j.expiresIn || 3600) * 1000};
+  authSave(); return fAuth.id;
+}
+const fsUrl = code => 'https://firestore.googleapis.com/v1/projects/' + encodeURIComponent(FB_PROJECT) + '/databases/(default)/documents/cards/' + code;
+function parseCard(d) {
+  const f = d && d.fields; if (!f) return null;
+  const name = f.name && f.name.stringValue, level = Number(f.level && f.level.integerValue), rank = f.rank && f.rank.stringValue;
+  if (typeof name !== 'string' || !(level >= 1) || !/^[EDCBAS]$/.test(rank || '')) return null;
+  return {name: name.slice(0, 24), level: Math.floor(level), rank: rank, upd: Number(f.upd && f.upd.integerValue) || 0};
+}
+async function fsGet(code) {
+  const tok = await fbToken();
+  const r = await fbFetch(fsUrl(code), {headers: {Authorization: 'Bearer ' + tok}});
+  if (r.status === 404) return null;
+  if (!r.ok) throw httpErr(r.status);
+  return parseCard(await r.json());
+}
+// Uploads your own card. Skipped when nothing changed in the last 10 minutes.
+async function fsPush() {
+  const L = levelOf(S.player.xp), name = S.player.name, rank = rankOf(L), sig = S.friends.code + '|' + name + '|' + L;
+  if (sig === fState.lastPush && Date.now() - fState.lastPushAt < 600000) return;
+  const tok = await fbToken();
+  const body = JSON.stringify({fields: {owner: {stringValue: fAuth.uid}, name: {stringValue: name}, level: {integerValue: String(L)}, rank: {stringValue: rank}, upd: {integerValue: String(Date.now())}}});
+  const r = await fbFetch(fsUrl(S.friends.code), {method: 'PATCH', headers: {Authorization: 'Bearer ' + tok, 'Content-Type': 'application/json'}, body: body});
+  if (r.status === 403) {
+    // This code already belongs to another sign-in (a restored backup, a new device or a very rare clash): take a fresh code.
+    S.friends.code = newCode(); save({noCount: true}); fState.lastPush = '';
+    const e = new Error('retry'); e.retry = true; throw e;
+  }
+  if (!r.ok) throw httpErr(r.status);
+  fState.lastPush = sig; fState.lastPushAt = Date.now();
+}
+function errText(e) {
+  if (e && e.auth) return 'Sign-in failed. Check that Anonymous sign-in is turned on in Firebase.';
+  if (e && (e.status === 401 || e.status === 403)) return 'Firebase refused the request. Check that the rules were published.';
+  if (e && e.status) return 'The server had a problem (' + e.status + '). Try Refresh in a minute.';
+  return 'Could not reach the server. Showing the last saved cards.';
+}
+// Redraws the Friends tab after a background update, but never while you are typing a code or a pop-up is open.
+function refreshFriendsView() {
+  if (ui.tab !== 'friends' || ui.rescue || $('#overlay').classList.contains('show')) return;
+  const f = document.getElementById('fcode');
+  if (f && (document.activeElement === f || f.value)) return;
+  renderView();
+}
+// force = skip the 20-second pause between updates.
+async function syncFriends(force) {
+  if (!FB_READY || ui.rescue || writesLocked || fState.busy) return;
+  if (!force && fState.last && Date.now() - fState.last < 20000) return;
+  fState.busy = true; fState.err = '';
+  refreshFriendsView();
+  try {
+    ensureCode();
+    for (let i = 0; i < 2; i++) {
+      try { await fsPush(); break; } catch (e) { if (e && e.retry && i === 0) continue; throw e; }
+    }
+    for (const c of S.friends.list.slice()) {
+      try { const card = await fsGet(c); if (card) fCards[c] = card; }
+      catch (e) { if (!e || !e.status || e.status >= 500) throw e; }   // a single refused card is skipped; network or server trouble stops the update
+    }
+    fState.last = Date.now();
+    saveFCache();
+  } catch (e) {
+    fState.err = errText(e);
+  } finally {
+    fState.busy = false;
+    refreshFriendsView();
+  }
+}
+async function addFriend() {
+  const el = $('#fcode'); if (!el || fState.adding) return;
+  const code = (el.value || '').toUpperCase().replace(/[^A-Z2-9]/g, '');
+  if (!CODE_RE.test(code)) { toast('A friend code has 8 letters and numbers.'); return; }
+  if (code === S.friends.code) { toast('That is your own code.'); return; }
+  if (S.friends.list.indexOf(code) >= 0) { toast('That friend is already in your list.'); return; }
+  if (S.friends.list.length >= MAX_FRIENDS) { toast('Your friend list is full (' + MAX_FRIENDS + ').'); return; }
+  fState.adding = true; toast('Looking for that player…');
+  try {
+    const card = await fsGet(code);
+    if (!card) { toast('No player found with that code.'); return; }
+    S.friends.list.push(code); fCards[code] = card; saveFCache(); save();
+    if (ui.tab === 'friends') renderView();
+    toast(card.name + ' was added.');
+  } catch (e) { toast(errText(e)); }
+  finally { fState.adding = false; }
+}
+async function copyCode() {
+  const c = S.friends.code;
+  try { await navigator.clipboard.writeText(c); toast('Code copied.'); return; } catch (e) {}
+  try {
+    const el = document.getElementById('fcodeShow'), r = document.createRange();
+    r.selectNodeContents(el); const s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
+    if (document.execCommand('copy')) { toast('Code copied.'); return; }
+  } catch (e) {}
+  toast('Touch and hold the code to copy it.');
 }
 
 /* ============ actions ============ */
@@ -2644,6 +2866,19 @@ const actions = {
   saveReward: el => { const v = ($('#rtext').value || '').trim().slice(0, 160); const n = Number(el.dataset.tier); if (v) S.rewardText[n] = v; else delete S.rewardText[n]; save(); closeModal(); render(); },
   resetReward: el => { delete S.rewardText[Number(el.dataset.tier)]; save(); closeModal(); render(); },
   enjoy: el => { const r = S.rewards.find(x => x.id === el.dataset.id); if (r) { r.enjoyed = !r.enjoyed; save(); render(); } },
+  // NEW 2.5.0: Friends
+  fcopy: copyCode,
+  fadd: addFriend,
+  fsync: () => { fState.lastPush = ''; syncFriends(true); },
+  fdel: el => {
+    const c = el.dataset.code, k = fcardOf(c);
+    confirmBox('Remove friend?', `<b>${esc(k ? k.name : 'This friend')}</b> will be taken off your list. You can add the code again any time.`, 'dofdel', 'Remove', `data-code="${esc(c)}"`);
+  },
+  dofdel: el => {
+    const c = el.dataset.code;
+    S.friends.list = S.friends.list.filter(x => x !== c); delete fCards[c]; saveFCache();
+    save(); closeModal(); render(); toast('Friend removed.');
+  },
   backup: doBackup,
   restore: () => { const f = $('#restoreFile'); f.value = ''; f.click(); },
   dorestore: () => {
@@ -2655,12 +2890,13 @@ const actions = {
     save({noCount:true});
     snapshot('daily');
     closeModal(); render(); toast('Backup restored.'); askPersist();
+    syncFriends(true);
   },
   retry: () => { boot(); },
   askfresh: () => confirmBox('Start fresh?', 'The damaged copy on this device will be replaced by an empty start. If you have a backup file, use Restore instead.', 'startfresh', 'Start fresh'),
   startfresh: startFresh,
-  erase: () => confirmBox('Erase everything?', 'All habits, XP, rewards, check-ins and journal lines on this device will be deleted, including the app\'s automatic safety copies. <b>Save a backup first</b> if you may want them back.', 'doerase', 'Erase all'),
-  doerase: () => { S = defaultState(); clearSnaps(); save({noCount:true}); closeModal(); ui.tab = 'habits'; render(); toast('All data erased.'); }
+  erase: () => confirmBox('Erase everything?', 'All habits, XP, rewards, check-ins, journal lines and friends on this device will be deleted, including the app\'s automatic safety copies. <b>Save a backup first</b> if you may want them back.', 'doerase', 'Erase all'),
+  doerase: () => { S = defaultState(); fCards = {}; saveFCache(); fState.lastPush = ''; clearSnaps(); save({noCount:true}); closeModal(); ui.tab = 'habits'; render(); toast('All data erased.'); }
 };
 
 document.addEventListener('click', e => {
@@ -2673,7 +2909,7 @@ document.addEventListener('click', e => {
   if (fn) fn(el);
 });
 document.addEventListener('change', e => {
-  if (e.target.id === 'pname') { S.player.name = (e.target.value || '').trim().slice(0, 24) || 'Player'; save(); toast('Name saved.'); }
+  if (e.target.id === 'pname') { S.player.name = (e.target.value || '').trim().slice(0, 24) || 'Player'; save(); toast('Name saved.'); syncFriends(true); }
   if (e.target.id === 'restoreFile') handleRestoreFile(e.target.files && e.target.files[0]);
   if (e.target.id === 'jtoday') commitInput();
 });
@@ -2688,6 +2924,7 @@ document.addEventListener('keydown', e => {
   if (e.key === 'Enter' && e.target.id === 'hname') { const b = document.querySelector('[data-action="savehabit"]'); if (b) b.click(); }
   if (e.key === 'Enter' && (e.target.id === 'jtoday' || e.target.id === 'jsearch')) e.target.blur();
   if (e.key === 'Enter' && e.target.id === 'jedit') { const b = document.querySelector('[data-action="savejedit"]'); if (b) b.click(); }
+  if (e.key === 'Enter' && e.target.id === 'fcode') { e.preventDefault(); addFriend(); }
 });
 
 /* new day / back to app => refresh */
@@ -2704,8 +2941,10 @@ document.addEventListener('visibilitychange', () => {
   if (document.hidden) { flush(); return; }
   adoptNewer(); refreshIfNewDay();
   if (!$('#overlay').classList.contains('show')) render();   // do not redraw underneath an open popup
+  syncFriends();
 });
 window.addEventListener('pagehide', flush);
+window.addEventListener('online', () => syncFriends(true));
 setInterval(refreshIfNewDay, 60000);
 
 /* ============ start ============ */
@@ -2720,6 +2959,7 @@ async function boot() {
     askPersist();
     render(); playIn(0);
     if (r.status === 'recovered') toast('Your progress was restored from a safety copy.');
+    syncFriends();   // 2.5: share your card and fetch your friends' cards in the background
   } else {
     writesLocked = true; ui.rescue = r.status;   // 'fresh' | 'damaged' | 'unreadable': nothing is written until the person decides
     render(); playIn(0);

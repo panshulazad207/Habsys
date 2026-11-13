@@ -1,5 +1,5 @@
 // Habsys offline worker. Bump CACHE when releasing a new version.
-const CACHE = 'habsys-v2.4.0';
+const CACHE = 'habsys-v2.5.0';
 const SHELL = ['./', 'index.html', 'manifest.webmanifest', 'icon-180.png', 'icon-192.png', 'icon-512.png'];
 const NET_WAIT = 4000;   // 2.2.0: on a weak connection, give the network 4 seconds, then open the saved copy instead of hanging
 
@@ -15,6 +15,7 @@ self.addEventListener('activate', e => {
   );
 });
 // Network first (so updates arrive), cache as the offline fallback.
+// 2.5.0: requests to other websites (the Friends cards on Firebase) are never touched by this worker: they go straight to the network.
 self.addEventListener('fetch', e => {
   const r = e.request;
   if (r.method !== 'GET' || new URL(r.url).origin !== location.origin) return;
