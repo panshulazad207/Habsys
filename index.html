@@ -13,7 +13,7 @@
 <link rel="apple-touch-icon" href="icon-180.png?v=199">
 <link rel="icon" type="image/png" href="icon-192.png?v=199">
 <style>
-/* ===== Habsys 2.5.0: new Friends tab (your friend code, add a friend by code, a small leaderboard of player name, level and rank). Everything else as in 2.4.0 ===== */
+/* ===== Habsys 2.6.0: level-up spotlight at the top of the Friends tab, and a partner goal (pick one friend, see your progress toward their level on the Habits tab). Everything else as in 2.5.0 ===== */
 :root{
   color-scheme:dark;
   --bg0:#0a0b10;
@@ -409,6 +409,32 @@ textarea.input.sm{min-height:76px}
 .fstat{margin:14px 4px 0;font-size:13px;line-height:1.45;color:var(--muted)}
 .fstat.bad{color:var(--warn)}
 
+/* NEW 2.6.0: level-up spotlight (top of the Friends tab), the partner star on a friend row, and the partner goal card on the Habits tab. */
+.spot{margin-bottom:18px;padding:8px 12px 6px;border-radius:24px;border-color:rgba(255,207,110,.32);background:linear-gradient(135deg,rgba(255,207,110,.13),rgba(255,159,74,.05)),var(--surface)}
+.spot-h{display:block;margin:8px 4px 2px;font-family:var(--body);font-weight:700;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold)}
+.spot-row{display:flex;align-items:center;gap:14px;min-height:62px;padding:8px 0}
+.spot-row + .spot-row{border-top:1px solid var(--hair)}
+.spot-ic{flex:none;width:40px;height:46px;display:grid;place-items:center;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);background:linear-gradient(160deg,#ffe9a8,#ffb04f 55%,#ff9f4a);color:#3a2300}
+.spot-ic svg{width:20px;height:20px}
+.spot-t{flex:1;min-width:0;display:grid}
+.spot-t b{font-family:var(--head);font-weight:800;font-size:17px;letter-spacing:-.01em;overflow-wrap:anywhere}
+.spot-t small{font-size:12.5px;font-weight:600;color:var(--gold)}
+.spot-more{margin:2px 4px 8px;font-size:12.5px;color:var(--muted)}
+.f-p{flex:none;width:40px;height:40px;display:grid;place-items:center;border-radius:50%;color:var(--muted);background:rgba(255,255,255,.06);transition:transform .2s var(--spring),background .2s,color .2s}
+.f-p svg{width:19px;height:19px}
+.f-p:active{transform:scale(.9)}
+.f-p.on{color:#3a2300;background:linear-gradient(180deg,#ffdd85,#ffa94d)}
+.f-p.on svg{fill:currentColor}
+.frow.pt{border-color:rgba(255,207,110,.32)}
+.partner{display:block;width:100%;margin-bottom:18px;padding:16px 18px 18px;border-radius:24px;text-align:left;border-color:rgba(255,207,110,.28);background:linear-gradient(135deg,rgba(255,207,110,.1),rgba(255,159,74,.04)),var(--surface);transition:transform .22s var(--spring)}
+.partner:active{transform:scale(.985)}
+.partner .tag{display:block;margin-bottom:3px;font-weight:700;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold)}
+.pt-h{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:11px}
+.pt-h b{min-width:0;font-family:var(--head);font-weight:800;font-size:19px;letter-spacing:-.01em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pt-h span{flex:none;font-family:var(--head);font-weight:800;font-size:14px;color:var(--gold);font-variant-numeric:tabular-nums}
+.pt-s{display:block;margin:10px 0 0;font-size:13.5px;line-height:1.4;color:var(--muted)}
+.pt-s b{color:var(--white);font-weight:700}
+
 #toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 108px);transform:translateX(-50%) translateY(18px) scale(.97);z-index:90;opacity:0;pointer-events:none;transition:opacity .3s var(--ease),transform .4s var(--spring);max-width:calc(100% - 32px)}
 #toast.show{opacity:1;transform:translateX(-50%)}
 #toast div{padding:12px 20px;border:1px solid var(--hair2);background:rgba(36,39,53,.92);-webkit-backdrop-filter:blur(20px) saturate(160%);backdrop-filter:blur(20px) saturate(160%);border-radius:999px;font-family:var(--body);font-weight:600;font-size:14px;text-align:center;box-shadow:inset 0 1px 0 rgba(255,255,255,.07),0 16px 36px -10px rgba(0,0,0,.85)}
@@ -569,6 +595,9 @@ textarea.input.sm{min-height:76px}
   .ci-pick{gap:6px}
   .chart{gap:3px}
   .fcode{font-size:28px}
+  .frow{gap:9px;padding-left:10px}
+  .f-x,.f-p{width:36px;height:36px}
+  .f-rk{width:40px;height:46px;font-size:18px}
 }
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
@@ -615,13 +644,14 @@ textarea.input.sm{min-height:76px}
 'use strict';
 
 /* ============ constants ============ */
-const APP_VERSION = '2.5.0';
-// NEW 2.5.0: Friends. These two values come from your free Firebase project (they are an address, not a password).
+const APP_VERSION = '2.6.0';
+// 2.5.0: Friends. These two values come from your free Firebase project (they are an address, not a password).
 // While they still say PASTE..., the Friends tab explains that it is not switched on yet and the rest of the app works as before.
 const FB_API_KEY = 'AIzaSyCCW0tJgzxmgOoOf304Q6elV-D18ZyH0AM', FB_PROJECT = 'habsys-9977a';
 const FB_READY = !/PASTE/.test(FB_API_KEY + FB_PROJECT) && FB_API_KEY.length > 20 && FB_PROJECT.length > 3;
 const FB_LS = 'habsys_fb_auth', FB_CACHE = 'habsys_friend_cards';   // sign-in token and last seen friend cards (never part of backups)
 const MAX_FRIENDS = 20, CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789', CODE_RE = /^[A-Z2-9]{8}$/;
+const RANK_ORDER = 'EDCBAS';   // 2.6.0: lowest to highest, used to tell when a friend's rank went up
 const MAX_HABITS = 10;
 const MAX_NOTE = 200, MAX_MINI = 60, MAX_ID = 60, MAX_REF = 200;   // length limits: note, 2-minute version, identity, reflection answers
 const MAX_JOURNAL = 160;   // one sentence about the day
@@ -671,6 +701,9 @@ const SHIELD_CK = SHIELD.replace('<svg ', '<svg class="ck" ');
 const ARR_UP = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 15l6-6 6 6"/></svg>';
 const ARR_DOWN = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>';
 const CROSS = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>';
+// 2.6.0: a double arrow up (level-up spotlight) and a star (partner)
+const LVUP = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 13l6-6 6 6M6 19l6-6 6 6" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const STAR = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5l2.6 5.4 5.9.8-4.3 4.1 1 5.8-5.2-2.8-5.2 2.8 1-5.8L3.5 9.7l5.9-.8z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/></svg>';
 
 /* ============ helpers ============ */
 const $ = s => document.querySelector(s);
@@ -712,9 +745,11 @@ function sum53(str) {
 // habit.task = true marks a "Daily task" habit (2.4): its note IS today's task; ticking moves it into habit.tlog[dayKey].
 // The order of S.habits IS the order shown on the Habits tab and in the Today card.
 // reflections, cel, allDay, checkins {dayKey:{m,e}}, journal {dayKey:text}, changes, bigMoment as in earlier versions.
-// NEW 2.5: friends = {code: your own 8-letter friend code ('' until the Friends tab is first opened), list: [friend codes]}.
+// 2.5: friends = {code: your own 8-letter friend code ('' until the Friends tab is first opened), list: [friend codes]}.
+// NEW 2.6: friends.partner = the code of the ONE friend you chose as your partner ('' = none).
+//          friends.seen = {code: {l: level, r: rank}} = the level and rank of each friend the last time you looked at the Friends tab (for the level-up spotlight).
 function defaultState() {
-  return { v:2, player:{name:'Player', xp:0}, savers:0, habits:[], rewards:[], rewardText:{}, reflections:[], cel:{}, allDay:'', checkins:{}, journal:{}, friends:{code:'', list:[]}, lastBackup:null, changes:0, bigMoment:false, updatedAt:0 };
+  return { v:2, player:{name:'Player', xp:0}, savers:0, habits:[], rewards:[], rewardText:{}, reflections:[], cel:{}, allDay:'', checkins:{}, journal:{}, friends:{code:'', list:[], partner:'', seen:{}}, lastBackup:null, changes:0, bigMoment:false, updatedAt:0 };
 }
 function validState(s) { return !!s && typeof s === 'object' && Array.isArray(s.habits); }
 function normalize(raw) {
@@ -803,6 +838,13 @@ function normalize(raw) {
   const fr = raw.friends && typeof raw.friends === 'object' ? raw.friends : {};
   s.friends.code = typeof fr.code === 'string' && CODE_RE.test(fr.code) ? fr.code : '';
   s.friends.list = [...new Set((Array.isArray(fr.list) ? fr.list : []).map(String).filter(c => CODE_RE.test(c) && c !== s.friends.code))].slice(0, MAX_FRIENDS);
+  // Partner and last seen levels (new in 2.6). Older data and backups simply have none. The partner must be someone in the friend list.
+  s.friends.partner = typeof fr.partner === 'string' && s.friends.list.indexOf(fr.partner) >= 0 ? fr.partner : '';
+  const sn = fr.seen && typeof fr.seen === 'object' ? fr.seen : {};
+  for (const c of s.friends.list) {
+    const x = sn[c], l = Math.floor(Number(x && x.l));
+    if (x && l >= 1 && /^[EDCBAS]$/.test(String(x.r))) s.friends.seen[c] = {l: Math.min(l, 100000), r: String(x.r)};
+  }
   s.allDay = /^\d{4}-\d{2}-\d{2}$/.test(raw.allDay) ? raw.allDay : '';
   s.lastBackup = typeof raw.lastBackup === 'string' ? raw.lastBackup : null;
   s.changes = Math.max(0, Math.floor(Number(raw.changes) || 0));
@@ -1355,6 +1397,7 @@ function switchTab(name) {
   if (TABS.indexOf(name) < 0 || ui.rescue) return;
   if (name === ui.tab) { window.scrollTo(0, 0); return; }
   commitInput();   // a journal line that is still being typed is saved before the screen changes
+  if (ui.tab === 'friends') ackFriends();   // 2.6: leaving the Friends tab counts as having seen the level-ups
   const dir = TABS.indexOf(name) > TABS.indexOf(ui.tab) ? 1 : -1;
   ui.tab = name;
   renderNav();
@@ -1460,6 +1503,34 @@ function checkinButton() {
   </button>`;
 }
 
+// NEW 2.6.0: the partner goal. A slim card under the player card: how far your XP is toward the level your partner has reached.
+// Only the partner's level is known (that is all a friend card holds), so the bar is your XP against the XP needed to reach that level.
+// Tapping the card opens the Friends tab, where the partner can be changed.
+function partnerCard() {
+  const c = S.friends.partner;
+  if (!c || S.friends.list.indexOf(c) < 0) return '';
+  const k = fcardOf(c), xp = S.player.xp, myL = levelOf(xp);
+  let name, right = '', pct = 0, note;
+  if (!k) {
+    name = 'Your partner';
+    note = 'Their level is not loaded yet. Open the Friends tab and tap Refresh.';
+  } else {
+    const target = xpFor(k.level), done = xp >= target, nm = esc(k.name);
+    name = nm;
+    right = 'LV ' + myL + ' / ' + k.level;
+    pct = done ? 100 : Math.min(99, Math.max(0, Math.floor(xp / target * 100)));
+    note = !done ? '<b>' + (target - xp).toLocaleString() + ' XP</b> to reach ' + nm + '\'s level.'
+      : myL > k.level ? 'You are <b>' + (myL - k.level) + ' level' + (myL - k.level === 1 ? '' : 's') + ' ahead</b> of ' + nm + '. Keep going!'
+      : 'You are on the same level as ' + nm + '.';
+  }
+  return `<button class="panel partner" id="partnerCard" data-action="tab" data-tab="friends" aria-label="Partner goal. Tap to open the Friends tab">
+    <span class="tag">Partner goal</span>
+    <span class="pt-h"><b>${name}</b>${right ? '<span>' + right + '</span>' : ''}</span>
+    <div class="bar" style="--ac:#ffcf6e"><i data-k="pg" style="width:${pct}%"></i></div>
+    <span class="pt-s">${note}</span>
+  </button>`;
+}
+
 function viewHabits() {
   const L = levelOf(S.player.xp), a = lvlStart(L), b = lvlStart(L + 1);
   const pct = Math.round((S.player.xp - a) / (b - a) * 100);
@@ -1477,6 +1548,7 @@ function viewHabits() {
     </div>
     <div class="p-lv"><small>LV</small><b>${L}</b></div>
   </section>`;
+  html += partnerCard();
   html += todayPanel();
   html += checkinButton();
   const rw = reflectDueWeek();
@@ -1845,14 +1917,34 @@ function viewRecords() {
   return html;
 }
 
-/* ---- NEW 2.5.0: the Friends tab. Only a player name, level and rank are ever shared. ---- */
+/* ---- the Friends tab. Only a player name, level and rank are ever shared. ---- */
+// 2.6.0: a spotlight at the top for friends who levelled up since you last looked, and a star to pick one friend as your partner.
 function fcardOf(code) { return fCards[code] && typeof fCards[code] === 'object' ? fCards[code] : null; }
+// Friends whose level (or rank) is higher than the last time you looked. "Last time you looked" = S.friends.seen.
+function friendLevelUps() {
+  const out = [];
+  S.friends.list.forEach(c => {
+    const k = fcardOf(c), s = S.friends.seen[c];
+    if (!k || !s) return;
+    const rankUp = RANK_ORDER.indexOf(k.rank) > RANK_ORDER.indexOf(s.r);
+    if (k.level > s.l || rankUp) out.push({code: c, name: k.name, level: k.level, rank: k.rank, rankUp: rankUp});
+  });
+  return out.sort((a, b) => b.level - a.level || a.name.localeCompare(b.name));
+}
+function spotlightHtml() {
+  const ups = friendLevelUps();
+  if (!ups.length) return '';
+  const rows = ups.slice(0, 5).map(u => `<div class="spot-row"><span class="spot-ic">${LVUP}</span><span class="spot-t"><b>${esc(u.name)} reached level ${u.level}</b>${u.rankUp ? '<small>New rank: ' + esc(u.rank) + '</small>' : ''}</span><button class="f-x" data-action="fack" data-code="${esc(u.code)}" aria-label="Dismiss ${esc(u.name)}'s level-up">${CROSS}</button></div>`).join('');
+  return `<section class="panel spot" aria-live="polite"><span class="spot-h">Level-up spotlight</span>${rows}${ups.length > 5 ? `<p class="spot-more">and ${ups.length - 5} more</p>` : ''}</section>`;
+}
 function friendRow(r) {
   const known = r.name != null;
   const rk = known ? esc(r.rank) : '–';
   const nm = known ? esc(r.name) + (r.me ? ' (you)' : '') : 'Code ' + esc(r.code);
-  const sm = known ? 'Rank ' + esc(r.rank) : 'Not loaded yet';
-  return `<div class="frow${r.me ? ' me' : ''}"><span class="f-rk">${rk}</span><span class="f-nm"><b>${nm}</b><small>${sm}</small></span><span class="f-lv">${known ? r.level : '–'}<small>LEVEL</small></span>${r.me ? '' : `<button class="f-x" data-action="fdel" data-code="${esc(r.code)}" aria-label="Remove ${known ? esc(r.name) : 'this friend'}">${CROSS}</button>`}</div>`;
+  const sm = (known ? 'Rank ' + esc(r.rank) : 'Not loaded yet') + (r.partner ? ' · Your partner' : '');
+  const star = r.me ? '' : `<button class="f-p${r.partner ? ' on' : ''}" data-action="fpartner" data-code="${esc(r.code)}" aria-pressed="${!!r.partner}" aria-label="${r.partner ? 'Stop using ' + (known ? esc(r.name) : 'this friend') + ' as your partner' : 'Make ' + (known ? esc(r.name) : 'this friend') + ' your partner'}">${STAR}</button>`;
+  const del = r.me ? '' : `<button class="f-x" data-action="fdel" data-code="${esc(r.code)}" aria-label="Remove ${known ? esc(r.name) : 'this friend'}">${CROSS}</button>`;
+  return `<div class="frow${r.me ? ' me' : ''}${r.partner ? ' pt' : ''}"><span class="f-rk">${rk}</span><span class="f-nm"><b>${nm}</b><small>${sm}</small></span><span class="f-lv">${known ? r.level : '–'}<small>LEVEL</small></span>${star}${del}</div>`;
 }
 function friendStatus() {
   if (fState.busy) return '<p class="fstat">Updating…</p>';
@@ -1868,8 +1960,9 @@ function viewFriends() {
   ensureCode();
   const L = levelOf(S.player.xp);
   const rows = [{me: true, code: S.friends.code, name: S.player.name, level: L, rank: rankOf(L)}]
-    .concat(S.friends.list.map(c => { const k = fcardOf(c); return k ? {me: false, code: c, name: k.name, level: k.level, rank: k.rank} : {me: false, code: c, name: null}; }));
+    .concat(S.friends.list.map(c => { const k = fcardOf(c), p = S.friends.partner === c; return k ? {me: false, code: c, name: k.name, level: k.level, rank: k.rank, partner: p} : {me: false, code: c, name: null, partner: p}; }));
   rows.sort((a, b) => (b.name != null ? b.level : -1) - (a.name != null ? a.level : -1) || String(a.name).localeCompare(String(b.name)));
+  html += spotlightHtml();
   html += `<section class="panel">
     <span class="panel-t">Your friend code</span>
     <span class="fcode" id="fcodeShow">${esc(S.friends.code)}</span>
@@ -1885,6 +1978,7 @@ function viewFriends() {
   <h2 class="sec">Leaderboard</h2>
   <div class="flist">${rows.map(friendRow).join('')}</div>`;
   if (!S.friends.list.length) html += '<p class="fstat">No friends yet. Add a code above, or send yours.</p>';
+  else html += '<p class="fstat">Tap the star to pick one friend as your partner. Your progress toward their level shows on the Habits tab.</p>';
   return html;
 }
 
@@ -2429,7 +2523,7 @@ function openJournalEdit(k) {
 
 /* ============ backup / restore ============ */
 // A backup file carries a fingerprint of its data. On restore the fingerprint is checked, so a damaged or
-// half-copied file is rejected instead of overwriting good data. (2.5: the friend code and friend list are inside the backup too.)
+// half-copied file is rejected instead of overwriting good data. (2.5: the friend code and friend list are inside the backup too. 2.6: so are the partner and the last seen levels.)
 const backupSumOk = j => !!j && typeof j.checksum === 'string' && sum53(JSON.stringify(j.data)) === j.checksum;
 async function doBackup() {
   if (ui.rescue) return;
@@ -2533,6 +2627,7 @@ function saveJournalEdit(k) {
 // It uploads ONE small card (player name, level, rank) under your friend code, and reads the cards of the codes in your list.
 // Nothing else is ever sent. The Firebase rules (set up once in the Firebase console) let anyone signed in read a card
 // and only its owner change it. All of this uses plain web requests: no library is loaded.
+// 2.6.0 adds nothing to what is sent: the level-up spotlight and the partner goal only compare the cards that were already read.
 let fCards = {};
 try {
   const x = JSON.parse(localStorage.getItem(FB_CACHE) || '{}');
@@ -2555,6 +2650,44 @@ function ensureCode() {
   S.friends.list = S.friends.list.filter(c => c !== S.friends.code);
   if (!writesLocked && !ui.rescue) save({noCount: true});
 }
+
+// NEW 2.6.0: "since you last looked". S.friends.seen holds the level and rank of every friend as you last saw them.
+// reconcileSeen: a friend you have no record of yet (just added, or you came from an older version) is recorded quietly, so no
+// spotlight appears for them; a friend who went DOWN (for example after erasing their data) is recorded quietly too; a friend who
+// is no longer in your list is forgotten.
+function reconcileSeen() {
+  const keep = {};
+  let ch = false;
+  S.friends.list.forEach(c => {
+    const k = fcardOf(c), s = S.friends.seen[c];
+    if (s) keep[c] = s;
+    if (k && (!s || k.level < s.l)) { keep[c] = {l: k.level, r: k.rank}; ch = true; }
+  });
+  if (Object.keys(keep).length !== Object.keys(S.friends.seen).length) ch = true;
+  S.friends.seen = keep;
+  if (ch && !writesLocked && !ui.rescue) save({noCount: true});
+}
+// ackFriends: you have looked. Everyone's level and rank (or only one friend, when a code is given) becomes the new "last seen".
+// Called when you leave the Friends tab or the app, and by the small X on a spotlight line.
+function ackFriends(code) {
+  if (ui.rescue || writesLocked) return false;
+  let ch = false;
+  (code ? [code] : S.friends.list).forEach(c => {
+    const k = fcardOf(c), s = S.friends.seen[c];
+    if (!k || S.friends.list.indexOf(c) < 0) return;
+    if (!s || s.l !== k.level || s.r !== k.rank) { S.friends.seen[c] = {l: k.level, r: k.rank}; ch = true; }
+  });
+  if (ch) save({noCount: true});
+  return ch;
+}
+// Redraws the Friends tab after you tapped something on it, keeping a friend code you were in the middle of typing.
+function redrawFriends() {
+  const f = document.getElementById('fcode'), v = f ? f.value : '';
+  render();
+  const g = document.getElementById('fcode');
+  if (g && v) g.value = v;
+}
+
 const httpErr = st => { const e = new Error('http' + st); e.status = st; return e; };
 async function fbFetch(url, opts) {
   const ctl = new AbortController(), t = setTimeout(() => ctl.abort(), 12000);
@@ -2624,6 +2757,12 @@ function refreshFriendsView() {
   if (f && (document.activeElement === f || f.value)) return;
   renderView();
 }
+// 2.6.0: when new cards arrive while you are on the Habits tab, only the partner card is swapped (no full redraw, so a tick effect is never cut short).
+function refreshPartnerCard() {
+  if (ui.tab !== 'habits' || ui.rescue) return;
+  const old = document.getElementById('partnerCard'), html = partnerCard();
+  if (old && html) old.outerHTML = html;
+}
 // force = skip the 20-second pause between updates.
 async function syncFriends(force) {
   if (!FB_READY || ui.rescue || writesLocked || fState.busy) return;
@@ -2640,12 +2779,14 @@ async function syncFriends(force) {
       catch (e) { if (!e || !e.status || e.status >= 500) throw e; }   // a single refused card is skipped; network or server trouble stops the update
     }
     fState.last = Date.now();
+    reconcileSeen();
     saveFCache();
   } catch (e) {
     fState.err = errText(e);
   } finally {
     fState.busy = false;
     refreshFriendsView();
+    refreshPartnerCard();
   }
 }
 async function addFriend() {
@@ -2659,7 +2800,9 @@ async function addFriend() {
   try {
     const card = await fsGet(code);
     if (!card) { toast('No player found with that code.'); return; }
-    S.friends.list.push(code); fCards[code] = card; saveFCache(); save();
+    S.friends.list.push(code); fCards[code] = card; saveFCache();
+    S.friends.seen[code] = {l: card.level, r: card.rank};   // 2.6: a new friend starts from where they are now, so no spotlight for them
+    save();
     if (ui.tab === 'friends') renderView();
     toast(card.name + ' was added.');
   } catch (e) { toast(errText(e)); }
@@ -2866,7 +3009,7 @@ const actions = {
   saveReward: el => { const v = ($('#rtext').value || '').trim().slice(0, 160); const n = Number(el.dataset.tier); if (v) S.rewardText[n] = v; else delete S.rewardText[n]; save(); closeModal(); render(); },
   resetReward: el => { delete S.rewardText[Number(el.dataset.tier)]; save(); closeModal(); render(); },
   enjoy: el => { const r = S.rewards.find(x => x.id === el.dataset.id); if (r) { r.enjoyed = !r.enjoyed; save(); render(); } },
-  // NEW 2.5.0: Friends
+  // 2.5.0: Friends
   fcopy: copyCode,
   fadd: addFriend,
   fsync: () => { fState.lastPush = ''; syncFriends(true); },
@@ -2876,9 +3019,20 @@ const actions = {
   },
   dofdel: el => {
     const c = el.dataset.code;
-    S.friends.list = S.friends.list.filter(x => x !== c); delete fCards[c]; saveFCache();
+    S.friends.list = S.friends.list.filter(x => x !== c); delete fCards[c]; delete S.friends.seen[c]; saveFCache();
+    if (S.friends.partner === c) S.friends.partner = '';   // 2.6: a removed friend can no longer be your partner
     save(); closeModal(); render(); toast('Friend removed.');
   },
+  // NEW 2.6.0: the star on a friend row picks (or drops) your partner. Only one partner at a time.
+  fpartner: el => {
+    const c = el.dataset.code;
+    if (S.friends.list.indexOf(c) < 0) return;
+    const k = fcardOf(c), nm = k ? k.name : 'Your friend';
+    if (S.friends.partner === c) { S.friends.partner = ''; save(); redrawFriends(); toast(nm + ' is no longer your partner.'); }
+    else { S.friends.partner = c; save(); redrawFriends(); toast(nm + ' is now your partner. Follow the goal on the Habits tab.'); }
+  },
+  // NEW 2.6.0: the small X on a spotlight line.
+  fack: el => { ackFriends(el.dataset.code); redrawFriends(); },
   backup: doBackup,
   restore: () => { const f = $('#restoreFile'); f.value = ''; f.click(); },
   dorestore: () => {
@@ -2886,6 +3040,7 @@ const actions = {
     S = pendingRestore; pendingRestore = null;
     S.changes = 0; S.bigMoment = false; S.lastBackup = pendingRestoreAt || new Date().toISOString();
     writesLocked = false; ui.rescue = null; ui.tab = 'habits';
+    reconcileSeen();              // 2.6: friends in the backup that have no "last seen" yet start from where they are now
     clearSnaps();                 // safety copies of the old data must not undo this restore
     save({noCount:true});
     snapshot('daily');
@@ -2938,12 +3093,12 @@ function adoptNewer() {
   try { const u = unpack(localStorage.getItem(LS_KEY)); if (u && u.state && u.upd > S.updatedAt) S = u.state; } catch (e) {}
 }
 document.addEventListener('visibilitychange', () => {
-  if (document.hidden) { flush(); return; }
+  if (document.hidden) { if (ui.tab === 'friends') ackFriends(); flush(); return; }   // 2.6: leaving the app on the Friends tab counts as having looked
   adoptNewer(); refreshIfNewDay();
   if (!$('#overlay').classList.contains('show')) render();   // do not redraw underneath an open popup
   syncFriends();
 });
-window.addEventListener('pagehide', flush);
+window.addEventListener('pagehide', () => { if (ui.tab === 'friends') ackFriends(); flush(); });
 window.addEventListener('online', () => syncFriends(true));
 setInterval(refreshIfNewDay, 60000);
 
@@ -2953,6 +3108,7 @@ async function boot() {
   S = r.state;
   if (r.status === 'ok' || r.status === 'recovered') {
     writesLocked = false; ui.rescue = null;
+    reconcileSeen();   // 2.6: friends with no "last seen" yet start from the cards saved on this device
     if (r.status === 'ok' && r.app !== APP_VERSION) snapshot('upgrade');  // copy of the data exactly as the older version left it
     save({noCount:true});   // writes all three copies, which also repairs any damaged one
     snapshot('daily');
