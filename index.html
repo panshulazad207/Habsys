@@ -13,6 +13,7 @@
 <link rel="apple-touch-icon" href="icon-180.png?v=199">
 <link rel="icon" type="image/png" href="icon-192.png?v=199">
 <style>
+/* ===== Habsys 2.6.6: each friend row has ONE three-dot button that opens a menu with Make partner / Stop being partners and Remove friend. ===== */
 /* ===== Habsys 2.6.0: level-up spotlight at the top of the Friends tab, and a partner goal (pick one friend, see your progress toward their level on the Habits tab). Everything else as in 2.5.0 ===== */
 :root{
   color-scheme:dark;
@@ -420,6 +421,7 @@ textarea.input.sm{min-height:76px}
 .spot-t b{font-family:var(--head);font-weight:800;font-size:17px;letter-spacing:-.01em;overflow-wrap:anywhere}
 .spot-t small{font-size:12.5px;font-weight:600;color:var(--gold)}
 .spot-more{margin:2px 4px 8px;font-size:12.5px;color:var(--muted)}
+.f-m svg{width:19px;height:19px;fill:currentColor}
 .f-p{flex:none;width:40px;height:40px;display:grid;place-items:center;border-radius:50%;color:var(--muted);background:rgba(255,255,255,.06);transition:transform .2s var(--spring),background .2s,color .2s}
 .f-p svg{width:19px;height:19px}
 .f-p:active{transform:scale(.9)}
@@ -644,7 +646,7 @@ textarea.input.sm{min-height:76px}
 'use strict';
 
 /* ============ constants ============ */
-const APP_VERSION = '2.6.0';
+const APP_VERSION = '2.6.6';
 // 2.5.0: Friends. These two values come from your free Firebase project (they are an address, not a password).
 // While they still say PASTE..., the Friends tab explains that it is not switched on yet and the rest of the app works as before.
 const FB_API_KEY = 'AIzaSyCCW0tJgzxmgOoOf304Q6elV-D18ZyH0AM', FB_PROJECT = 'habsys-9977a';
@@ -1942,9 +1944,9 @@ function friendRow(r) {
   const rk = known ? esc(r.rank) : '–';
   const nm = known ? esc(r.name) + (r.me ? ' (you)' : '') : 'Code ' + esc(r.code);
   const sm = (known ? 'Rank ' + esc(r.rank) : 'Not loaded yet') + (r.partner ? ' · Your partner' : '');
-  const star = r.me ? '' : `<button class="f-p${r.partner ? ' on' : ''}" data-action="fpartner" data-code="${esc(r.code)}" aria-pressed="${!!r.partner}" aria-label="${r.partner ? 'Stop using ' + (known ? esc(r.name) : 'this friend') + ' as your partner' : 'Make ' + (known ? esc(r.name) : 'this friend') + ' your partner'}">${STAR}</button>`;
-  const del = r.me ? '' : `<button class="f-x" data-action="fdel" data-code="${esc(r.code)}" aria-label="Remove ${known ? esc(r.name) : 'this friend'}">${CROSS}</button>`;
-  return `<div class="frow${r.me ? ' me' : ''}${r.partner ? ' pt' : ''}"><span class="f-rk">${rk}</span><span class="f-nm"><b>${nm}</b><small>${sm}</small></span><span class="f-lv">${known ? r.level : '–'}<small>LEVEL</small></span>${star}${del}</div>`;
+  // 2.6.6: ONE three-dot button after the level. It opens a small menu with Make partner / Stop being partners and Remove friend.
+  const more = r.me ? '' : `<button class="f-x f-m" data-action="fmenu" data-code="${esc(r.code)}" aria-label="Options for ${known ? esc(r.name) : 'this friend'}: partner or remove">${DOTS}</button>`;
+  return `<div class="frow${r.me ? ' me' : ''}${r.partner ? ' pt' : ''}"><span class="f-rk">${rk}</span><span class="f-nm"><b>${nm}</b><small>${sm}</small></span><span class="f-lv">${known ? r.level : '–'}<small>LEVEL</small></span>${more}</div>`;
 }
 function friendStatus() {
   if (fState.busy) return '<p class="fstat">Updating…</p>';
@@ -1978,7 +1980,7 @@ function viewFriends() {
   <h2 class="sec">Leaderboard</h2>
   <div class="flist">${rows.map(friendRow).join('')}</div>`;
   if (!S.friends.list.length) html += '<p class="fstat">No friends yet. Add a code above, or send yours.</p>';
-  else html += '<p class="fstat">Tap the star to pick one friend as your partner. Your progress toward their level shows on the Habits tab.</p>';
+  else html += '<p class="fstat">Tap the three dots on a friend to make them your partner or remove them. Your progress toward their level shows on the Habits tab.</p>';
   return html;
 }
 
@@ -3023,8 +3025,24 @@ const actions = {
     if (S.friends.partner === c) S.friends.partner = '';   // 2.6: a removed friend can no longer be your partner
     save(); closeModal(); render(); toast('Friend removed.');
   },
-  // NEW 2.6.0: the star on a friend row picks (or drops) your partner. Only one partner at a time.
+  // NEW 2.6.6: the three-dot button on a friend row opens a small menu (partner / remove).
+  fmenu: el => {
+    const c = el.dataset.code;
+    if (S.friends.list.indexOf(c) < 0) return;
+    const k = fcardOf(c), nm = k ? esc(k.name) : 'This friend', isP = S.friends.partner === c;
+    showModal(`
+    <div class="wtag"><span class="tag">Habsys</span></div>
+    <h3>Friend options</h3>
+    <p class="sub">${nm}${isP ? ' · Your partner' : ''}</p>
+    <div class="actions">
+      <button class="btn" data-action="fpartner" data-code="${esc(c)}">${isP ? 'Stop being partners' : 'Make partner'}</button>
+      <button class="btn danger" data-action="fdel" data-code="${esc(c)}">Remove friend</button>
+      <button class="btn ghost" data-action="close">Close</button>
+    </div>`, '', true);
+  },
+  // The partner choice: picks (or drops) your partner. Only one partner at a time. (2.6.6: it is chosen from the three-dot menu, which closes first.)
   fpartner: el => {
+    closeModal();
     const c = el.dataset.code;
     if (S.friends.list.indexOf(c) < 0) return;
     const k = fcardOf(c), nm = k ? k.name : 'Your friend';
