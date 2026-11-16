@@ -13,6 +13,7 @@
 <link rel="apple-touch-icon" href="icon-180.png?v=199">
 <link rel="icon" type="image/png" href="icon-192.png?v=199">
 <style>
+/* ===== Habsys 2.7.0: small XP for daily ticks, badges, streak flame, a stronger level-up moment, Evening wrap-up, habit icons. Everything else as in 2.6.6 ===== */
 /* ===== Habsys 2.6.6: each friend row has ONE three-dot button that opens a menu with Make partner / Stop being partners and Remove friend. ===== */
 /* ===== Habsys 2.6.0: level-up spotlight at the top of the Friends tab, and a partner goal (pick one friend, see your progress toward their level on the Habits tab). Everything else as in 2.5.0 ===== */
 :root{
@@ -601,6 +602,79 @@ textarea.input.sm{min-height:76px}
   .f-x,.f-p{width:36px;height:36px}
   .f-rk{width:40px;height:46px;font-size:18px}
 }
+
+/* ===== 2.7.0: habit icons, streak flame, level-up moment, badges, evening wrap-up ===== */
+.h-ic{flex:none;width:40px;height:40px;border-radius:13px;display:grid;place-items:center;font-size:22px;line-height:1;background:color-mix(in srgb,var(--ac) 20%,transparent);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--ac) 42%,transparent)}
+.h-name.hasic::before{display:none}
+.h-name.hasic{gap:11px}
+.t-ic{flex:none;width:26px;text-align:center;font-size:21px;line-height:1}
+.t-row.on .t-ic{opacity:.45}
+.arr-ic{flex:none;width:24px;text-align:center;font-size:19px;line-height:1}
+.ipick{display:grid;grid-template-columns:repeat(auto-fill,minmax(44px,1fr));gap:6px;margin-bottom:16px}
+.ipk{min-height:46px;border:0;border-radius:13px;background:rgba(255,255,255,.07);font-size:22px;line-height:1;transition:background .25s var(--ease),box-shadow .25s,transform .22s var(--spring)}
+.ipk:active{transform:scale(.88)}
+.ipk.on{background:linear-gradient(180deg,#6c97ff,#4a6cf5);box-shadow:0 8px 16px -8px rgba(74,108,245,.9),inset 0 1px 0 rgba(255,255,255,.28)}
+
+/* streak flame */
+.sn{display:inline-flex;align-items:center;gap:3px}
+.fl{width:26px;height:26px;flex:none;overflow:visible;transform-origin:50% 92%}
+.fl .fo{fill:var(--f1)}
+.fl .fi{fill:var(--f2)}
+.fl.t1{--f1:#ff8a3d;--f2:#ffd36b}
+.fl.t2{--f1:#ff5a3c;--f2:#ffc04d;width:29px;height:29px}
+.fl.t3{--f1:#4f86ff;--f2:#e2ecff;width:31px;height:31px}
+.fl.lit{filter:drop-shadow(0 0 5px var(--f1));animation:flick 1.7s ease-in-out infinite}
+.fl.t2.lit{animation-duration:1.35s;filter:drop-shadow(0 0 7px var(--f1))}
+.fl.t3.lit{animation-duration:1.1s;filter:drop-shadow(0 0 9px var(--f1))}
+.fl.dim{--f1:#6b7285;--f2:#9aa1b5;opacity:.55}
+.fl.ign{animation:ignite .85s var(--spring)}
+.t-st .fl{width:17px;height:17px;margin-right:0}
+.t-st .fl.t2{width:19px;height:19px}
+.t-st .fl.t3{width:20px;height:20px}
+@keyframes flick{0%,100%{transform:scale(1,1) rotate(-1.5deg)}25%{transform:scale(.95,1.07) rotate(1.5deg)}50%{transform:scale(1.04,.96) rotate(-1deg)}75%{transform:scale(.97,1.05) rotate(1deg)}}
+@keyframes ignite{0%{transform:scale(.2);opacity:0}55%{transform:scale(1.5,1.7);opacity:1}100%{transform:scale(1);opacity:1}}
+
+/* stronger level-up moment */
+.cel-hero.lvl{width:150px;height:170px;margin-bottom:14px}
+.cel-hero .rays,.cel-hero .shock{display:none}
+.cel-hero.lvl .rays{display:block;position:absolute;left:50%;top:50%;width:330px;height:330px;margin:-165px 0 0 -165px;border-radius:50%;pointer-events:none;
+  background:repeating-conic-gradient(from 0deg,rgba(160,185,255,.34) 0 6deg,transparent 6deg 22deg);
+  -webkit-mask:radial-gradient(circle,#000 0,#000 30%,transparent 66%);mask:radial-gradient(circle,#000 0,#000 30%,transparent 66%);
+  animation:raysin 1s var(--ease) both,spin 18s linear infinite}
+.cel-hero.lvl .shock{display:block;position:absolute;left:50%;top:50%;width:120px;height:120px;margin:-60px 0 0 -60px;border-radius:50%;border:3px solid #d6e2ff;opacity:0;pointer-events:none}
+.cel-hero.boom .shock{animation:shock 1.1s var(--ease) both}
+.cel-hero.boom .shock.s2{animation-delay:.2s;border-color:#a98bff}
+.cel-hero.lvl .cel-ic{z-index:1}
+@keyframes raysin{from{opacity:0}to{opacity:1}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes shock{0%{transform:scale(.5);opacity:.95}100%{transform:scale(3.6);opacity:0}}
+.cel-lbl.lv{font-size:15px;letter-spacing:.38em;color:#d6e2ff;text-shadow:0 0 18px rgba(130,160,255,.95);animation:lvtxt .8s var(--spring) both}
+@keyframes lvtxt{from{opacity:0;letter-spacing:.9em}to{opacity:1;letter-spacing:.38em}}
+.win.cel h3.lvh{font-size:38px;letter-spacing:-.03em}
+.win.cel.lvlwin{background:radial-gradient(120% 55% at 50% 0%,rgba(110,130,255,.32),transparent 62%),linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,0) 30%),#1a1d28}
+.win.cel.lvlwin .sub{color:#c9d8ff}
+.cel-ic .bic{font-size:40px;line-height:1}
+
+/* badges (Vault) */
+.bdg-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px;margin-bottom:6px}
+.bdg{display:flex;align-items:center;gap:15px;padding:16px 18px}
+.bdg-ic{flex:none;width:56px;height:62px;display:grid;place-items:center;font-size:27px;line-height:1;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);background:linear-gradient(160deg,#ffe9a8,#ffb04f 55%,#ff9f4a)}
+.bdg.lock .bdg-ic{background:rgba(255,255,255,.08);filter:grayscale(1);opacity:.7}
+.bdg h4{margin:0 0 3px;font-family:var(--head);font-weight:800;font-size:16px;letter-spacing:-.01em}
+.bdg p{margin:0;font-size:13px;line-height:1.4;color:var(--muted)}
+.bdg small{display:block;margin-top:5px;font-family:var(--body);font-weight:700;font-size:12px;color:var(--gold)}
+.bdg.lock small{color:var(--blue2)}
+
+/* evening wrap-up */
+.wrap-steps{display:flex;gap:6px;margin:0 0 18px}
+.wrap-steps i{flex:1;height:4px;border-radius:2px;background:rgba(255,255,255,.12);transition:background .3s}
+.wrap-steps i.on{background:var(--blue2)}
+.wlist{display:grid;gap:8px;margin-bottom:14px}
+.w-line{display:flex;gap:8px;align-items:stretch}
+.w-line .t-row{flex:1;min-width:0}
+.w-mini{flex:none;border:0;border-radius:18px;padding:0 14px;background:rgba(255,255,255,.07);color:var(--blue2);font-family:var(--body);font-weight:700;font-size:12.5px}
+.w-mini:active{transform:scale(.95)}
+.wrapbtn .cib-ic{background:rgba(120,140,255,.16)}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -646,7 +720,7 @@ textarea.input.sm{min-height:76px}
 'use strict';
 
 /* ============ constants ============ */
-const APP_VERSION = '2.6.6';
+const APP_VERSION = '2.7.0';
 // 2.5.0: Friends. These two values come from your free Firebase project (they are an address, not a password).
 // While they still say PASTE..., the Friends tab explains that it is not switched on yet and the rest of the app works as before.
 const FB_API_KEY = 'AIzaSyCCW0tJgzxmgOoOf304Q6elV-D18ZyH0AM', FB_PROJECT = 'habsys-9977a';
@@ -657,6 +731,23 @@ const RANK_ORDER = 'EDCBAS';   // 2.6.0: lowest to highest, used to tell when a 
 const MAX_HABITS = 10;
 const MAX_NOTE = 200, MAX_MINI = 60, MAX_ID = 60, MAX_REF = 200;   // length limits: note, 2-minute version, identity, reflection answers
 const MAX_JOURNAL = 160;   // one sentence about the day
+// NEW 2.7.0
+const XP_TICK = 2, XP_LITE = 1;   // small XP for a daily tick: 2 for a full day, 1 for the 2-minute version (quests still give the big XP)
+const WRAP_HOUR = 18;             // the Evening wrap-up card shows on the Habits tab from this hour (6 pm)
+const MAX_PLAN = 100;             // "first move tomorrow" line
+// Habit icons: pick one per habit (optional).
+const ICONS = ['🏃','💪','🧘','🚴','🏊','🚶','🥗','💧','😴','🍎','🦷','🧴',
+  '📖','✍️','🧠','🎓','🎧','🗣️','📝','🧩',
+  '💻','🎯','📅','⏰','💼','🧹','💰','📵',
+  '🎨','🎸','🎹','📷','🌱','🪴',
+  '🙏','☀️','🌙','❤️','😊','🛁','🍵','🚭'];
+// Badges: goals beyond the streak ladder. Once earned they stay earned (S.badges holds the day each one was earned).
+const BADGES = [
+  {id:'seven',    ic:'🔥', name:'First 7-day streak',          text:'You kept one habit going for 7 real days in a row.', hint:'Keep one habit going for 7 days in a row.'},
+  {id:'perfect',  ic:'⭐', name:'Perfect week',                text:'A full week, Monday to Sunday, with every scheduled habit done and no streak saver needed.', hint:'Finish a Monday to Sunday week with every scheduled habit done and no saver used.'},
+  {id:'bounce5',  ic:'💪', name:'Never missed twice ×5',       text:'Five times you missed a day and came straight back the next one.', hint:'Miss a day, then come straight back. Do that 5 times.'},
+  {id:'return30', ic:'🌅', name:'Came back after 30 days off', text:'You were away from a habit for 30 days or more, and you returned. That takes courage.', hint:'Return to a habit after at least 30 days without doing it.'}
+];
 // Mood is stored as 1 to 5 (as before) and shown as a face. 1 = sad ... 5 = very happy.
 const MOODS = ['😢', '🙁', '😐', '🙂', '😄'];
 const MOOD_NAMES = ['Sad', 'A bit down', 'Neutral', 'Good', 'Very happy'];
@@ -748,10 +839,12 @@ function sum53(str) {
 // The order of S.habits IS the order shown on the Habits tab and in the Today card.
 // reflections, cel, allDay, checkins {dayKey:{m,e}}, journal {dayKey:text}, changes, bigMoment as in earlier versions.
 // 2.5: friends = {code: your own 8-letter friend code ('' until the Friends tab is first opened), list: [friend codes]}.
+// NEW 2.7: habit.icon = one emoji from ICONS ('' = none). habit.xpd = {dayKey: XP given for that tick} (last 7 days only; it lets an un-tick take the XP back).
+//          S.badges = {badgeId: dayKey earned}. S.wrap = the day the Evening wrap-up was finished ('' = none). S.plan = {day, text}: the "first move" written the evening before.
 // NEW 2.6: friends.partner = the code of the ONE friend you chose as your partner ('' = none).
 //          friends.seen = {code: {l: level, r: rank}} = the level and rank of each friend the last time you looked at the Friends tab (for the level-up spotlight).
 function defaultState() {
-  return { v:2, player:{name:'Player', xp:0}, savers:0, habits:[], rewards:[], rewardText:{}, reflections:[], cel:{}, allDay:'', checkins:{}, journal:{}, friends:{code:'', list:[], partner:'', seen:{}}, lastBackup:null, changes:0, bigMoment:false, updatedAt:0 };
+  return { v:2, player:{name:'Player', xp:0}, savers:0, habits:[], rewards:[], rewardText:{}, reflections:[], cel:{}, allDay:'', checkins:{}, journal:{}, friends:{code:'', list:[], partner:'', seen:{}}, badges:{}, wrap:'', plan:{day:'', text:''}, lastBackup:null, changes:0, bigMoment:false, updatedAt:0 };
 }
 function validState(s) { return !!s && typeof s === 'object' && Array.isArray(s.habits); }
 function normalize(raw) {
@@ -779,6 +872,11 @@ function normalize(raw) {
         if (/^\d{4}-\d{2}-\d{2}$/.test(k) && t) tlog[k] = t;
       }
     }
+    // 2.7: XP given for recent ticks (max 7 days kept) and the habit icon
+    const xpd = {};
+    if (h && h.xpd && typeof h.xpd === 'object') {
+      for (const k of Object.keys(h.xpd).sort().slice(-7)) { const n = Math.floor(Number(h.xpd[k])); if (/^\d{4}-\d{2}-\d{2}$/.test(k) && n >= 1 && n <= 5) xpd[k] = n; }
+    }
     return {
       id: String((h && h.id) || uid()),
       name: String((h && h.name) || 'Habit').trim().slice(0, 30) || 'Habit',
@@ -791,7 +889,9 @@ function normalize(raw) {
       days: task ? [] : (days.length === 7 ? [] : days),
       task: task,
       tlog: tlog,
-      claimed: Math.min(TIERS.length, Math.max(0, Math.floor(Number(h && h.claimed) || 0)))
+      claimed: Math.min(TIERS.length, Math.max(0, Math.floor(Number(h && h.claimed) || 0))),
+      icon: ICONS.indexOf(h && h.icon) >= 0 ? h.icon : '',
+      xpd: xpd
     };
   });
   // FIX 2.2.0: an empty entry in the rewards list no longer stops the app from loading.
@@ -847,6 +947,12 @@ function normalize(raw) {
     const x = sn[c], l = Math.floor(Number(x && x.l));
     if (x && l >= 1 && /^[EDCBAS]$/.test(String(x.r))) s.friends.seen[c] = {l: Math.min(l, 100000), r: String(x.r)};
   }
+  // Badges, the day of the last Evening wrap-up, and tomorrow's first move (new in 2.7). Older data and backups simply have none.
+  const bg = raw.badges && typeof raw.badges === 'object' ? raw.badges : {};
+  for (const b of BADGES) if (okDay(String(bg[b.id]))) s.badges[b.id] = bg[b.id];
+  s.wrap = okDay(String(raw.wrap)) ? raw.wrap : '';
+  const pl = raw.plan && typeof raw.plan === 'object' ? raw.plan : {};
+  s.plan = okDay(String(pl.day)) ? {day: pl.day, text: String(pl.text || '').replace(/\s+/g, ' ').trim().slice(0, MAX_PLAN)} : {day: '', text: ''};
   s.allDay = /^\d{4}-\d{2}-\d{2}$/.test(raw.allDay) ? raw.allDay : '';
   s.lastBackup = typeof raw.lastBackup === 'string' ? raw.lastBackup : null;
   s.changes = Math.max(0, Math.floor(Number(raw.changes) || 0));
@@ -1143,6 +1249,79 @@ const rankOf = L => { let r = 'E'; for (const x of RANKS) if (L >= x.min) r = x.
 const rewardTextFor = t => S.rewardText[t.n] || t.reward;
 const findHabit = id => S.habits.find(h => h.id === id);
 
+/* ---- NEW 2.7.0: small XP for daily ticks ---- */
+// Each tick pays XP once per habit and day (h.xpd remembers it). An un-tick takes exactly that XP back, so ticking and un-ticking cannot be used to farm XP.
+function giveXp(h, k, lite) {
+  if (!h.xpd) h.xpd = {};
+  if (h.xpd[k]) return 0;
+  const n = lite ? XP_LITE : XP_TICK;
+  h.xpd[k] = n; S.player.xp += n;
+  const ks = Object.keys(h.xpd).sort();
+  for (let i = 0; i < ks.length - 7; i++) delete h.xpd[ks[i]];
+  return n;
+}
+function takeXp(h, k) {
+  const n = h.xpd && h.xpd[k] ? h.xpd[k] : 0;
+  if (!n) return 0;
+  delete h.xpd[k];
+  S.player.xp = Math.max(0, S.player.xp - n);
+  return n;
+}
+const todayXp = () => { const tk = dkey(new Date()); return S.habits.reduce((n, h) => n + ((h.xpd && h.xpd[tk]) || 0), 0); };
+
+/* ---- NEW 2.7.0: streak flame ---- */
+// A flame appears from a 3-day streak. 3-6 days: small orange. 7-29: bigger red-orange. 30+: blue-white (hottest).
+// It burns bright when the habit is done today (or today is a rest day) and is dim while today is still open (the streak is at risk).
+const FLAME = '<path class="fo" d="M12 2.1c.6 3.3-1.4 5-3 6.9-1.7 2-3.2 3.9-3.2 6.5 0 3.6 2.9 6.4 6.2 6.4s6.2-2.8 6.2-6.4c0-2.4-1.1-4.2-2.4-5.6-.2 1.4-.9 2.4-1.9 2.9.5-3.8-.4-7.6-2.9-10.7z"/><path class="fi" d="M12 21.9c-2 0-3.6-1.6-3.6-3.6 0-1.8 1.1-2.8 2.1-4 .5-.6.9-1.4 1-2.3 2 1.3 4.1 3.4 4.1 6.3 0 2-1.6 3.6-3.6 3.6z"/>';
+const flameTier = n => n >= 30 ? 3 : n >= 7 ? 2 : n >= 3 ? 1 : 0;
+function flameHtml(h, cur, extra) {
+  const tr = flameTier(cur);
+  if (!tr) return '';
+  const now = new Date(), lit = !!h.done[dkey(now)] || !isSched(h, now);
+  return '<svg class="fl t' + tr + (lit ? ' lit' : ' dim') + (extra || '') + '" viewBox="0 0 24 24" aria-hidden="true">' + FLAME + '</svg>';
+}
+
+/* ---- NEW 2.7.0: badges ---- */
+const gapDays = (a, b) => Math.round((parseKey(b) - parseKey(a)) / 86400000);
+// Perfect week: a Monday to Sunday week that is over (or is Sunday and finished) where every habit with scheduled days had ALL of them done,
+// no streak saver was needed, at least 3 habit-days were due, and at least one habit was tracked for the whole week.
+function hasPerfectWeek() {
+  if (!S.habits.length) return false;
+  let first = '';
+  for (const h of S.habits) { const ks = Object.keys(h.done).sort(); const s = ks.length && ks[0] < h.created ? ks[0] : h.created; if (!first || s < first) first = s; }
+  const tk = dkey(new Date());
+  let mon = parseKey(weekKey(parseKey(first)));
+  for (let n = 0; n < 600; n++, mon = addDays(mon, 7)) {
+    if (dkey(addDays(mon, 6)) > tk) break;   // this week is not over yet
+    const wk = dkey(mon), st = weekStats(wk);
+    const act = st.rows.filter(r => r.due > 0 || r.saved > 0);
+    if (act.length && act.every(r => r.done === r.due && r.saved === 0) && act.reduce((a, r) => a + r.due, 0) >= 3 && act.some(r => r.h.created <= wk)) return true;
+  }
+  return false;
+}
+function badgeFacts() {
+  let best = 0, bounce = 0, back = false;
+  for (const h of S.habits) {
+    best = Math.max(best, longestStreak(h));
+    bounce += habitStats(h).bounce;
+    const ks = Object.keys(h.done).filter(k => h.done[k] === 1).sort();
+    for (let i = 1; i < ks.length; i++) if (gapDays(ks[i - 1], ks[i]) >= 31) back = true;   // 30 full days without a done day, then a done day
+  }
+  return {best: best, bounce: bounce, back: back, perfect: hasPerfectWeek()};
+}
+// Gives every badge that is now earned and not yet recorded. Returns the new ones. silent = quiet catch-up (boot, restore), no "big moment" flag.
+function awardBadges(silent) {
+  if (BADGES.every(b => S.badges[b.id])) return [];
+  const f = badgeFacts(), tk = dkey(new Date()), got = [];
+  const ok = {seven: f.best >= 7, perfect: f.perfect, bounce5: f.bounce >= 5, return30: f.back};
+  for (const b of BADGES) if (ok[b.id] && !S.badges[b.id]) { S.badges[b.id] = tk; got.push(b); }
+  if (got.length) { if (!silent) S.bigMoment = true; save({noCount: !!silent}); }
+  return got;
+}
+function badgeToast(got) {
+  if (got && got.length) toast(got.length === 1 ? 'Badge unlocked: ' + got[0].name : got.length + ' badges unlocked. See them in the Vault.');
+}
+
 /* ---- Today ring ---- */
 // A habit is due today when today is on its schedule (or it is already marked done today).
 // The list follows the order of S.habits, so it always matches the order you chose with "Arrange habits".
@@ -1347,7 +1526,7 @@ function chartHtml(cols, max) {
 const TABS = ['habits', 'vault', 'records', 'friends', 'system'];
 // fx = which habit/day was just ticked (set only for the moment the screen is redrawn, so the tick effects play once).
 // jq = journal search text. jback = the journal line editor was opened from the Mood & journal sheet, so it returns there.
-const ui = { tab: 'habits', day: dkey(new Date()), rec: null, rescue: null, pend: null, fx: null, jq: '', jback: false };  // rescue: null | 'fresh' | 'damaged' | 'unreadable'.
+const ui = { tab: 'habits', day: dkey(new Date()), rec: null, rescue: null, pend: null, fx: null, jq: '', jback: false, wrap: null };  // rescue: null | 'fresh' | 'damaged' | 'unreadable'.
 
 function renderNav() {
   document.querySelectorAll('.tab').forEach(t => {
@@ -1460,6 +1639,7 @@ function todayPanel() {
     msg = first ? 'Cast your first vote: ' + first.identity + '.' : n + ' habit' + (n === 1 ? '' : 's') + ' to do. Start with the easiest one.';
   } else { title = 'Keep going'; msg = (n - done) + ' to go. Finish the chain today.'; }
   const focus = currentFocus();
+  const plan = S.plan && S.plan.day === tk && S.plan.text ? S.plan.text : '';   // 2.7: the first move written in last night's wrap-up
   const rows = due.map(h => {
     const d = !!h.done[tk], nm = d ? null : nmtInfo(h), col = HCOL[S.habits.indexOf(h) % HCOL.length];
     const pop = d && ui.fx && ui.fx.id === h.id && ui.fx.day === tk;
@@ -1471,8 +1651,9 @@ function todayPanel() {
     const sub = nm ? '<small class="nm">Never miss twice</small>'
       : tough ? '<small class="nm">' + esc(h.mini ? 'Tough day: your 2-minute version counts' : 'Tough day for this one: start small') + '</small>'
       : h.identity ? '<small>' + esc(h.identity) + '</small>' : taskSub;
+    const cs = currentStreak(h);
     return `<button class="t-row${d ? ' on' : ''}${pop ? ' pop' : ''}" style="--ac:${col}" data-action="tick" data-id="${esc(h.id)}" data-day="${tk}" aria-label="${d ? 'Unmark ' : 'Mark '}${esc(h.name)} today" aria-pressed="${d}">
-      <span class="t-dot">${d ? CHECK : ''}</span><span class="t-txt"><b>${esc(h.name)}</b>${sub}</span><span class="t-st">${currentStreak(h)}<small>STREAK</small></span></button>`;
+      <span class="t-dot">${d ? CHECK : ''}</span>${h.icon ? '<span class="t-ic" aria-hidden="true">' + esc(h.icon) + '</span>' : ''}<span class="t-txt"><b>${esc(h.name)}</b>${sub}</span><span class="t-st"><span class="sn">${flameHtml(h, cs)}${cs}</span><small>STREAK</small></span></button>`;
   }).join('');
   // FIX 2.2.0: the ring only pops when TODAY was just completed (ticking yesterday no longer makes it pop).
   const celeb = full && ui.fx && ui.fx.day === tk;
@@ -1483,7 +1664,7 @@ function todayPanel() {
         <svg viewBox="0 0 112 112"><circle class="rt" cx="56" cy="56" r="46"/><circle class="rp" data-k="ring" data-off="1" cx="56" cy="56" r="46" stroke-dasharray="${C.toFixed(1)}" stroke-dashoffset="${off}" style="stroke-dashoffset:${off}"/></svg>
         <div class="rc"><span>${n ? done + '/' + n : '–'}</span><small>TODAY</small></div>
       </div>
-      <div class="t-msg"><h3>${title}</h3><p>${esc(msg)}</p>${focus ? `<div class="t-focus"><b>This week's focus</b>${esc(focus)}</div>` : ''}</div>
+      <div class="t-msg"><h3>${title}</h3><p>${esc(msg)}</p>${plan ? `<div class="t-focus"><b>Your first move</b>${esc(plan)}</div>` : ''}${focus ? `<div class="t-focus"><b>This week's focus</b>${esc(focus)}</div>` : ''}</div>
     </div>
     ${rows ? `<div class="t-list">${rows}</div>` : ''}
   </section>`;
@@ -1502,6 +1683,20 @@ function checkinButton() {
     <span class="cib-ic">${c.m ? MOODS[c.m - 1] : '🙂'}</span>
     <span class="cib-t"><b>Daily check-in</b><small>${esc(sub)}</small></span>
     <span class="cib-s">${done ? 'Done ✓' : 'Open'}</span>
+  </button>`;
+}
+
+// NEW 2.7.0: the Evening wrap-up card. Shows from WRAP_HOUR until midnight (and stays as "Done" for the rest of that evening).
+function wrapCard() {
+  if (!S.habits.length) return '';
+  const tk = dkey(new Date()), fin = S.wrap === tk;
+  if (!fin && new Date().getHours() < WRAP_HOUR) return '';
+  const due = dueToday(), open = due.filter(h => !h.done[tk]).length;
+  const sub = fin ? 'Day closed. Rest well.' : open ? open + ' habit' + (open === 1 ? '' : 's') + ' still open · check-in · plan tomorrow' : 'Check in and plan tomorrow';
+  return `<button class="panel cibtn wrapbtn${fin ? ' done' : ''}" data-action="wrap" aria-label="Open the evening wrap-up">
+    <span class="cib-ic">🌙</span>
+    <span class="cib-t"><b>Evening wrap-up</b><small>${esc(sub)}</small></span>
+    <span class="cib-s">${fin ? 'Done ✓' : 'Start'}</span>
   </button>`;
 }
 
@@ -1552,6 +1747,7 @@ function viewHabits() {
   </section>`;
   html += partnerCard();
   html += todayPanel();
+  html += wrapCard();
   html += checkinButton();
   const rw = reflectDueWeek();
   if (rw) {
@@ -1638,9 +1834,9 @@ function habitCard(h) {
   return `
   <section class="panel habit">
     <div class="h-head">
-      <button class="h-name" data-action="edit" data-id="${esc(h.id)}" aria-label="Edit ${esc(h.name)}"><span>${esc(h.name)}</span>${PENCIL}</button>
+      <button class="h-name${h.icon ? ' hasic' : ''}" data-action="edit" data-id="${esc(h.id)}" aria-label="Edit ${esc(h.name)}">${h.icon ? '<span class="h-ic" aria-hidden="true">' + esc(h.icon) + '</span>' : ''}<span>${esc(h.name)}</span>${PENCIL}</button>
       <button class="h-more" data-action="extras" data-id="${esc(h.id)}" aria-label="${h.task ? 'Write the task for ' + esc(h.name) : 'Options for ' + esc(h.name) + ': identity, 2-minute habit, note, flexible days'}">${DOTS}</button>
-      <div class="streak"><small>STREAK</small><b${fxOn ? ' class="bump"' : ''}>${cur}</b></div>
+      <div class="streak"><small>STREAK</small><span class="sn">${flameHtml(h, cur, fxOn ? ' ign' : '')}<b${fxOn ? ' class="bump"' : ''}>${cur}</b></span></div>
     </div>
     ${extrasHtml(h)}${nmt}
     <div class="week${flex ? ' flex' : ''}"${flex ? ` style="grid-template-columns:repeat(${vis.length},minmax(0,1fr))"` : ''}>${boxes}</div>${rest}${yrow}
@@ -1648,8 +1844,17 @@ function habitCard(h) {
   </section>`;
 }
 
+function badgesSection() {
+  const f = badgeFacts(), n = BADGES.filter(b => S.badges[b.id]).length;
+  const prog = {seven: 'Best streak so far: ' + Math.min(f.best, 7) + ' / 7 days', bounce5: Math.min(f.bounce, 5) + ' / 5 comebacks'};
+  return `<h2 class="sec" style="margin-top:6px">Badges</h2><p class="note">${n} of ${BADGES.length} earned. Goals beyond the streak ladder.</p><div class="bdg-grid">`
+    + BADGES.map(b => {
+      const got = S.badges[b.id];
+      return `<section class="panel bdg${got ? '' : ' lock'}"><span class="bdg-ic" aria-hidden="true">${got ? b.ic : '🔒'}</span><div><h4>${esc(b.name)}</h4><p>${esc(got ? b.text : b.hint)}</p><small>${got ? 'Earned ' + esc(fmtKey(got)) : esc(prog[b.id] || 'Not earned yet')}</small></div></section>`;
+    }).join('') + '</div>';
+}
 function viewVault() {
-  let html = `<h2 class="sec">Streak savers</h2>
+  let html = badgesSection() + `<h2 class="sec">Streak savers</h2>
   <section class="panel">
     <div class="sv-row"><div class="sv-n">${S.savers}</div><div><h4>Savers in stock</h4><p>Earned from quests that show a saver bonus below. They work on any habit.</p></div></div>
     <p class="note" style="margin:14px 0 0">Missed a day? Tap yesterday's box on that habit and choose <b>Use a streak saver</b>. Your streak stays alive, but the saved day does not add a day to it. It works on yesterday only, and only while a streak is running. Tap the shield again before the day ends to get the saver back.</p>
@@ -1883,7 +2088,7 @@ function viewRecords() {
   const h = findHabit(ui.rec) || S.habits[0];
   ui.rec = h.id;
   const st = habitStats(h), tk = dkey(new Date());
-  html += '<div class="chips">' + S.habits.map(x => `<button class="chip ${x.id === h.id ? 'on' : ''}" data-action="rec" data-id="${esc(x.id)}">${esc(x.name)}</button>`).join('') + '</div>';
+  html += '<div class="chips">' + S.habits.map(x => `<button class="chip ${x.id === h.id ? 'on' : ''}" data-action="rec" data-id="${esc(x.id)}">${x.icon ? esc(x.icon) + ' ' : ''}${esc(x.name)}</button>`).join('') + '</div>';
   const tile = (l, v, c) => `<div class="stat"><small>${l}</small><b${c ? ' class="' + c + '"' : ''}>${v}</b></div>`;
   html += `<section class="panel"><div class="tag" style="margin-bottom:12px">${esc(h.name)}</div>${extrasHtml(h)}<div class="stats">`
     + tile('Days done', st.nDone)
@@ -1999,6 +2204,7 @@ function viewSystem() {
   <section class="panel">
     <p class="note">See how XP, levels and ranks work, and how far you are from the next rank.</p>
     <button class="btn ghost block" data-action="info">Levels &amp; ranks info</button>
+    <button class="btn ghost block" data-action="wrap" style="margin-top:10px">Evening wrap-up</button>
   </section>
 
   <h2 class="sec">Data safety</h2>
@@ -2029,7 +2235,7 @@ let leaveTimer;
 function showModal(inner, cls, noFocus) {
   const o = $('#overlay');
   clearTimeout(leaveTimer); o.classList.remove('leaving');
-  if (cls === 'cel') { clearTimeout(toastTimer); $('#toast').classList.remove('show'); }   // a celebration sheet is never covered by a toast
+  if (cls && cls.split(' ')[0] === 'cel') { clearTimeout(toastTimer); $('#toast').classList.remove('show'); }   // a celebration sheet is never covered by a toast
   o.innerHTML = `<div class="panel win${cls ? ' ' + cls : ''}">${inner}</div>`;
   o.classList.add('show');
   if (noFocus) return;
@@ -2133,38 +2339,191 @@ function pulse(el) {
   el.animate([{transform:'scale(1)'}, {transform:'scale(1.25)'}, {transform:'scale(1)'}], {duration:550, easing:'cubic-bezier(.3,1.35,.5,1)'});
 }
 
-// Called after a habit is marked done. Shows the celebration that fits: day complete, streak milestone, or a comeback.
+// NEW 2.7.0: a soft flash across the screen, a small floating "+2 XP", and the level-up burst.
+function flash() {
+  if (!canFx()) return;
+  const w = fxLayer(1000), f = document.createElement('i');
+  f.style.cssText = 'left:0;top:0;width:100%;height:100%;background:radial-gradient(circle at 50% 42%,rgba(200,215,255,.8),rgba(120,140,255,.28) 45%,transparent 78%)';
+  w.appendChild(f);
+  f.animate([{opacity:0}, {opacity:1, offset:.16}, {opacity:0}], {duration:850, easing:'ease-out', fill:'forwards'});
+}
+// Floats text up from the first of these elements that is on screen.
+function xpFloat(els, text) {
+  if (!canFx()) return;
+  for (const el of els) {
+    if (!el) continue;
+    const r = el.getBoundingClientRect();
+    if (!r.width || r.bottom < 0 || r.top > window.innerHeight) continue;
+    const w = fxLayer(1400), t = document.createElement('i');
+    t.textContent = text;
+    t.style.cssText = 'left:' + (r.left + r.width / 2) + 'px;top:' + (r.top - 4) + 'px;font:800 16px/1 var(--head);color:#ffdd85;text-shadow:0 2px 12px rgba(0,0,0,.7);white-space:nowrap;opacity:0';
+    w.appendChild(t);
+    t.animate([{transform:'translate(-50%,6px)', opacity:0}, {transform:'translate(-50%,-14px)', opacity:1, offset:.22}, {transform:'translate(-50%,-48px)', opacity:0}], {duration:1100, easing:'cubic-bezier(.2,.7,.3,1)', fill:'forwards'});
+    return;
+  }
+}
+// The level-up burst: screen flash, shock rings, the level number rolls up, cannons fire, the phone buzzes. Used after a quest claim and after a tick lifts you a level.
+function levelBoom(from, to) {
+  if (!$('#celnum')) return;
+  const hero = $('.cel-hero');
+  countUp($('#celnum'), from, to, 600);
+  if (hero) { hero.classList.remove('boom'); void hero.offsetWidth; hero.classList.add('boom'); }
+  pulse($('.cel-ic'));
+  flash();
+  confetti(120, true);
+  try { if (navigator.vibrate) navigator.vibrate([30, 60, 30, 60, 140]); } catch (e) {}
+}
+
+// Called after a habit is marked done. Shows the celebration that fits: level up, new badge, day complete, streak milestone, or a comeback.
 // If another popup is open (a quest to claim), it waits and runs when that popup is closed.
-function celebrate(id, k, bounced) {
+// 2.7: lv = {from, to} when the tick XP lifted you a level; nb = badges that were just earned.
+function celebrate(id, k, bounced, lv, nb) {
   const h = findHabit(id); if (!h) return;
-  if ($('#overlay').classList.contains('show')) { ui.pend = {id: id, k: k, bounced: bounced, t: Date.now()}; return; }
+  if ($('#overlay').classList.contains('show')) { ui.pend = {id: id, k: k, bounced: bounced, lv: lv, nb: nb, t: Date.now()}; return; }
   ui.pend = null;
   const tk = dkey(new Date()), cur = currentStreak(h);
   const ms = MILESTONES.indexOf(cur) >= 0 && !S.cel['m:' + h.id + ':' + cur] ? cur : 0;
   const all = k === tk && S.allDay !== tk && allDueDone();
-  if (!ms && !all) { if (bounced) toast('Back on track. You never missed twice.'); return; }
+  nb = nb || [];
+  if (!ms && !all && !lv && !nb.length) { if (bounced) toast('Back on track. You never missed twice.'); return; }
   if (ms) S.cel['m:' + h.id + ':' + ms] = 1;
   if (all) S.allDay = tk;
   const ks = Object.keys(S.cel);
   for (let i = 0; i < ks.length - 400; i++) delete S.cel[ks[i]];
   save({noCount:true});
+  momentSheet({h: h, ms: ms, all: all, bounced: bounced, lv: lv, nb: nb});
+}
+// The celebration sheet. One sheet can carry several things (a level up AND a badge AND a day complete); the biggest one gets the hero.
+function momentSheet(o) {
+  const tk = dkey(new Date()), h = o.h, nb = o.nb || [], lv = o.lv, ms = o.ms || 0, all = !!o.all;
+  const rankUp = !!lv && rankOf(lv.to) !== rankOf(lv.from);
   const votes = S.habits.filter(x => x.identity && x.done[tk] === 1).map(x => esc(x.identity));
   let body = '';
+  if (lv) body += `<div class="reward"><b>Level up</b>LV ${lv.from} → LV ${lv.to} · Rank ${rankOf(lv.to)}${rankUp ? ' · New rank!' : ''}<br>${(xpFor(lv.to + 1) - S.player.xp).toLocaleString()} XP to reach level ${lv.to + 1}.</div>`;
+  nb.forEach(b => { body += `<div class="reward"><b>Badge unlocked · ${esc(b.name)}</b>${esc(b.text)}</div>`; });
   if (all) body += `<div class="reward"><b>Today's votes</b>${votes.length ? votes.join('<br>') : 'Every habit done. This is how days become a life.'}</div>`;
-  if (ms) body += `<div class="reward"><b>${ms}-day streak</b>${esc(h.name)}: ${ms} real days in a row. ${h.identity ? esc(h.identity) + '. You are proving it.' : 'This is no longer luck. It is who you are.'}</div>`;
-  if (bounced) body += `<div class="reward"><b>Never missed twice</b>You came straight back after a miss. That is the skill that matters most.</div>`;
-  showModal(`
-    <div class="cel-hero"><div class="cel-ic">${all ? CHECK : '<span class="num">' + ms + '</span>'}</div></div>
-    <div class="cel-lbl">${all ? 'Every habit done' : 'Streak milestone'}</div>
-    <h3>${all ? 'Day complete' : ms + '-day streak'}</h3>
-    <p class="sub">${all ? 'All ' + dueToday().length + ' habits done' : esc(h.name)}</p>
-    ${body}
-    <div class="actions"><button class="btn" data-action="close">Keep going</button></div>`, 'cel');
-  confetti(ms >= 30 ? 110 : 64, ms >= 30);
+  if (ms && h) body += `<div class="reward"><b>${ms}-day streak</b>${esc(h.name)}: ${ms} real days in a row. ${h.identity ? esc(h.identity) + '. You are proving it.' : 'This is no longer luck. It is who you are.'}</div>`;
+  if (o.bounced) body += `<div class="reward"><b>Never missed twice</b>You came straight back after a miss. That is the skill that matters most.</div>`;
+  if (o.claim) body += `<div class="reward"><b>Quest complete</b>A quest reward is ready. Tap Claim on the habit card.</div>`;
+  let hero, lbl, title, sub;
+  if (lv) {
+    hero = `<div class="cel-hero lvl"><i class="rays"></i><i class="shock"></i><i class="shock s2"></i><div class="cel-ic big"><span class="num" id="celnum">${lv.from}</span></div></div>`;
+    lbl = `<div class="cel-lbl lv">${rankUp ? 'Rank up' : 'Level up'}</div>`;
+    title = `<h3 class="lvh">Level ${lv.to}</h3>`;
+    sub = o.sub || 'Your daily ticks added up';
+  } else if (nb.length) {
+    hero = `<div class="cel-hero"><div class="cel-ic"><span class="bic">${nb[0].ic}</span></div></div>`;
+    lbl = `<div class="cel-lbl">Badge unlocked</div>`;
+    title = `<h3>${esc(nb[0].name)}</h3>`;
+    sub = nb.length > 1 ? '+ ' + (nb.length - 1) + ' more badge' + (nb.length > 2 ? 's' : '') : (o.sub || 'A new goal reached');
+  } else {
+    hero = `<div class="cel-hero"><div class="cel-ic">${all ? CHECK : '<span class="num">' + ms + '</span>'}</div></div>`;
+    lbl = `<div class="cel-lbl">${all ? 'Every habit done' : 'Streak milestone'}</div>`;
+    title = `<h3>${all ? 'Day complete' : ms + '-day streak'}</h3>`;
+    sub = all ? 'All ' + dueToday().length + ' habits done' : (h ? esc(h.name) : '');
+  }
+  showModal(`${hero}${lbl}${title}<p class="sub">${sub}</p>${body}
+    <div class="actions"><button class="btn" data-action="close">${o.btn || 'Keep going'}</button></div>`, 'cel' + (lv ? ' lvlwin' : ''));
+  confetti(lv ? 70 : ms >= 30 ? 110 : 64, !lv && ms >= 30);
+  if (lv) setTimeout(() => levelBoom(lv.from, lv.to), 700);
+}
+
+/* ---- NEW 2.7.0: Evening wrap-up. Three short steps: close your habits, check in, plan tomorrow. ---- */
+// Ticking inside the wrap-up is quiet (no pop-ups on top of it). Level ups and badges earned during it are shown together when you close the day.
+function wrapSumHtml() {
+  const tk = dkey(new Date()), due = dueToday(), done = due.filter(h => h.done[tk]).length;
+  return `<b>Today so far</b>${due.length ? done + ' of ' + due.length + ' habits done' : 'No habits were due today'} · +${todayXp()} XP from ticks`;
+}
+function wrapRows() {
+  const tk = dkey(new Date()), due = dueToday();
+  if (!due.length) return '<p class="small">Nothing was due today. A rest day.</p>';
+  return due.map(h => {
+    const d = !!h.done[tk], col = HCOL[S.habits.indexOf(h) % HCOL.length], cs = currentStreak(h), nm = !d && nmtInfo(h);
+    const small = !d && h.task && !h.note ? '<small class="nm">Write today\'s task on the habit card first</small>' : nm ? '<small class="nm">Never miss twice</small>' : '';
+    const mini = !d && !h.task && h.mini ? `<button class="w-mini" data-action="wmini" data-id="${esc(h.id)}" aria-label="Mark ${esc(h.name)} done with the 2-minute version">2-min</button>` : '';
+    return `<div class="w-line"><button class="t-row${d ? ' on' : ''}" style="--ac:${col}" data-action="wtick" data-id="${esc(h.id)}" aria-label="${d ? '' : 'Mark '}${esc(h.name)}${d ? ' is done' : ' done'}" aria-pressed="${d}">
+      <span class="t-dot">${d ? CHECK : ''}</span>${h.icon ? '<span class="t-ic" aria-hidden="true">' + esc(h.icon) + '</span>' : ''}<span class="t-txt"><b>${esc(h.name)}</b>${small}</span><span class="t-st"><span class="sn">${flameHtml(h, cs)}${cs}</span><small>STREAK</small></span></button>${mini}</div>`;
+  }).join('');
+}
+function tomorrowRows() {
+  const tm = addDays(new Date(), 1), tk = dkey(new Date());
+  const list = S.habits.filter(h => isSched(h, tm));
+  if (!list.length) return '<p class="small">Nothing is scheduled for tomorrow. A rest day.</p>';
+  return list.map(h => {
+    const cur = currentStreak(h), txt = h.done[tk] ? (cur ? 'Day ' + (cur + 1) + ' of your streak' : 'A new start') : 'Come straight back';
+    return `<div class="kv"><span>${h.icon ? esc(h.icon) + ' ' : ''}${esc(h.name)}</span><b>${esc(txt)}</b></div>`;
+  }).join('');
+}
+function wrapSteps(step) { return '<div class="wrap-steps" aria-hidden="true">' + [1, 2, 3].map(n => '<i' + (n <= step ? ' on' : '') + '></i>').join('') + '</div>'; }
+// Saves the "first move" line if it was typed (safe to call at any time).
+function savePlanInput() {
+  const el = document.getElementById('wplan'); if (!el || ui.rescue || writesLocked) return;
+  const v = (el.value || '').replace(/\s+/g, ' ').trim().slice(0, MAX_PLAN), day = dkey(addDays(new Date(), 1));
+  if ((S.plan.day === day ? S.plan.text : '') === v) return;
+  S.plan = v ? {day: day, text: v} : {day: '', text: ''};
+  save();
+}
+function openWrap(step) {
+  if (!S.habits.length) { toast('Add a habit first.'); return; }
+  step = Math.min(3, Math.max(1, Math.floor(Number(step)) || 1));
+  if (!ui.wrap) ui.wrap = {l0: levelOf(S.player.xp), nb: []};
+  savePlanInput(); commitInput();
+  const tk = dkey(new Date()), tm = dkey(addDays(new Date(), 1));
+  let body;
+  if (step === 1) {
+    body = `<p class="sub">Step 1 of 3 · Close your habits</p>${wrapSteps(1)}
+      <div class="reward" id="wsum">${wrapSumHtml()}</div>
+      <div class="wlist" id="wlist">${wrapRows()}</div>
+      <p class="hint" style="margin-top:0">Tap a habit to mark it done. Anything left open is fine: tomorrow is your comeback day.</p>
+      <div class="actions"><button class="btn" data-action="wnext" data-step="2">Next: check-in</button><button class="btn ghost" data-action="wquit">Not now</button></div>`;
+  } else if (step === 2) {
+    body = `<p class="sub">Step 2 of 3 · How was today?</p>${wrapSteps(2)}
+      <div class="ci-blk"><span>How was your mood?</span><div class="ci-pick" id="cipm">${ciPick('m')}</div></div>
+      <div class="ci-blk"><span>How was your energy?</span><div class="ci-pick" id="cipe">${ciPick('e')}</div><div class="ci-ends"><span>1 low</span><span>5 high</span></div></div>
+      <label class="field"><span>One line about your day</span><input class="input" id="jtoday" maxlength="${MAX_JOURNAL}" placeholder="e.g. Tough morning, strong finish" value="${esc(S.journal[tk] || '')}" autocomplete="off"></label>
+      <div class="actions two"><button class="btn ghost" data-action="wnext" data-step="1">Back</button><button class="btn" data-action="wnext" data-step="3">Next: tomorrow</button></div>`;
+  } else {
+    const plan = S.plan.day === tm ? S.plan.text : '';
+    body = `<p class="sub">Step 3 of 3 · Plan tomorrow</p>${wrapSteps(3)}
+      <div class="grp">${tomorrowRows()}</div>
+      <label class="field"><span>Your first move tomorrow (optional)</span><input class="input" id="wplan" maxlength="${MAX_PLAN}" placeholder="e.g. Walk right after coffee" value="${esc(plan)}" autocomplete="off"></label>
+      <p class="hint">Choosing the first small step tonight makes it easier to start. It shows on your Today card tomorrow.</p>
+      <div class="actions two"><button class="btn ghost" data-action="wnext" data-step="2">Back</button><button class="btn" data-action="wfinish">Close the day</button></div>`;
+  }
+  showModal(`<div class="wtag"><span class="tag">Habsys</span></div><h3>Evening wrap-up</h3>${body}`, '', true);
+}
+// One tap inside step 1: mark today done, quietly. The list and the summary are redrawn in place.
+function wrapTick(id, lite) {
+  const h = findHabit(id), tk = dkey(new Date());
+  if (!h || h.done[tk]) return;
+  if (!ui.wrap) ui.wrap = {l0: levelOf(S.player.xp), nb: []};
+  const gain = markDone(id, tk, lite, true);
+  const l = $('#wlist'); if (l) l.innerHTML = wrapRows();
+  const s = $('#wsum'); if (s) s.innerHTML = wrapSumHtml();
+  if (gain) {
+    const col = HCOL[Math.max(0, S.habits.indexOf(h)) % HCOL.length], dot = document.querySelector('#wlist .t-row[data-id="' + id + '"] .t-dot');
+    requestAnimationFrame(() => { spark(dot, col); xpFloat([dot], '+' + gain + ' XP'); });
+    try { if (navigator.vibrate) navigator.vibrate(12); } catch (e) {}
+  }
+}
+function wrapFinish() {
+  savePlanInput(); commitInput();
+  const w = ui.wrap || {l0: levelOf(S.player.xp), nb: []};
+  S.wrap = dkey(new Date());
+  save();
+  ui.wrap = null;
+  closeModal(); render();
+  const L = levelOf(S.player.xp), lv = L > w.l0 ? {from: w.l0, to: L} : null, claim = S.habits.some(x => claimableCount(x) > 0);
+  if (lv || w.nb.length) momentSheet({lv: lv, nb: w.nb, claim: claim, sub: 'Evening wrap-up complete', btn: 'Good night'});
+  else toast(claim ? 'Day closed. A quest reward is waiting for you.' : 'Day closed. Rest well.');
 }
 
 // 2.4: the New habit pop-up first asks for the TYPE: Regular habit (identity + flexible days, as before) or Daily task
 // (only a name and today's task). The two sets of fields live in #f-reg and #f-task; the type buttons switch between them.
+// NEW 2.7.0: the icon grid in the New habit / Edit habit pop-up. Tap an icon to choose it, tap it again to clear it.
+function iconPicker(cur) {
+  return `<div class="field"><span>Icon (optional)</span><div class="ipick" id="ipick">${ICONS.map(i => `<button class="ipk${i === cur ? ' on' : ''}" data-action="pickicon" data-i="${i}" aria-pressed="${i === cur}" aria-label="Icon ${i}">${i}</button>`).join('')}</div></div>`;
+}
 function openHabitForm(id) {
   const h = id ? findHabit(id) : null;
   showModal(`
@@ -2173,6 +2532,7 @@ function openHabitForm(id) {
     <p class="sub">${h ? 'Rename or remove' : 'Slot ' + (S.habits.length + 1) + ' of ' + MAX_HABITS}</p>
     ${h ? '' : `<div class="tpick"><button class="tchip on" data-action="ftype" data-t="reg" aria-pressed="true">Regular habit</button><button class="tchip" data-action="ftype" data-t="task" aria-pressed="false">Daily task</button></div>`}
     <label class="field"><span>Habit name</span><input class="input" id="hname" maxlength="30" placeholder="e.g. Read 10 pages" value="${h ? esc(h.name) : ''}" autocomplete="off"></label>
+    ${iconPicker(h ? h.icon : '')}
     ${h ? '' : `<div id="f-reg"><label class="field"><span>Who are you becoming? (optional)</span><input class="input" id="hid" maxlength="${MAX_ID}" placeholder="e.g. I am a reader" autocomplete="off"></label>
     <div class="field"><span>Flexible days (optional)</span><div class="dchips" style="margin-bottom:6px">${DAY_SHORT.map((n, i) => `<button class="dchip" data-action="toggleday" data-d="${i}" aria-pressed="false">${n}</button>`).join('')}</div><p class="hint" style="margin:0 0 6px">Leave all days unselected for an every-day habit. You can change this later with the three-dot button.</p></div></div>
     <div id="f-task" style="display:none"><label class="field"><span>Today's task</span><textarea class="input sm" id="htask" maxlength="${MAX_NOTE}" placeholder="e.g. Finish chapter 3"></textarea></label>
@@ -2191,7 +2551,7 @@ function arrRows() {
   const n = S.habits.length;
   return S.habits.map((h, i) => `
     <div class="arr-row" style="--ac:${HCOL[i % HCOL.length]}">
-      <span class="arr-n">${i + 1}</span><span class="arr-dot"></span><b>${esc(h.name)}</b>
+      <span class="arr-n">${i + 1}</span>${h.icon ? '<span class="arr-ic" aria-hidden="true">' + esc(h.icon) + '</span>' : '<span class="arr-dot"></span>'}<b>${esc(h.name)}</b>
       <button class="arr-btn" data-action="moveup" data-id="${esc(h.id)}" aria-label="Move ${esc(h.name)} up"${i === 0 ? ' disabled' : ''}>${ARR_UP}</button>
       <button class="arr-btn" data-action="movedown" data-id="${esc(h.id)}" aria-label="Move ${esc(h.name)} down"${i === n - 1 ? ' disabled' : ''}>${ARR_DOWN}</button>
     </div>`).join('');
@@ -2313,6 +2673,7 @@ function setDays(id, arr) {
   closeModal();
   afterChange(id, before);
   toast(h.days.length ? 'Days saved: ' + daysLabel(h.days) : 'This habit now runs every day.');
+  setTimeout(() => badgeToast(awardBadges()), 2700);
 }
 
 // Quest complete: the sheet opens with a glowing tier badge and a small burst of confetti.
@@ -2354,9 +2715,9 @@ function doClaim(id) {
   const pOld = pctOf(oldXp, oldL), pNew = pctOf(newXp, newL);
   showModal(`
     <div class="wtag"><span class="tag">Habsys</span></div>
-    <div class="cel-hero${leveled ? ' lvl' : ''}"><div class="cel-ic${leveled ? ' big' : ''}"><span class="num" id="celnum">${leveled ? oldL : t.n}</span></div></div>
-    <div class="cel-lbl">${leveled ? (rankUp ? 'Rank up' : 'Level up') : 'Reward claimed'}</div>
-    <h3>${leveled ? 'Level ' + newL : esc(t.title)}</h3>
+    <div class="cel-hero${leveled ? ' lvl' : ''}">${leveled ? '<i class="rays"></i><i class="shock"></i><i class="shock s2"></i>' : ''}<div class="cel-ic${leveled ? ' big' : ''}"><span class="num" id="celnum">${leveled ? oldL : t.n}</span></div></div>
+    <div class="cel-lbl${leveled ? ' lv' : ''}">${leveled ? (rankUp ? 'Rank up' : 'Level up') : 'Reward claimed'}</div>
+    <h3${leveled ? ' class="lvh"' : ''}>${leveled ? 'Level ' + newL : esc(t.title)}</h3>
     <p class="sub">${esc(t.title)} · ${esc(h.name)}</p>
     <div class="reward xpbox"><b>XP earned</b><span class="xpg">+<span id="celxp">0</span> XP</span>
       <div class="bar"><i id="celbar" style="width:${pOld}%"></i></div>
@@ -2365,7 +2726,7 @@ function doClaim(id) {
     ${t.savers ? `<div class="reward"><b>Streak savers</b>+${t.savers} · you now have ${S.savers}</div>` : ''}
     <div class="reward"><b>Go enjoy it</b>${esc(S.rewards[0].text)}</div>
     <p style="color:var(--muted);font-size:14px">Mark it as enjoyed in the Vault once you have had it. Then save a backup on the Habits tab to lock in this win.</p>
-    <div class="actions"><button class="btn" data-action="afterclaim" data-id="${esc(h.id)}">${more ? 'Next reward' : 'Continue'}</button></div>`, 'cel');
+    <div class="actions"><button class="btn" data-action="afterclaim" data-id="${esc(h.id)}">${more ? 'Next reward' : 'Continue'}</button></div>`, 'cel' + (leveled ? ' lvlwin' : ''));
   confetti(leveled ? 50 : 70);
   setTimeout(() => {
     countUp($('#celxp'), 0, t.xp, 900);
@@ -2374,13 +2735,11 @@ function doClaim(id) {
     bar.style.width = '100%';                       // fill to the top of the old level ...
     setTimeout(() => {
       const b2 = $('#celbar'); if (!b2) return;
-      countUp($('#celnum'), oldL, newL, 450);       // ... the level number rolls up ...
-      pulse($('.cel-ic'));
+      levelBoom(oldL, newL);                        // ... the level number rolls up, with flash, shock rings, cannons and a buzz (2.7) ...
       b2.style.transition = 'none'; b2.style.width = '0%';
       void b2.offsetWidth;
       b2.style.transition = ''; b2.style.width = pNew + '%';   // ... and the bar refills for the new level
       const lv = $('#cellv'); if (lv) lv.textContent = 'LV ' + newL;
-      confetti(120, true);
     }, 1000);
   }, 450);
 }
@@ -2469,7 +2828,7 @@ function openInfo() {
     <h3>Levels &amp; ranks</h3>
     <p class="sub">How you grow</p>
     <div class="reward"><b>Your status</b>Level ${L} · Rank ${cur}<br>${S.player.xp.toLocaleString()} XP · ${need.toLocaleString()} XP to Level ${L + 1}</div>
-    <p>XP comes only from clearing quests, which means keeping one habit going for a streak. Daily ticks give no XP, so every level is proof of real consistency.</p>
+    <p>XP comes from two places. Clearing a quest (keeping one habit going for a streak) gives the big XP. Each daily tick gives a small bit: ${XP_TICK} XP for a full day, ${XP_LITE} XP for the 2-minute version. Un-ticking takes that XP back. The levels still reward real consistency, because the big jumps come from quests.</p>
     <p>Levels get harder as you climb. Level 1 to 2 takes ${cost(2)} XP, and every level after that needs ${LV_STEP} XP more than the one before. Level 49 to 50 takes ${cost(50)} XP, and Level 364 to 365 takes ${cost(365)} XP. There is no maximum level.</p>
     <div class="mini">Ranks</div><div class="grp">${ranks}</div>
     <div class="mini">XP needed in total</div><div class="grp">${marks}</div>
@@ -2830,16 +3189,18 @@ function afterChange(id, before) {
 // lite = true: the day was done with the 2-minute version (still a real done day).
 // The tick effect: ui.fx is set only while the screen is redrawn, so the pop, the drawing check and the streak bump play once.
 // 2.4: a Daily task habit. Ticking TODAY moves the written task into its history (tlog) and clears the note, so the next task can be written.
-function markDone(id, k, lite) {
-  const h = findHabit(id); if (!h) return;
+// 2.7: a tick gives small XP (2, or 1 for the 2-minute version), can lift you a level, and can unlock a badge.
+// quiet = used by the Evening wrap-up: no pop-ups, no tick effects (the wrap-up shows everything when you close the day). Returns the XP given.
+function markDone(id, k, lite, quiet) {
+  const h = findHabit(id); if (!h) return 0;
   const tk = dkey(new Date()), yk = dkey(addDays(new Date(), -1));
-  if ((k !== tk && k !== yk) || h.done[k]) return;
+  if ((k !== tk && k !== yk) || h.done[k]) return 0;
   if (h.task) {
     lite = false;
-    if (k === tk && !h.note) { toast('Write today\'s task first.'); openNote(id); return; }
+    if (k === tk && !h.note) { toast(quiet ? 'Write today\'s task on the habit card first.' : 'Write today\'s task first.'); if (!quiet) openNote(id); return 0; }
   }
   const bounced = wasMissed(h, prevSchedKey(h, parseKey(k)));   // coming straight back after a miss
-  const before = claimableCount(h);
+  const before = claimableCount(h), oldL = levelOf(S.player.xp);
   h.done[k] = 1;
   let askNext = false;
   if (h.task) {
@@ -2852,22 +3213,36 @@ function markDone(id, k, lite) {
     if (!h.lite) h.lite = {};
     if (lite) h.lite[k] = true; else delete h.lite[k];
   }
+  const gain = giveXp(h, k, lite);
+  const newL = levelOf(S.player.xp), lv = newL > oldL ? {from: oldL, to: newL} : null;
+  if (newL !== oldL) syncFriends(true);   // your new level is shared with friends
+  if (quiet) {
+    save(); render();
+    const got = awardBadges();
+    if (ui.wrap) ui.wrap.nb = ui.wrap.nb.concat(got);
+    return gain;
+  }
   ui.fx = {id: id, day: k};
   afterChange(id, before);
   ui.fx = null;
   try { if (navigator.vibrate) navigator.vibrate(14); } catch (e) {}
   const col = HCOL[Math.max(0, S.habits.indexOf(h)) % HCOL.length];
   requestAnimationFrame(() => {
-    spark(document.querySelector('#view .box[data-id="' + id + '"][data-day="' + k + '"]'), col);
-    if (k === dkey(new Date())) spark(document.querySelector('#view .t-row[data-id="' + id + '"] .t-dot'), col);
+    const box = document.querySelector('#view .box[data-id="' + id + '"][data-day="' + k + '"]');
+    const dot = k === dkey(new Date()) ? document.querySelector('#view .t-row[data-id="' + id + '"] .t-dot') : null;
+    spark(box, col);
+    if (dot) spark(dot, col);
+    if (gain) xpFloat([dot, box], '+' + gain + ' XP');
   });
-  if (lite) toast('2-minute version done. Streak kept alive.');
-  celebrate(id, k, bounced);
+  if (lite) toast('2-minute version done. +' + gain + ' XP. Streak kept alive.');
+  const got = awardBadges();
+  celebrate(id, k, bounced, lv, got);
   // Ask for the next task, unless a celebration or reward sheet is already on screen (the card then shows "Write tomorrow's task").
   if (askNext) setTimeout(() => {
     const hh = findHabit(id);
     if (hh && hh.task && !hh.note && hh.done[dkey(new Date())] && !$('#overlay').classList.contains('show')) openNote(id, true);
   }, 500);
+  return gain;
 }
 function useSaver(id, k) {
   const h = findHabit(id); if (!h) return;
@@ -2878,6 +3253,7 @@ function useSaver(id, k) {
   S.savers -= 1;
   afterChange(id, before);
   toast('Streak saver used. Your streak is protected.');
+  setTimeout(() => badgeToast(awardBadges()), 2700);
 }
 function toggleDay(id, k) {
   const h = findHabit(id); if (!h) return;
@@ -2887,9 +3263,10 @@ function toggleDay(id, k) {
     delete h.done[k]; S.savers += 1; save(); render(); toast('Streak saver returned.'); return;
   }
   if (h.done[k]) { // done day (full or 2-minute): tapping again unmarks it
-    const before = claimableCount(h);
+    const before = claimableCount(h), oldL = levelOf(S.player.xp);
     delete h.done[k];
     if (h.lite) delete h.lite[k];
+    const refund = takeXp(h, k);   // 2.7: the XP that tick gave is taken back
     // 2.4: unticking today's task puts it back as the note (unless a newer task was already written, which is kept).
     let restored = false;
     if (h.task && h.tlog) {
@@ -2897,7 +3274,9 @@ function toggleDay(id, k) {
       if (k === tk && t && !h.note) { h.note = t; restored = true; }
     }
     afterChange(id, before);
+    if (levelOf(S.player.xp) !== oldL) syncFriends(true);
     if (restored) toast('Unmarked. Your task is back.');
+    else if (refund) toast('Unmarked. −' + refund + ' XP.');
     return;
   }
   if (!isSchedKey(h, k)) return;   // rest day of a flexible habit: nothing to mark
@@ -2919,6 +3298,18 @@ const actions = {
   tick: el => toggleDay(el.dataset.id, el.dataset.day),
   rec: el => { ui.rec = el.dataset.id; renderView(); playIn(0); },
   checkin: openCheckin,
+  // NEW 2.7.0: Evening wrap-up and habit icons
+  wrap: () => { ui.wrap = null; openWrap(1); },
+  wnext: el => openWrap(Number(el.dataset.step)),
+  wtick: el => wrapTick(el.dataset.id, false),
+  wmini: el => wrapTick(el.dataset.id, true),
+  wfinish: wrapFinish,
+  wquit: () => { savePlanInput(); ui.wrap = null; closeModal(); },
+  pickicon: el => {
+    const on = !el.classList.contains('on');
+    document.querySelectorAll('#ipick .ipk').forEach(b => { b.classList.remove('on'); b.setAttribute('aria-pressed', 'false'); });
+    if (on) { el.classList.add('on'); el.setAttribute('aria-pressed', 'true'); }
+  },
   mooddata: openMoodData,
   ci: el => setCheckin(el.dataset.f, el.dataset.v),
   jedit: el => { ui.jback = !!document.querySelector('#overlay #jlist'); openJournalEdit(el.dataset.day); },
@@ -2979,18 +3370,19 @@ const actions = {
     const name = ($('#hname').value || '').trim().slice(0, 30);
     if (!name) { toast('Give your habit a name.'); return; }
     const id = el.dataset.id;
-    if (id) { const h = findHabit(id); if (h) h.name = name; }
+    const ipk = document.querySelector('#ipick .ipk.on'), icon = ipk && ICONS.indexOf(ipk.dataset.i) >= 0 ? ipk.dataset.i : '';   // 2.7: chosen icon
+    if (id) { const h = findHabit(id); if (h) { h.name = name; h.icon = icon; } }
     else {
       if (S.habits.length >= MAX_HABITS) return;
       const isTask = !!document.querySelector('#overlay .tchip.on[data-t="task"]');
       if (isTask) {
         const te = $('#htask'), task = te ? (te.value || '').trim().slice(0, MAX_NOTE) : '';
         if (!task) { toast('Write today\'s task.'); return; }
-        S.habits.push({id: uid(), name, created: dkey(new Date()), done: {}, lite: {}, mini: '', note: task, identity: '', days: [], claimed: 0, task: true, tlog: {}});
+        S.habits.push({id: uid(), name, created: dkey(new Date()), done: {}, lite: {}, mini: '', note: task, identity: '', days: [], claimed: 0, task: true, tlog: {}, icon: icon, xpd: {}});
       } else {
         const picked = Array.from(document.querySelectorAll('#overlay .dchip.on')).map(c => Number(c.dataset.d)).sort((a, b) => a - b);
         const idEl = $('#hid'), identity = idEl ? (idEl.value || '').trim().slice(0, MAX_ID) : '';
-        S.habits.push({id: uid(), name, created: dkey(new Date()), done: {}, lite: {}, mini: '', note: '', identity: identity, days: picked.length === 7 ? [] : picked, claimed: 0});
+        S.habits.push({id: uid(), name, created: dkey(new Date()), done: {}, lite: {}, mini: '', note: '', identity: identity, days: picked.length === 7 ? [] : picked, claimed: 0, icon: icon, xpd: {}});
       }
       S.bigMoment = true; askPersist();
     }
@@ -3005,7 +3397,8 @@ const actions = {
     const h = findHabit(el.dataset.id);
     if (h && claimableCount(h) > 0) { openClaim(h.id); return; }
     const p = ui.pend; ui.pend = null;   // a celebration that was waiting behind the quest popup (kept for 10 minutes)
-    if (p && Date.now() - p.t < 600000) celebrate(p.id, p.k, p.bounced);
+    if (p && p.lv && levelOf(S.player.xp) !== p.lv.to) p.lv = null;   // the claim sheet already moved your level on
+    if (p && Date.now() - p.t < 600000) celebrate(p.id, p.k, p.bounced, p.lv, p.nb);
   },
   editreward: el => openRewardEdit(Number(el.dataset.tier)),
   saveReward: el => { const v = ($('#rtext').value || '').trim().slice(0, 160); const n = Number(el.dataset.tier); if (v) S.rewardText[n] = v; else delete S.rewardText[n]; save(); closeModal(); render(); },
@@ -3059,6 +3452,7 @@ const actions = {
     S.changes = 0; S.bigMoment = false; S.lastBackup = pendingRestoreAt || new Date().toISOString();
     writesLocked = false; ui.rescue = null; ui.tab = 'habits';
     reconcileSeen();              // 2.6: friends in the backup that have no "last seen" yet start from where they are now
+    awardBadges(true);            // 2.7: badges already earned in the restored history are recorded quietly
     clearSnaps();                 // safety copies of the old data must not undo this restore
     save({noCount:true});
     snapshot('daily');
@@ -3091,11 +3485,11 @@ document.addEventListener('input', e => {
   if (e.target.id === 'jtoday') { clearTimeout(jTimer); jTimer = setTimeout(commitInput, 900); }
   if (e.target.id === 'jsearch') { ui.jq = e.target.value || ''; const l = $('#jlist'); if (l) l.innerHTML = journalList(); }
 });
-document.addEventListener('focusout', e => { if (e.target.id === 'jtoday') commitInput(); });
+document.addEventListener('focusout', e => { if (e.target.id === 'jtoday') commitInput(); if (e.target.id === 'wplan') savePlanInput(); });
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') closeModal();
   if (e.key === 'Enter' && e.target.id === 'hname') { const b = document.querySelector('[data-action="savehabit"]'); if (b) b.click(); }
-  if (e.key === 'Enter' && (e.target.id === 'jtoday' || e.target.id === 'jsearch')) e.target.blur();
+  if (e.key === 'Enter' && (e.target.id === 'jtoday' || e.target.id === 'jsearch' || e.target.id === 'wplan')) e.target.blur();
   if (e.key === 'Enter' && e.target.id === 'jedit') { const b = document.querySelector('[data-action="savejedit"]'); if (b) b.click(); }
   if (e.key === 'Enter' && e.target.id === 'fcode') { e.preventDefault(); addFriend(); }
 });
@@ -3103,7 +3497,7 @@ document.addEventListener('keydown', e => {
 /* new day / back to app => refresh */
 function refreshIfNewDay() {
   const k = dkey(new Date());
-  if (k !== ui.day) { commitInput(); ui.day = k; if (!ui.rescue) { snapshot('daily'); } render(); }
+  if (k !== ui.day) { commitInput(); ui.day = k; ui.wrap = null; let got = []; if (!ui.rescue) { snapshot('daily'); if (!writesLocked) got = awardBadges(); } render(); badgeToast(got); }   // 2.7: a week that just ended can earn Perfect week
 }
 // If another window of the app saved newer data, take it instead of overwriting it with old data.
 function adoptNewer() {
@@ -3127,12 +3521,14 @@ async function boot() {
   if (r.status === 'ok' || r.status === 'recovered') {
     writesLocked = false; ui.rescue = null;
     reconcileSeen();   // 2.6: friends with no "last seen" yet start from the cards saved on this device
+    const caught = r.status === 'ok' || r.status === 'recovered' ? awardBadges(true) : [];   // 2.7: badges already earned in your history are recorded quietly
     if (r.status === 'ok' && r.app !== APP_VERSION) snapshot('upgrade');  // copy of the data exactly as the older version left it
     save({noCount:true});   // writes all three copies, which also repairs any damaged one
     snapshot('daily');
     askPersist();
     render(); playIn(0);
     if (r.status === 'recovered') toast('Your progress was restored from a safety copy.');
+    else if (caught.length) toast(caught.length === 1 ? 'Badge found in your history: ' + caught[0].name : caught.length + ' badges found in your history. See the Vault.');
     syncFriends();   // 2.5: share your card and fetch your friends' cards in the background
   } else {
     writesLocked = true; ui.rescue = r.status;   // 'fresh' | 'damaged' | 'unreadable': nothing is written until the person decides
