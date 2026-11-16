@@ -13,6 +13,7 @@
 <link rel="apple-touch-icon" href="icon-180.png?v=199">
 <link rel="icon" type="image/png" href="icon-192.png?v=199">
 <style>
+/* ===== Habsys 2.8.0: Morning intention on the Today card, and an evening reminder notification (needs the reminder setup). Everything else as in 2.7.0 ===== */
 /* ===== Habsys 2.7.0: small XP for daily ticks, badges, streak flame, a stronger level-up moment, Evening wrap-up, habit icons. Everything else as in 2.6.6 ===== */
 /* ===== Habsys 2.6.6: each friend row has ONE three-dot button that opens a menu with Make partner / Stop being partners and Remove friend. ===== */
 /* ===== Habsys 2.6.0: level-up spotlight at the top of the Friends tab, and a partner goal (pick one friend, see your progress toward their level on the Habits tab). Everything else as in 2.5.0 ===== */
@@ -603,6 +604,15 @@ textarea.input.sm{min-height:76px}
   .f-rk{width:40px;height:46px;font-size:18px}
 }
 
+/* ===== 2.8.0: morning intention + reminders ===== */
+.t-win{margin-top:12px;padding:10px 12px;border-radius:14px;background:rgba(255,207,110,.09);border:1px solid rgba(255,207,110,.28);font-size:14px;line-height:1.4;color:var(--white);overflow-wrap:anywhere;text-align:left;width:100%;display:block;font-family:inherit;cursor:pointer}
+.t-win b{display:block;font-family:var(--body);font-weight:700;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);margin-bottom:2px}
+.t-win.ask{background:rgba(255,255,255,.05);border-color:var(--hair);color:var(--muted)}
+.t-win.ask b{color:var(--muted)}
+.rm-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:2px 0 14px}
+.rm-row span{font-family:var(--body);font-weight:600;font-size:13px;color:var(--muted)}
+.rm-row input[type=time]{width:auto;min-width:132px;min-height:46px}
+.rm-ok{color:var(--gold)}
 /* ===== 2.7.0: habit icons, streak flame, level-up moment, badges, evening wrap-up ===== */
 .h-ic{flex:none;width:40px;height:40px;border-radius:13px;display:grid;place-items:center;font-size:22px;line-height:1;background:color-mix(in srgb,var(--ac) 20%,transparent);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--ac) 42%,transparent)}
 .h-name.hasic::before{display:none}
@@ -720,7 +730,7 @@ textarea.input.sm{min-height:76px}
 'use strict';
 
 /* ============ constants ============ */
-const APP_VERSION = '2.7.0';
+const APP_VERSION = '2.8.0';
 // 2.5.0: Friends. These two values come from your free Firebase project (they are an address, not a password).
 // While they still say PASTE..., the Friends tab explains that it is not switched on yet and the rest of the app works as before.
 const FB_API_KEY = 'AIzaSyCCW0tJgzxmgOoOf304Q6elV-D18ZyH0AM', FB_PROJECT = 'habsys-9977a';
@@ -735,6 +745,14 @@ const MAX_JOURNAL = 160;   // one sentence about the day
 const XP_TICK = 2, XP_LITE = 1;   // small XP for a daily tick: 2 for a full day, 1 for the 2-minute version (quests still give the big XP)
 const WRAP_HOUR = 18;             // the Evening wrap-up card shows on the Habits tab from this hour (6 pm)
 const MAX_PLAN = 100;             // "first move tomorrow" line
+// NEW 2.8.0: morning intention + reminders
+const MAX_INTENT = 100;           // the one thing that makes today a win
+const INTENT_BEFORE = WRAP_HOUR;  // the morning question is not asked from this hour on (the Evening wrap-up takes over)
+// Reminders need a push key (the PUBLIC half of a VAPID key pair, made once with vapid-keys.html). While it says PASTE..., the System tab explains the setup is not done yet.
+const VAPID_PUBLIC = 'PASTE_VAPID_PUBLIC_KEY_HERE';
+const PUSH_READY = !/PASTE/.test(VAPID_PUBLIC) && VAPID_PUBLIC.length > 40;
+const REMIND_LS = 'habsys_remind';   // {on, time} for THIS device (never part of backups: a push subscription belongs to one device)
+const REMIND_TIME = '20:00';
 // Habit icons: pick one per habit (optional).
 const ICONS = ['🏃','💪','🧘','🚴','🏊','🚶','🥗','💧','😴','🍎','🦷','🧴',
   '📖','✍️','🧠','🎓','🎧','🗣️','📝','🧩',
@@ -841,10 +859,11 @@ function sum53(str) {
 // 2.5: friends = {code: your own 8-letter friend code ('' until the Friends tab is first opened), list: [friend codes]}.
 // NEW 2.7: habit.icon = one emoji from ICONS ('' = none). habit.xpd = {dayKey: XP given for that tick} (last 7 days only; it lets an un-tick take the XP back).
 //          S.badges = {badgeId: dayKey earned}. S.wrap = the day the Evening wrap-up was finished ('' = none). S.plan = {day, text}: the "first move" written the evening before.
+// NEW 2.8: S.intents = {dayKey: text} = the morning intention of each day (last 400 kept). S.askedDay = the day the morning question was last answered or skipped (so it is asked once a day).
 // NEW 2.6: friends.partner = the code of the ONE friend you chose as your partner ('' = none).
 //          friends.seen = {code: {l: level, r: rank}} = the level and rank of each friend the last time you looked at the Friends tab (for the level-up spotlight).
 function defaultState() {
-  return { v:2, player:{name:'Player', xp:0}, savers:0, habits:[], rewards:[], rewardText:{}, reflections:[], cel:{}, allDay:'', checkins:{}, journal:{}, friends:{code:'', list:[], partner:'', seen:{}}, badges:{}, wrap:'', plan:{day:'', text:''}, lastBackup:null, changes:0, bigMoment:false, updatedAt:0 };
+  return { v:2, player:{name:'Player', xp:0}, savers:0, habits:[], rewards:[], rewardText:{}, reflections:[], cel:{}, allDay:'', checkins:{}, journal:{}, friends:{code:'', list:[], partner:'', seen:{}}, badges:{}, wrap:'', plan:{day:'', text:''}, intents:{}, askedDay:'', lastBackup:null, changes:0, bigMoment:false, updatedAt:0 };
 }
 function validState(s) { return !!s && typeof s === 'object' && Array.isArray(s.habits); }
 function normalize(raw) {
@@ -953,6 +972,13 @@ function normalize(raw) {
   s.wrap = okDay(String(raw.wrap)) ? raw.wrap : '';
   const pl = raw.plan && typeof raw.plan === 'object' ? raw.plan : {};
   s.plan = okDay(String(pl.day)) ? {day: pl.day, text: String(pl.text || '').replace(/\s+/g, ' ').trim().slice(0, MAX_PLAN)} : {day: '', text: ''};
+  // Morning intentions (new in 2.8). Older data and backups simply have none.
+  const it = raw.intents && typeof raw.intents === 'object' ? raw.intents : {};
+  for (const k of Object.keys(it).sort().slice(-400)) {
+    const t = String(it[k] == null ? '' : it[k]).replace(/\s+/g, ' ').trim().slice(0, MAX_INTENT);
+    if (okDay(k) && t) s.intents[k] = t;
+  }
+  s.askedDay = okDay(String(raw.askedDay)) ? raw.askedDay : '';
   s.allDay = /^\d{4}-\d{2}-\d{2}$/.test(raw.allDay) ? raw.allDay : '';
   s.lastBackup = typeof raw.lastBackup === 'string' ? raw.lastBackup : null;
   s.changes = Math.max(0, Math.floor(Number(raw.changes) || 0));
@@ -1070,6 +1096,7 @@ function save(opts) {
   if (writesLocked) return;
   writeAll(makeRec(S));
   maybeSnap();
+  remindSoon();   // 2.8: tell the reminder service how many habits are still left today (only when reminders are on)
 }
 // Re-write the current copy when the app goes to the background, in case a write was still in flight.
 // (2.3: a journal line that is still being typed is saved first.)
@@ -1639,6 +1666,7 @@ function todayPanel() {
     msg = first ? 'Cast your first vote: ' + first.identity + '.' : n + ' habit' + (n === 1 ? '' : 's') + ' to do. Start with the easiest one.';
   } else { title = 'Keep going'; msg = (n - done) + ' to go. Finish the chain today.'; }
   const focus = currentFocus();
+  const win = S.intents[tk] || '';   // 2.8: the morning intention
   const plan = S.plan && S.plan.day === tk && S.plan.text ? S.plan.text : '';   // 2.7: the first move written in last night's wrap-up
   const rows = due.map(h => {
     const d = !!h.done[tk], nm = d ? null : nmtInfo(h), col = HCOL[S.habits.indexOf(h) % HCOL.length];
@@ -1664,7 +1692,7 @@ function todayPanel() {
         <svg viewBox="0 0 112 112"><circle class="rt" cx="56" cy="56" r="46"/><circle class="rp" data-k="ring" data-off="1" cx="56" cy="56" r="46" stroke-dasharray="${C.toFixed(1)}" stroke-dashoffset="${off}" style="stroke-dashoffset:${off}"/></svg>
         <div class="rc"><span>${n ? done + '/' + n : '–'}</span><small>TODAY</small></div>
       </div>
-      <div class="t-msg"><h3>${title}</h3><p>${esc(msg)}</p>${plan ? `<div class="t-focus"><b>Your first move</b>${esc(plan)}</div>` : ''}${focus ? `<div class="t-focus"><b>This week's focus</b>${esc(focus)}</div>` : ''}</div>
+      <div class="t-msg"><h3>${title}</h3><p>${esc(msg)}</p>${win ? `<button class="t-win" data-action="intent" aria-label="Today's win. Tap to change"><b>Today is a win if</b>${esc(win)}</button>` : (new Date().getHours() < INTENT_BEFORE ? `<button class="t-win ask" data-action="intent"><b>Morning intention</b>What is the one thing that makes today a win?</button>` : '')}${plan ? `<div class="t-focus"><b>Your first move</b>${esc(plan)}</div>` : ''}${focus ? `<div class="t-focus"><b>This week's focus</b>${esc(focus)}</div>` : ''}</div>
     </div>
     ${rows ? `<div class="t-list">${rows}</div>` : ''}
   </section>`;
@@ -2207,6 +2235,8 @@ function viewSystem() {
     <button class="btn ghost block" data-action="wrap" style="margin-top:10px">Evening wrap-up</button>
   </section>
 
+  ${remindersSection()}
+
   <h2 class="sec">Data safety</h2>
   <section class="panel">
     <p class="note">Your data lives only on this device. The app keeps several protected copies and daily safety copies by itself and repairs them if one gets damaged. Only a backup file survives deleting the app or resetting the iPad, so save one regularly.</p>
@@ -2516,6 +2546,41 @@ function wrapFinish() {
   const L = levelOf(S.player.xp), lv = L > w.l0 ? {from: w.l0, to: L} : null, claim = S.habits.some(x => claimableCount(x) > 0);
   if (lv || w.nb.length) momentSheet({lv: lv, nb: w.nb, claim: claim, sub: 'Evening wrap-up complete', btn: 'Good night'});
   else toast(claim ? 'Day closed. A quest reward is waiting for you.' : 'Day closed. Rest well.');
+}
+
+/* ---- NEW 2.8.0: Morning intention. One question, once a day: "What is the one thing that makes today a win?" The answer sits on the Today card. ---- */
+function openIntent() {
+  if (ui.rescue || writesLocked) return;
+  const tk = dkey(new Date()), cur = S.intents[tk] || '', hr = new Date().getHours();
+  const hi = hr < 12 ? 'Good morning' : hr < 18 ? 'Good afternoon' : 'Good evening';
+  showModal(`<div class="wtag"><span class="tag">Habsys</span></div><h3>${hi}</h3>
+    <p class="sub">Morning intention</p>
+    <label class="field"><span>What is the one thing that makes today a win?</span><input class="input" id="intent" maxlength="${MAX_INTENT}" placeholder="e.g. Finish the report before lunch" value="${esc(cur)}" autocomplete="off"></label>
+    <p class="hint">Just one thing. It stays on your Today card all day.</p>
+    <div class="actions two"><button class="btn" data-action="intentsave">Save</button><button class="btn ghost" data-action="intentskip">${cur ? 'Cancel' : 'Skip today'}</button></div>`, '', true);
+}
+function saveIntent() {
+  if (ui.rescue || writesLocked) { closeModal(); return; }
+  const el = $('#intent'), tk = dkey(new Date());
+  const v = el ? (el.value || '').replace(/\s+/g, ' ').trim().slice(0, MAX_INTENT) : '';
+  if (v) S.intents[tk] = v; else delete S.intents[tk];
+  S.askedDay = tk;
+  save();
+  closeModal(); render();
+  toast(v ? 'Intention set. Make it happen.' : 'Intention cleared.');
+}
+function skipIntent() {
+  const tk = dkey(new Date());
+  if (!S.intents[tk] && S.askedDay !== tk && !ui.rescue && !writesLocked) { S.askedDay = tk; save({noCount: true}); }
+  closeModal();
+}
+// Asked once a day when the app is opened (before the evening, and not in the small hours). Never on top of another pop-up.
+function maybeAskIntent() {
+  if (ui.rescue || writesLocked || document.hidden || !S.habits.length) return;
+  const tk = dkey(new Date()), hr = new Date().getHours();
+  if (S.askedDay === tk || S.intents[tk] || hr >= INTENT_BEFORE || hr < 4) return;
+  if ($('#overlay').classList.contains('show')) return;
+  openIntent();
 }
 
 // 2.4: the New habit pop-up first asks for the TYPE: Regular habit (identity + flexible days, as before) or Daily task
@@ -3298,6 +3363,13 @@ const actions = {
   tick: el => toggleDay(el.dataset.id, el.dataset.day),
   rec: el => { ui.rec = el.dataset.id; renderView(); playIn(0); },
   checkin: openCheckin,
+  // NEW 2.8.0: Morning intention and reminders
+  intent: openIntent,
+  intentsave: saveIntent,
+  intentskip: skipIntent,
+  remon: enableReminders,
+  remoff: disableReminders,
+  remtest: testReminder,
   // NEW 2.7.0: Evening wrap-up and habit icons
   wrap: () => { ui.wrap = null; openWrap(1); },
   wnext: el => openWrap(Number(el.dataset.step)),
@@ -3479,6 +3551,7 @@ document.addEventListener('change', e => {
   if (e.target.id === 'pname') { S.player.name = (e.target.value || '').trim().slice(0, 24) || 'Player'; save(); toast('Name saved.'); syncFriends(true); }
   if (e.target.id === 'restoreFile') handleRestoreFile(e.target.files && e.target.files[0]);
   if (e.target.id === 'jtoday') commitInput();
+  if (e.target.id === 'rtime') setRemindTime(e.target.value);   // 2.8
 });
 // The journal line saves a moment after you stop typing. The Journal search only redraws its own list, so the keyboard stays open.
 document.addEventListener('input', e => {
@@ -3490,6 +3563,7 @@ document.addEventListener('keydown', e => {
   if (e.key === 'Escape') closeModal();
   if (e.key === 'Enter' && e.target.id === 'hname') { const b = document.querySelector('[data-action="savehabit"]'); if (b) b.click(); }
   if (e.key === 'Enter' && (e.target.id === 'jtoday' || e.target.id === 'jsearch' || e.target.id === 'wplan')) e.target.blur();
+  if (e.key === 'Enter' && e.target.id === 'intent') { const b = document.querySelector('[data-action="intentsave"]'); if (b) b.click(); }
   if (e.key === 'Enter' && e.target.id === 'jedit') { const b = document.querySelector('[data-action="savejedit"]'); if (b) b.click(); }
   if (e.key === 'Enter' && e.target.id === 'fcode') { e.preventDefault(); addFriend(); }
 });
@@ -3497,7 +3571,7 @@ document.addEventListener('keydown', e => {
 /* new day / back to app => refresh */
 function refreshIfNewDay() {
   const k = dkey(new Date());
-  if (k !== ui.day) { commitInput(); ui.day = k; ui.wrap = null; let got = []; if (!ui.rescue) { snapshot('daily'); if (!writesLocked) got = awardBadges(); } render(); badgeToast(got); }   // 2.7: a week that just ended can earn Perfect week
+  if (k !== ui.day) { commitInput(); ui.day = k; ui.wrap = null; let got = []; if (!ui.rescue) { snapshot('daily'); if (!writesLocked) got = awardBadges(); } render(); badgeToast(got); setTimeout(maybeAskIntent, 400); }   // 2.7: a week that just ended can earn Perfect week
 }
 // If another window of the app saved newer data, take it instead of overwriting it with old data.
 function adoptNewer() {
@@ -3509,10 +3583,143 @@ document.addEventListener('visibilitychange', () => {
   adoptNewer(); refreshIfNewDay();
   if (!$('#overlay').classList.contains('show')) render();   // do not redraw underneath an open popup
   syncFriends();
+  clearBadge(); remindSoon(); maybeAskIntent();   // 2.8: coming back clears the reminder badge, refreshes the reminder status and asks the morning question
 });
 window.addEventListener('pagehide', () => { if (ui.tab === 'friends') ackFriends(); flush(); });
-window.addEventListener('online', () => syncFriends(true));
+window.addEventListener('online', () => { syncFriends(true); remindSoon(); });
 setInterval(refreshIfNewDay, 60000);
+
+/* ============ reminders (2.8.0) ============ */
+// A web app cannot wake itself up at 8 pm, so the evening reminder is a PUSH notification sent by a small free "sender" (GitHub Actions, see the setup steps).
+// What this app does: asks the iPad for permission, makes a push subscription, and keeps ONE small document in your Firebase project (reminders/<your hidden sign-in id>) with:
+// reminder on/off, the time, your time zone, the push address, and how many habits are still left today. No habit names, streaks, notes or journal ever leave the device.
+// The sender looks at that document every 15 minutes and, from your reminder time, sends "N habits still left today" unless your day is already complete.
+const rem = {on: false, time: REMIND_TIME};
+try { const r = JSON.parse(localStorage.getItem(REMIND_LS) || 'null'); if (r && typeof r === 'object') { rem.on = !!r.on; if (/^([01]\d|2[0-3]):[0-5]\d$/.test(r.time)) rem.time = r.time; } } catch (e) {}
+const remSave = () => { try { localStorage.setItem(REMIND_LS, JSON.stringify({on: rem.on, time: rem.time})); } catch (e) {} };
+const rState = {busy: false, again: false, sig: '', ok: null, timer: 0, offDue: false, working: false};
+const pushSupported = () => 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
+function keyBytes(b64) {
+  const t = (b64 + '='.repeat((4 - b64.length % 4) % 4)).replace(/-/g, '+').replace(/_/g, '/'), raw = atob(t);
+  return Uint8Array.from(raw, c => c.charCodeAt(0));
+}
+// 'unsupported' | 'notready' | 'blocked' | 'off' | 'on'
+function remindState() {
+  if (!pushSupported()) return 'unsupported';
+  if (!PUSH_READY || !FB_READY) return 'notready';
+  if (Notification.permission === 'denied') return 'blocked';
+  return rem.on && Notification.permission === 'granted' ? 'on' : 'off';
+}
+function remindersSection() {
+  const st = remindState();
+  let body;
+  if (st === 'unsupported') body = '<p class="note">Reminders need Habsys to be opened from its Home Screen icon (iPadOS 16.4 or newer). Open it from the icon and come back here.</p>';
+  else if (st === 'notready') body = '<p class="note">The reminder service is not set up yet. It is a one-time setup. Ask Claude for the reminder setup steps.</p>';
+  else if (st === 'blocked') body = '<p class="note">Notifications are blocked for Habsys. Open the iPad Settings, then Notifications, then Habsys, turn on Allow Notifications and come back here.</p>';
+  else if (st === 'off') body = `<p class="note">Get one gentle reminder in the evening when habits are still left today. Nothing is sent when your day is already complete.</p>
+    <button class="btn block" data-action="remon"${rState.working ? ' disabled' : ''}>${rState.working ? 'Turning on…' : 'Turn on evening reminder'}</button>`;
+  else body = `<div class="rm-row"><span>Remind me at</span><input class="input" type="time" id="rtime" value="${esc(rem.time)}"></div>
+    <div class="kv"><span>Reminder service</span><b class="${rState.ok === true ? 'rm-ok' : ''}">${rState.ok === true ? 'Connected' : rState.ok === false ? 'Not connected yet' : 'Checking…'}</b></div>
+    <p class="note" style="margin-top:12px">You get one reminder at this time if habits are still left today. If your day is complete, nothing is sent.</p>
+    <div class="stack"><button class="btn ghost block" data-action="remtest">Send a test notification</button><button class="btn ghost block" data-action="remoff">Turn off reminder</button></div>`;
+  return '<h2 class="sec">Reminders</h2><section class="panel">' + body + '</section>';
+}
+// Redraws the System tab after a reminder change, but never under a pop-up or while the player name is being typed.
+function redrawSystem() {
+  if (ui.tab !== 'system' || ui.rescue || $('#overlay').classList.contains('show')) return;
+  const a = document.activeElement;
+  if (a && a.id === 'pname') return;
+  renderView();
+}
+async function pushSub(create) {
+  const reg = await withTimeout(navigator.serviceWorker.ready, 8000);
+  let sub = await reg.pushManager.getSubscription();
+  if (!sub && create) {
+    try { sub = await reg.pushManager.subscribe({userVisibleOnly: true, applicationServerKey: keyBytes(VAPID_PUBLIC)}); }
+    catch (e) {
+      // an old subscription made with another key blocks a new one: remove it and try once more
+      const old = await reg.pushManager.getSubscription(); if (old) await old.unsubscribe();
+      sub = await reg.pushManager.subscribe({userVisibleOnly: true, applicationServerKey: keyBytes(VAPID_PUBLIC)});
+    }
+  }
+  return sub;
+}
+// Must start from a tap: the permission question is asked before the first "await".
+async function enableReminders() {
+  if (rState.working || remindState() !== 'off') return;
+  rState.working = true;
+  let perm = Notification.permission;
+  try {
+    if (perm === 'default') perm = await Notification.requestPermission();
+    if (perm !== 'granted') { toast('Notifications were not allowed. You can allow them in the iPad Settings.'); return; }
+    await pushSub(true);
+    rem.on = true; remSave(); rState.sig = ''; rState.ok = null;
+    toast('Evening reminder is on.');
+    remindPush(true);
+  } catch (e) {
+    toast('Could not turn on the reminder. Open Habsys from its Home Screen icon and try again.');
+  } finally { rState.working = false; redrawSystem(); }
+}
+async function disableReminders() {
+  rem.on = false; remSave(); rState.offDue = true; rState.ok = null;
+  toast('Reminder turned off.');
+  redrawSystem();
+  await remindPush(true);   // tells the reminder service to stop (kept for a retry if offline)
+  try { const s = await pushSub(false); if (s) await s.unsubscribe(); } catch (e) {}
+  redrawSystem();
+}
+function setRemindTime(v) {
+  if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(v || '')) return;
+  rem.time = v; remSave(); rState.sig = '';
+  toast('Reminder time saved.');
+  remindPush(true);
+}
+async function testReminder() {
+  try {
+    const reg = await withTimeout(navigator.serviceWorker.ready, 8000), n = dueToday().filter(h => !h.done[dkey(new Date())]).length;
+    await reg.showNotification('Habsys', {body: n ? n + ' habit' + (n === 1 ? '' : 's') + ' still left today. This is a test reminder.' : 'This is a test reminder. Your day looks complete.', icon: 'icon-192.png', tag: 'habsys-test'});
+    toast('Test sent. If you cannot see it, swipe down for the Notification Centre.');
+  } catch (e) { toast('Could not show a notification.'); }
+}
+const remUrl = () => 'https://firestore.googleapis.com/v1/projects/' + encodeURIComponent(FB_PROJECT) + '/databases/(default)/documents/reminders/' + encodeURIComponent(fAuth.uid);
+// Waits a moment after the last change, then sends the status (skipped when nothing changed or reminders are off).
+function remindSoon() {
+  if (!rem.on && !rState.offDue) return;
+  clearTimeout(rState.timer);
+  rState.timer = setTimeout(() => remindPush(false), 2500);
+}
+async function remindPush(force) {
+  if (!FB_READY || !PUSH_READY || ui.rescue || writesLocked || !pushSupported()) return;
+  if (!rem.on && !rState.offDue) return;
+  if (rState.busy) { rState.again = true; return; }
+  rState.busy = true;
+  try {
+    const tk = dkey(new Date()), due = dueToday(), left = due.filter(h => !h.done[tk]).length;
+    let sub = '';
+    if (rem.on) {
+      if (Notification.permission !== 'granted') return;
+      const s = await pushSub(false); sub = s ? JSON.stringify(s.toJSON()) : '';
+      if (!sub) { rState.ok = false; return; }
+    }
+    let tz = 'UTC'; try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC'; } catch (e) {}
+    const hm = rem.time.split(':').map(Number), sig = [rem.on, sub, rem.time, tz, tk, left, due.length].join('|');
+    if (!force && sig === rState.sig) return;
+    const f = {on: {booleanValue: !!rem.on}, hour: {integerValue: String(hm[0])}, min: {integerValue: String(hm[1])}, tz: {stringValue: tz}, day: {stringValue: tk},
+      left: {integerValue: String(Math.min(20, left))}, total: {integerValue: String(Math.min(20, due.length))}, upd: {integerValue: String(Date.now())}};
+    if (sub) f.sub = {stringValue: sub};
+    const tok = await fbToken();   // only the listed fields are written, so the "sent" mark kept by the sender is never wiped
+    const r = await fbFetch(remUrl() + '?' + Object.keys(f).map(k => 'updateMask.fieldPaths=' + k).join('&'), {method: 'PATCH', headers: {Authorization: 'Bearer ' + tok, 'Content-Type': 'application/json'}, body: JSON.stringify({fields: f})});
+    if (!r.ok) throw httpErr(r.status);
+    rState.sig = sig; rState.ok = true; if (!rem.on) rState.offDue = false;
+  } catch (e) { rState.ok = false; }
+  finally {
+    rState.busy = false;
+    if (rState.again) { rState.again = false; remindSoon(); }
+    redrawSystem();
+  }
+}
+// The reminder sets the icon badge to the number of habits left; opening the app clears it.
+function clearBadge() { try { if (navigator.clearAppBadge) navigator.clearAppBadge().catch(() => {}); } catch (e) {} }
 
 /* ============ start ============ */
 async function boot() {
@@ -3530,6 +3737,8 @@ async function boot() {
     if (r.status === 'recovered') toast('Your progress was restored from a safety copy.');
     else if (caught.length) toast(caught.length === 1 ? 'Badge found in your history: ' + caught[0].name : caught.length + ' badges found in your history. See the Vault.');
     syncFriends();   // 2.5: share your card and fetch your friends' cards in the background
+    clearBadge(); remindSoon();   // 2.8
+    setTimeout(maybeAskIntent, 600);   // 2.8: the morning question, once the app is on screen
   } else {
     writesLocked = true; ui.rescue = r.status;   // 'fresh' | 'damaged' | 'unreadable': nothing is written until the person decides
     render(); playIn(0);
