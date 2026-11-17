@@ -1,0 +1,32 @@
+# Habsys evening reminders (2.8.0). Free for public repositories.
+name: Habsys reminders
+on:
+  schedule:
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+    inputs:
+      force:
+        description: 'Test run: send a reminder now to every device that has reminders on'
+        type: boolean
+        default: false
+permissions:
+  contents: read
+concurrency:
+  group: habsys-reminders
+  cancel-in-progress: false
+jobs:
+  send:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm install --no-save --no-audit --no-fund firebase-admin@12 web-push@3
+      - run: node reminders/send-reminders.js
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          VAPID_PUBLIC: ${{ secrets.VAPID_PUBLIC }}
+          VAPID_PRIVATE: ${{ secrets.VAPID_PRIVATE }}
+          FORCE: ${{ github.event.inputs.force }}

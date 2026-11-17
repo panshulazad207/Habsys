@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Habsys reminder keys</title>
+<style>
+body{margin:0;padding:28px 20px 60px;background:#0a0b10;color:#f4f5f9;font:16px/1.5 -apple-system,system-ui,sans-serif;max-width:640px;margin-inline:auto}
+h1{font-size:26px;margin:0 0 8px}p{color:#aab0c4}
+button{font:inherit;font-weight:700;border:0;border-radius:14px;padding:14px 20px;background:#5b8cff;color:#fff;margin:6px 8px 6px 0}
+button.g{background:rgba(255,255,255,.1)}
+label{display:block;margin-top:22px;font-weight:700}
+textarea{width:100%;box-sizing:border-box;min-height:84px;margin-top:8px;padding:12px;border-radius:14px;border:1px solid #2a2f45;background:#141830;color:#f4f5f9;font:14px/1.4 ui-monospace,Menlo,monospace}
+.w{color:#ffcf6e}
+</style></head><body>
+<h1>Habsys reminder keys</h1>
+<p>Makes the one pair of keys the reminders need. Everything happens on this device: nothing is sent anywhere. Make them once and keep them.</p>
+<button id="mk">Make my keys</button>
+<div id="out" hidden>
+  <label for="pub">1. Public key <span style="font-weight:400;color:#aab0c4">(give this to Claude, it goes into the app)</span></label>
+  <textarea id="pub" readonly></textarea><button class="g" data-c="pub">Copy public key</button>
+  <label for="prv">2. Private key <span class="w">(secret: paste it into GitHub only)</span></label>
+  <textarea id="prv" readonly></textarea><button class="g" data-c="prv">Copy private key</button>
+  <p class="w">Never share the private key or paste it into the app. If you press "Make my keys" again, the old pair stops working and the steps must be repeated.</p>
+</div>
+<script>
+const b64 = u8 => btoa(String.fromCharCode(...u8)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+const unb64 = s => Uint8Array.from(atob(s.replace(/-/g, '+').replace(/_/g, '/') + '='.repeat((4 - s.length % 4) % 4)), c => c.charCodeAt(0));
+document.getElementById('mk').onclick = async () => {
+  try {
+    const kp = await crypto.subtle.generateKey({name: 'ECDSA', namedCurve: 'P-256'}, true, ['sign', 'verify']);
+    const j = await crypto.subtle.exportKey('jwk', kp.privateKey);
+    const x = unb64(j.x), y = unb64(j.y), pub = new Uint8Array(65); pub[0] = 4; pub.set(x, 1); pub.set(y, 33);
+    document.getElementById('pub').value = b64(pub);
+    document.getElementById('prv').value = j.d;
+    document.getElementById('out').hidden = false;
+  } catch (e) { alert('This browser could not make the keys.'); }
+};
+document.querySelectorAll('[data-c]').forEach(b => b.onclick = async () => {
+  const t = document.getElementById(b.dataset.c); t.select();
+  try { await navigator.clipboard.writeText(t.value); b.textContent = 'Copied'; } catch (e) { document.execCommand('copy'); b.textContent = 'Copied'; }
+});
+</script></body></html>
