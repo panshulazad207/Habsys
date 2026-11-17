@@ -13,7 +13,7 @@
 <link rel="apple-touch-icon" href="icon-180.png?v=199">
 <link rel="icon" type="image/png" href="icon-192.png?v=199">
 <style>
-/* ===== Habsys 2.8.0: Morning intention on the Today card, and an evening reminder notification (needs the reminder setup). Everything else as in 2.7.0 ===== */
+/* ===== Habsys 2.9.0: Keep-going cheers for friends, a Next goal card, a graph button with Insights on every habit, and Focus time (a timer). Everything else as in 2.8.0 ===== */
 /* ===== Habsys 2.7.0: small XP for daily ticks, badges, streak flame, a stronger level-up moment, Evening wrap-up, habit icons. Everything else as in 2.6.6 ===== */
 /* ===== Habsys 2.6.6: each friend row has ONE three-dot button that opens a menu with Make partner / Stop being partners and Remove friend. ===== */
 /* ===== Habsys 2.6.0: level-up spotlight at the top of the Friends tab, and a partner goal (pick one friend, see your progress toward their level on the Habits tab). Everything else as in 2.5.0 ===== */
@@ -685,6 +685,48 @@ textarea.input.sm{min-height:76px}
 .w-mini{flex:none;border:0;border-radius:18px;padding:0 14px;background:rgba(255,255,255,.07);color:var(--blue2);font-family:var(--body);font-weight:700;font-size:12.5px}
 .w-mini:active{transform:scale(.95)}
 .wrapbtn .cib-ic{background:rgba(120,140,255,.16)}
+/* ===== 2.9.0: cheers, next goal, habit insights button, focus time ===== */
+.h-ins{width:40px;height:40px;flex:none;display:grid;place-items:center;border-radius:50%;background:var(--surface2);border:1px solid var(--hair);color:var(--muted);transition:background .2s,color .2s,transform .2s var(--spring)}
+.h-ins svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.h-ins:active{background:var(--surface3);color:var(--white);transform:scale(.9)}
+@media (hover:hover){.h-ins:hover{background:var(--surface3);color:var(--white)}}
+.goal{display:block;width:100%;margin-bottom:18px;padding:16px 18px 18px;border-radius:24px;text-align:left;border-color:rgba(110,231,183,.28);background:linear-gradient(135deg,rgba(110,231,183,.1),rgba(60,180,140,.03)),var(--surface)}
+.goal .tag{display:block;margin-bottom:3px;font-weight:700;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:#6ee7b7}
+.goal.empty{border-style:dashed;transition:transform .22s var(--spring)}
+.goal.empty:active{transform:scale(.985)}
+.goal.empty b{display:block;font-family:var(--head);font-weight:800;font-size:19px;letter-spacing:-.01em}
+.goal.empty small{display:block;margin:4px 0 10px;font-size:13.5px;line-height:1.4;color:var(--muted)}
+.goal-plus{font-family:var(--body);font-weight:700;font-size:13px;color:#6ee7b7}
+.goal-top{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.goal-top .tag{margin:0}
+.goal-chip{flex:none;padding:4px 11px;border-radius:999px;background:rgba(110,231,183,.14);color:#6ee7b7;font-family:var(--body);font-weight:700;font-size:12px}
+.goal-t{display:flex;align-items:center;gap:10px;width:100%;min-height:44px;margin:4px 0 8px;padding:0;text-align:left;font-family:var(--head);font-weight:800;font-size:22px;letter-spacing:-.015em;color:var(--white)}
+.goal-t span{flex:1;min-width:0;overflow-wrap:anywhere}
+.goal-t svg{flex:none;width:13px;height:13px;opacity:.35}
+.goal-s{display:block;margin:10px 0 14px;font-size:13.5px;line-height:1.4;color:var(--muted)}
+.goal .bar{margin-top:2px}
+.spot-ic.ch{background:linear-gradient(160deg,#ffd0dc,#ff8aa8 55%,#ff6b8f);color:#4a0f22}
+.ins-in{padding:13px 0;border-top:1px solid var(--hair)}
+.ins-in:first-of-type{border-top:0}
+.ins-in .tag{display:block;margin-bottom:5px;font-weight:700;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--blue2)}
+.ins-in p{margin:0 0 8px;font-size:14.5px;line-height:1.45}
+.win .chart-cap{margin-top:8px}
+.fc-ring{position:relative;width:min(68vw,240px);margin:6px auto 20px}
+.fc-ring svg{display:block;width:100%;transform:rotate(-90deg)}
+.fc-t{fill:none;stroke:rgba(255,255,255,.09);stroke-width:10}
+.fc-p{fill:none;stroke:var(--blue2);stroke-width:10;stroke-linecap:round;transition:stroke-dashoffset .5s linear;filter:drop-shadow(0 0 8px rgba(91,140,255,.55))}
+.fc-mid{position:absolute;inset:0;display:grid;place-content:center;text-align:center}
+.fc-mid b{font-family:var(--head);font-weight:800;font-size:46px;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.fc-mid small{font-family:var(--body);font-weight:700;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.fc-done{text-align:center;margin:4px 0 20px}
+.fc-done b{display:block;font-family:var(--head);font-weight:800;font-size:44px;letter-spacing:-.02em;color:var(--blue2)}
+.fc-done small{font-size:14px;color:var(--muted)}
+.fc-pill{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 84px);transform:translateX(-50%);z-index:30;display:flex;align-items:center;gap:10px;max-width:calc(100vw - 32px);padding:10px 18px;border:1px solid var(--hair2);border-radius:999px;background:rgba(36,39,53,.94);color:var(--white);box-shadow:0 8px 28px rgba(0,0,0,.45);font-family:var(--body);font-weight:600;font-size:14px}
+.fc-pill[hidden]{display:none}
+.fc-pill b{font-family:var(--head);font-weight:800;font-size:16px;font-variant-numeric:tabular-nums}
+.fc-pill small{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--muted);font-size:13px}
+.fc-pill i{flex:none;width:9px;height:9px;border-radius:50%;background:#6ee7b7;box-shadow:0 0 10px #6ee7b7}
+.fc-pill.paused i{background:var(--gold);box-shadow:0 0 10px var(--gold)}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -730,7 +772,7 @@ textarea.input.sm{min-height:76px}
 'use strict';
 
 /* ============ constants ============ */
-const APP_VERSION = '2.8.0';
+const APP_VERSION = '2.9.0';
 // 2.5.0: Friends. These two values come from your free Firebase project (they are an address, not a password).
 // While they still say PASTE..., the Friends tab explains that it is not switched on yet and the rest of the app works as before.
 const FB_API_KEY = 'AIzaSyCCW0tJgzxmgOoOf304Q6elV-D18ZyH0AM', FB_PROJECT = 'habsys-9977a';
@@ -748,6 +790,13 @@ const MAX_PLAN = 100;             // "first move tomorrow" line
 // NEW 2.8.0: morning intention + reminders
 const MAX_INTENT = 100;           // the one thing that makes today a win
 const INTENT_BEFORE = WRAP_HOUR;  // the morning question is not asked from this hour on (the Evening wrap-up takes over)
+// NEW 2.9.0: next goal, keep-going cheers, habit insights button, focus time
+const MAX_GOAL = 60;                              // the "next goal" text, for example: Run a 5K
+const FB_CHEERS = 'habsys_friend_cheers';         // cheers last seen from friends (this device only, never part of backups)
+const CHEER_GAP = 6 * 3600 * 1000;                // one cheer per friend every 6 hours
+const CHEER_KEEP = 7 * 86400000;                  // a cheer leaves the spotlight after 7 days at the latest
+const FOCUS_LS = 'habsys_focus';                  // the running focus timer of THIS device (not part of backups)
+const FOCUS_MAX = 180;                            // longest focus time in minutes
 // Reminders need a push key (the PUBLIC half of a VAPID key pair, made once with vapid-keys.html). While it says PASTE..., the System tab explains the setup is not done yet.
 const VAPID_PUBLIC = 'PASTE_VAPID_PUBLIC_KEY_HERE';
 const PUSH_READY = !/PASTE/.test(VAPID_PUBLIC) && VAPID_PUBLIC.length > 40;
@@ -814,6 +863,8 @@ const ARR_DOWN = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 
 const CROSS = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>';
 // 2.6.0: a double arrow up (level-up spotlight) and a star (partner)
 const LVUP = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 13l6-6 6 6M6 19l6-6 6 6" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const GRAPH = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4v16h16"/><path d="M8.5 15.5v-3M12.5 15.5V8.5M16.5 15.5v-5"/></svg>';
+const CHEER = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5s-7.5-4.6-7.5-10A4.3 4.3 0 0 1 12 7.8a4.3 4.3 0 0 1 7.5 2.7c0 5.4-7.5 10-7.5 10z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/></svg>';
 const STAR = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5l2.6 5.4 5.9.8-4.3 4.1 1 5.8-5.2-2.8-5.2 2.8 1-5.8L3.5 9.7l5.9-.8z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/></svg>';
 
 /* ============ helpers ============ */
@@ -863,7 +914,7 @@ function sum53(str) {
 // NEW 2.6: friends.partner = the code of the ONE friend you chose as your partner ('' = none).
 //          friends.seen = {code: {l: level, r: rank}} = the level and rank of each friend the last time you looked at the Friends tab (for the level-up spotlight).
 function defaultState() {
-  return { v:2, player:{name:'Player', xp:0}, savers:0, habits:[], rewards:[], rewardText:{}, reflections:[], cel:{}, allDay:'', checkins:{}, journal:{}, friends:{code:'', list:[], partner:'', seen:{}}, badges:{}, wrap:'', plan:{day:'', text:''}, intents:{}, askedDay:'', lastBackup:null, changes:0, bigMoment:false, updatedAt:0 };
+  return { v:2, player:{name:'Player', xp:0}, savers:0, habits:[], rewards:[], rewardText:{}, reflections:[], cel:{}, allDay:'', checkins:{}, journal:{}, friends:{code:'', list:[], partner:'', seen:{}, cheerSeen:{}, cheerSent:{}}, goal:{text:'', date:'', set:''}, goals:[], badges:{}, wrap:'', plan:{day:'', text:''}, intents:{}, askedDay:'', lastBackup:null, changes:0, bigMoment:false, updatedAt:0 };
 }
 function validState(s) { return !!s && typeof s === 'object' && Array.isArray(s.habits); }
 function normalize(raw) {
@@ -896,6 +947,11 @@ function normalize(raw) {
     if (h && h.xpd && typeof h.xpd === 'object') {
       for (const k of Object.keys(h.xpd).sort().slice(-7)) { const n = Math.floor(Number(h.xpd[k])); if (/^\d{4}-\d{2}-\d{2}$/.test(k) && n >= 1 && n <= 5) xpd[k] = n; }
     }
+    // 2.9: minutes of focus time per day (last 400 days kept)
+    const focus = {};
+    if (h && h.focus && typeof h.focus === 'object') {
+      for (const k of Object.keys(h.focus).sort().slice(-400)) { const n = Math.floor(Number(h.focus[k])); if (/^\d{4}-\d{2}-\d{2}$/.test(k) && n >= 1 && n <= 1440) focus[k] = n; }
+    }
     return {
       id: String((h && h.id) || uid()),
       name: String((h && h.name) || 'Habit').trim().slice(0, 30) || 'Habit',
@@ -910,7 +966,8 @@ function normalize(raw) {
       tlog: tlog,
       claimed: Math.min(TIERS.length, Math.max(0, Math.floor(Number(h && h.claimed) || 0))),
       icon: ICONS.indexOf(h && h.icon) >= 0 ? h.icon : '',
-      xpd: xpd
+      xpd: xpd,
+      focus: focus
     };
   });
   // FIX 2.2.0: an empty entry in the rewards list no longer stops the app from loading.
@@ -979,6 +1036,19 @@ function normalize(raw) {
     if (okDay(k) && t) s.intents[k] = t;
   }
   s.askedDay = okDay(String(raw.askedDay)) ? raw.askedDay : '';
+  // Next goal and achieved goals (new in 2.9). Older data and backups simply have none.
+  const gl = raw.goal && typeof raw.goal === 'object' ? raw.goal : {};
+  const gt = String(gl.text == null ? '' : gl.text).replace(/\s+/g, ' ').trim().slice(0, MAX_GOAL);
+  if (gt) s.goal = {text: gt, date: okDay(String(gl.date)) ? gl.date : '', set: okDay(String(gl.set)) ? gl.set : dkey(new Date())};
+  s.goals = (Array.isArray(raw.goals) ? raw.goals : []).filter(g => g && typeof g === 'object' && String(g.text || '').trim() && okDay(String(g.at))).slice(0, 100)
+    .map(g => ({text: String(g.text).replace(/\s+/g, ' ').trim().slice(0, MAX_GOAL), at: g.at, set: okDay(String(g.set)) ? g.set : g.at}));
+  // Cheers (new in 2.9): when you last looked at each friend's cheer, and when you last cheered each friend.
+  const cs = fr.cheerSeen && typeof fr.cheerSeen === 'object' ? fr.cheerSeen : {}, cn = fr.cheerSent && typeof fr.cheerSent === 'object' ? fr.cheerSent : {};
+  for (const c of s.friends.list) {
+    const a = Math.floor(Number(cs[c])), b = Math.floor(Number(cn[c]));
+    if (a > 0) s.friends.cheerSeen[c] = a;
+    if (b > 0) s.friends.cheerSent[c] = b;
+  }
   s.allDay = /^\d{4}-\d{2}-\d{2}$/.test(raw.allDay) ? raw.allDay : '';
   s.lastBackup = typeof raw.lastBackup === 'string' ? raw.lastBackup : null;
   s.changes = Math.max(0, Math.floor(Number(raw.changes) || 0));
@@ -1522,9 +1592,9 @@ function weekdayAll() {
 }
 // The insight cards shown in Records: hardest days (with the offer of a 2-minute version) and what lifts mood and energy.
 // 2.4: a Daily task habit has no 2-minute version, so its card suggests planning a lighter task for that weekday instead.
-function insights() {
-  const found = [];
-  S.habits.forEach(h => {
+function insights(only) {   // 2.9: pass one habit to get only its cards (used by the graph button on a habit)
+  const found = [], hs = only ? [only] : S.habits;
+  hs.forEach(h => {
     const t = toughDay(h);
     if (!t) return;
     const base = 'You miss ' + h.name + ' most on ' + DAY_PLURAL[t.wd] + ' (' + t.miss + ' of ' + t.due + '). ';
@@ -1536,7 +1606,7 @@ function insights() {
   const list = found.slice(0, 3);
   [['m', 'mood', 'Mood lift'], ['e', 'energy', 'Energy lift']].forEach(f => {
     let best = null;
-    S.habits.forEach(h => { const l = moodLift(h, f[0]); if (l && l.lift >= 0.5 && (!best || l.lift > best.l.lift)) best = {h: h, l: l}; });
+    hs.forEach(h => { const l = moodLift(h, f[0]); if (l && l.lift >= 0.5 && (!best || l.lift > best.l.lift)) best = {h: h, l: l}; });
     if (best) list.push({tag: f[2], text: 'Your ' + f[1] + ' averages ' + best.l.avgDone.toFixed(1) + ' (out of 5) on days you do ' + best.h.name + ', against ' + best.l.avgNot.toFixed(1) + ' on days you do not. It is a pattern, not proof, but worth protecting on low days.'});
   });
   return list;
@@ -1773,6 +1843,7 @@ function viewHabits() {
     </div>
     <div class="p-lv"><small>LV</small><b>${L}</b></div>
   </section>`;
+  html += cheerSpotHtml();   // 2.9: a friend cheered you on
   html += partnerCard();
   html += todayPanel();
   html += wrapCard();
@@ -1788,6 +1859,7 @@ function viewHabits() {
   if (!S.habits.length) {
     html += `<section class="panel empty"><div class="tag">Habsys</div><h3>Welcome, ${esc(S.player.name)}</h3><p>You have no habits yet. Add your first one (up to ${MAX_HABITS}) and start your first quest.</p></section>`;
   }
+  html += goalCard();   // 2.9: the next goal sits right above the habits
   // Arrange button: only useful with two or more habits.
   if (S.habits.length > 1) {
     html += `<div class="arrbar"><button class="btn ghost sm" data-action="arrange">Arrange habits</button></div>`;
@@ -1863,6 +1935,7 @@ function habitCard(h) {
   <section class="panel habit">
     <div class="h-head">
       <button class="h-name${h.icon ? ' hasic' : ''}" data-action="edit" data-id="${esc(h.id)}" aria-label="Edit ${esc(h.name)}">${h.icon ? '<span class="h-ic" aria-hidden="true">' + esc(h.icon) + '</span>' : ''}<span>${esc(h.name)}</span>${PENCIL}</button>
+      <button class="h-ins" data-action="insights" data-id="${esc(h.id)}" aria-label="Insights for ${esc(h.name)}">${GRAPH}</button>
       <button class="h-more" data-action="extras" data-id="${esc(h.id)}" aria-label="${h.task ? 'Write the task for ' + esc(h.name) : 'Options for ' + esc(h.name) + ': identity, 2-minute habit, note, flexible days'}">${DOTS}</button>
       <div class="streak"><small>STREAK</small><span class="sn">${flameHtml(h, cur, fxOn ? ' ign' : '')}<b${fxOn ? ' class="bump"' : ''}>${cur}</b></span></div>
     </div>
@@ -1961,14 +2034,7 @@ function monthPanel(h, y, m, st, tk) {
 }
 
 /* ---- Records sections (insights, trends from 2.3.0; mood and journal data now live in a pop-up in 2.3.5) ---- */
-function insightsSection() {
-  const list = insights();
-  const head = '<h2 class="sec">Insights</h2>';
-  if (!list.length) {
-    return head + '<section class="panel"><p class="note" style="margin:0">No clear patterns yet. Keep ticking your habits and checking in. After about three weeks, Habsys starts to spot your hardest days and what lifts your mood and energy.</p></section>';
-  }
-  return head + '<div class="stack">' + list.map(i => `<section class="panel ins"><span class="tag">${esc(i.tag)}</span><p>${esc(i.text)}</p>${i.offer ? `<button class="btn sm" data-action="xmini" data-id="${esc(i.hid)}">Set a 2-minute version</button>` : ''}</section>`).join('') + '</div>';
-}
+// 2.9.0: the habit Insights moved out of Records. Each habit has a graph button next to its three dots (see openInsights).
 function trendsSection() {
   // 1. weekly completion trend (all habits, last 12 weeks)
   const mon = parseKey(weekKey(new Date())), wk = [];
@@ -2064,7 +2130,7 @@ function moodDataButton() {
   </button>`;
 }
 // Streak of one habit at the end of each of the last 12 weeks.
-function streakTimeHtml(h) {
+function streakTimeHtml(h, bare) {
   const today = new Date(), tk = dkey(today), mon = parseKey(weekKey(today)), vals = [];
   for (let i = 11; i >= 0; i--) {
     const sun = addDays(mon, -7 * i + 6);
@@ -2073,6 +2139,7 @@ function streakTimeHtml(h) {
   }
   const mx = Math.max(1, ...vals.map(v => v == null ? 0 : v));
   const cols = vals.map((v, i) => ({v: v, show: v == null ? '' : v, label: String(addDays(mon, -7 * (11 - i)).getDate()), best: v != null && v > 0 && v === mx}));
+  if (bare) return `<div class="mini">Streak over time</div>${chartHtml(cols, mx)}<p class="chart-cap">Streak at the end of each of the last 12 weeks. Longest ever: <b>${longestStreak(h)}</b>.</p>`;
   return `<section class="panel" style="margin-top:12px"><span class="panel-t">Streak over time</span>${chartHtml(cols, mx)}<p class="chart-cap">Streak at the end of each of the last 12 weeks. Longest ever: <b>${longestStreak(h)}</b>.</p></section>`;
 }
 // 2.4: the finished tasks of a Daily task habit (newest first), shown under its stats in Records.
@@ -2147,8 +2214,8 @@ function viewRecords() {
   let y = sd.getFullYear(), m = sd.getMonth();
   while (y < now.getFullYear() || (y === now.getFullYear() && m <= now.getMonth())) { months.push([y, m]); if (++m > 11) { m = 0; y++; } }
   html += '<div class="months">' + months.reverse().map(p => monthPanel(h, p[0], p[1], st, tk)).join('') + '</div>';
-  // 3. insights, 4. trends (weekly completion, best weekday, best streaks), 5. mood and journal behind a button
-  html += insightsSection() + trendsSection() + moodDataButton();
+  // 3. trends (weekly completion, best weekday, best streaks), 4. mood and journal behind a button (2.9: habit insights now live on each habit)
+  html += trendsSection() + moodDataButton();
   return html;
 }
 
@@ -2197,6 +2264,7 @@ function viewFriends() {
   const rows = [{me: true, code: S.friends.code, name: S.player.name, level: L, rank: rankOf(L)}]
     .concat(S.friends.list.map(c => { const k = fcardOf(c), p = S.friends.partner === c; return k ? {me: false, code: c, name: k.name, level: k.level, rank: k.rank, partner: p} : {me: false, code: c, name: null, partner: p}; }));
   rows.sort((a, b) => (b.name != null ? b.level : -1) - (a.name != null ? a.level : -1) || String(a.name).localeCompare(String(b.name)));
+  html += cheerSpotHtml();   // 2.9
   html += spotlightHtml();
   html += `<section class="panel">
     <span class="panel-t">Your friend code</span>
@@ -2213,7 +2281,7 @@ function viewFriends() {
   <h2 class="sec">Leaderboard</h2>
   <div class="flist">${rows.map(friendRow).join('')}</div>`;
   if (!S.friends.list.length) html += '<p class="fstat">No friends yet. Add a code above, or send yours.</p>';
-  else html += '<p class="fstat">Tap the three dots on a friend to make them your partner or remove them. Your progress toward their level shows on the Habits tab.</p>';
+  else html += '<p class="fstat">Tap the three dots on a friend to send a Keep going cheer, make them your partner or remove them. Your progress toward their level shows on the Habits tab.</p>';
   return html;
 }
 
@@ -2257,6 +2325,331 @@ function viewSystem() {
     <div class="kv"><span>Version</span><b>${APP_VERSION}</b></div>
     <div class="stack" style="margin-top:14px"><button class="btn danger block" data-action="erase">Erase all data</button></div>
   </section>`;
+}
+
+/* ============ NEW 2.9.0: next goal, keep-going cheers, habit insights, focus time ============ */
+
+/* ---- Next goal: one big goal (for example "Run a 5K") above the habits. S.goal = {text, date, set}, S.goals = achieved goals. ---- */
+function goalLeft() {
+  const g = S.goal;
+  if (!g.text || !g.date) return null;
+  return Math.round((parseKey(g.date) - parseKey(dkey(new Date()))) / 86400000);
+}
+function goalCard() {
+  const g = S.goal, n = S.goals.length;
+  if (!g.text) {
+    return `<button class="panel goal empty" data-action="goal" aria-label="Set your next goal"><span class="tag">Next goal</span><b>What are you working toward?</b><small>${n ? n + (n === 1 ? ' goal' : ' goals') + ' achieved so far. ' : ''}Pick one big goal your habits lead to, like a 5K run.</small><span class="goal-plus">+ Set a goal</span></button>`;
+  }
+  const left = goalLeft();
+  let chip = '', bar = '', sub = 'Working on it since ' + fmtKey(g.set) + '.';
+  if (left !== null) {
+    chip = left > 1 ? left + ' days left' : left === 1 ? 'Tomorrow' : left === 0 ? 'Due today' : (-left) + (left === -1 ? ' day over' : ' days over');
+    const total = Math.max(1, Math.round((parseKey(g.date) - parseKey(g.set)) / 86400000)), used = total - left;
+    const pct = left <= 0 ? 100 : Math.max(0, Math.min(99, Math.round(used / total * 100)));
+    bar = `<div class="bar" style="--ac:#6ee7b7"><i style="width:${pct}%"></i></div>`;
+    sub = 'Target date ' + fmtKey(g.date) + '. The bar shows how much of the time has passed.';
+  }
+  return `<section class="panel goal">
+    <div class="goal-top"><span class="tag">Next goal</span>${chip ? '<span class="goal-chip">' + esc(chip) + '</span>' : ''}</div>
+    <button class="goal-t" data-action="goal" aria-label="Edit your goal: ${esc(g.text)}"><span>${esc(g.text)}</span>${PENCIL}</button>
+    ${bar}<span class="goal-s">${esc(sub)}</span>
+    <button class="btn sm" data-action="goaldone">I achieved it</button>
+  </section>`;
+}
+function openGoal() {
+  const g = S.goal, tk = dkey(new Date());
+  const past = S.goals.slice(0, 5).map(x => `<div class="kv"><span>${esc(x.text)}</span><b>${esc(fmtKey(x.at))}</b></div>`).join('');
+  showModal(`
+    <div class="wtag"><span class="tag">Habsys</span></div>
+    <h3>${g.text ? 'Your next goal' : 'Set your next goal'}</h3>
+    <p class="sub">The big thing your habits lead to</p>
+    <label class="field"><span>Goal</span><input class="input" id="gtext" maxlength="${MAX_GOAL}" placeholder="e.g. Run a 5K" value="${esc(g.text)}" autocomplete="off"></label>
+    <label class="field"><span>Target date (optional)</span><input class="input" id="gdate" type="date"${!g.date || g.date >= tk ? ' min="' + tk + '"' : ''} value="${esc(g.date)}"></label>
+    <p class="hint">One goal at a time keeps you focused. Your habits are the daily steps toward it. When you reach it, mark it achieved and set the next one.</p>
+    <div class="actions">
+      <button class="btn" data-action="goalsave">Save</button>
+      ${g.text ? '<button class="btn danger" data-action="goalremove">Remove goal</button>' : ''}
+      <button class="btn ghost" data-action="close">Cancel</button>
+    </div>
+    ${past ? '<div class="mini">Achieved goals</div><div class="grp">' + past + '</div>' : ''}`);
+}
+
+/* ---- Insights of ONE habit (the graph button next to the three dots). The overall Insights section left Records in 2.9.0. ---- */
+const fmtMin = n => n < 60 ? n + ' min' : Math.floor(n / 60) + ' h' + (n % 60 ? ' ' + (n % 60) + ' min' : '');
+function habitWeekdayHtml(h) {
+  const c = weekdayCounts(h, 365), tot = c.due.reduce((a, b) => a + b, 0);
+  const rates = c.due.map((n, w) => n >= 2 ? Math.round((n - c.miss[w]) / n * 100) : null);
+  const head = '<div class="mini">Best weekday</div>';
+  if (tot < 21 || rates.filter(r => r != null).length < 2) return head + '<p class="chart-cap">Needs about three weeks of tracking before it can tell your strong days from your hard ones.</p>';
+  let best = -1, worst = -1;
+  rates.forEach((r, w) => { if (r == null) return; if (best < 0 || r > rates[best]) best = w; if (worst < 0 || r < rates[worst]) worst = w; });
+  const cols = rates.map((r, w) => ({v: r, show: r == null ? '' : r, label: DAY_SHORT[w], best: w === best && best !== worst}));
+  const cap = best !== worst
+    ? 'Strongest day: <b>' + DAY_LONG[best] + '</b> (' + rates[best] + '%). Hardest: <b>' + DAY_LONG[worst] + '</b> (' + rates[worst] + '%).'
+    : 'Your days are all very even.';
+  return head + chartHtml(cols, 100) + '<p class="chart-cap">' + cap + ' Share of days done, last year.</p>';
+}
+function focusStats(h) {
+  const f = h.focus || {}, today = new Date(), mins = [];
+  let total = 0, week = 0;
+  Object.keys(f).forEach(k => { total += f[k]; });
+  for (let i = 6; i >= 0; i--) { const d = addDays(today, -i), m = f[dkey(d)] || 0; week += m; mins.push({d: d, m: m}); }
+  const mx = Math.max(30, ...mins.map(x => x.m));
+  return {total: total, week: week, today: f[dkey(today)] || 0, mx: mx, cols: mins.map(x => ({v: x.m, show: x.m ? x.m : '', label: DAY_SHORT[wdOf(x.d)], best: false}))};
+}
+function openInsights(id) {
+  const h = findHabit(id); if (!h) return;
+  const st = habitStats(h), fs = focusStats(h), list = insights(h);
+  const tile = (l, v) => `<div class="stat"><small>${l}</small><b>${v}</b></div>`;
+  const cards = list.length
+    ? list.map(i => `<div class="ins-in"><span class="tag">${esc(i.tag)}</span><p>${esc(i.text)}</p>${i.offer ? `<button class="btn sm" data-action="xmini" data-id="${esc(h.id)}">Set a 2-minute version</button>` : ''}</div>`).join('')
+    : '<p class="chart-cap">No clear patterns yet. After about three weeks of ticking and checking in, Habsys starts to spot the hardest days of this habit and what lifts your mood and energy.</p>';
+  showModal(`
+    <div class="wtag"><span class="tag">Habsys</span></div>
+    <h3>Insights</h3>
+    <p class="sub">${h.icon ? esc(h.icon) + ' ' : ''}${esc(h.name)}</p>
+    <div class="stats">
+      ${tile('Days done', st.nDone)}${tile('Success rate', st.rate === null ? '—' : st.rate + '%')}
+      ${tile('Current streak', currentStreak(h))}${tile('Longest streak', longestStreak(h))}
+      ${tile('Missed days', st.missed)}${tile('Bounce-backs', st.bounce)}
+      ${h.task ? tile('Tasks done', Object.keys(h.tlog || {}).length) : tile('Quests cleared', h.claimed + ' / ' + TIERS.length)}${tile('Focus this week', fmtMin(fs.week))}
+    </div>
+    <div class="mini">Patterns</div>
+    ${cards}
+    ${habitWeekdayHtml(h)}
+    ${streakTimeHtml(h, true)}
+    <div class="mini">Focus time</div>
+    ${chartHtml(fs.cols, fs.mx)}
+    <p class="chart-cap">Minutes of focus time over the last 7 days. This week: <b>${fmtMin(fs.week)}</b>. All time: <b>${fmtMin(fs.total)}</b>.</p>
+    <div class="actions" style="margin-top:16px">
+      <button class="btn" data-action="focus" data-id="${esc(h.id)}">Start focus time</button>
+      <button class="btn ghost" data-action="close">Close</button>
+    </div>`, '', true);
+}
+
+/* ---- Keep-going cheers. A cheer is ONE tiny online document per pair: cheers/<receiver code>_<sender code> (sender code, sender name, time). ----
+   Sending again replaces it. The receiver reads only the documents of the friends in their OWN list (a code lookup, like the cards), so nobody is ever searched or listed. */
+let fCheers = {};
+try {
+  const x = JSON.parse(localStorage.getItem(FB_CHEERS) || 'null');
+  if (x && typeof x === 'object') for (const c of Object.keys(x)) { const k = x[c]; if (CODE_RE.test(c) && k && Number(k.upd) > 0) fCheers[c] = {name: String(k.name || '').slice(0, 24), upd: Number(k.upd)}; }
+} catch (e) {}
+function saveCCache() { try { localStorage.setItem(FB_CHEERS, JSON.stringify(fCheers)); } catch (e) {} }
+const fsCheerUrl = (to, from) => 'https://firestore.googleapis.com/v1/projects/' + encodeURIComponent(FB_PROJECT) + '/databases/(default)/documents/cheers/' + to + '_' + from;
+async function fsGetCheer(from) {
+  const me = S.friends.code;
+  if (!CODE_RE.test(me)) return null;
+  const tok = await fbToken();
+  const r = await fbFetch(fsCheerUrl(me, from), {headers: {Authorization: 'Bearer ' + tok}});
+  if (r.status === 404) return null;
+  if (!r.ok) throw httpErr(r.status);
+  const f = (await r.json()).fields;
+  const nm = f && f.name && f.name.stringValue, upd = Number(f && f.upd && f.upd.integerValue);
+  if (typeof nm !== 'string' || !(upd > 0) || !f.from || f.from.stringValue !== from || !f.to || f.to.stringValue !== me) return null;
+  return {name: nm.slice(0, 24), upd: upd};
+}
+// The cheers you have not seen yet, from friends in your list, newest first. A cheer leaves the spotlight after 7 days.
+function cheersNew() {
+  const out = [], now = Date.now();
+  S.friends.list.forEach(c => {
+    const k = fCheers[c];
+    if (!k || k.upd <= (S.friends.cheerSeen[c] || 0) || now - k.upd > CHEER_KEEP || k.upd > now + 86400000) return;
+    const card = fcardOf(c);
+    out.push({code: c, name: card ? card.name : (k.name || 'A friend'), upd: k.upd});
+  });
+  return out.sort((a, b) => b.upd - a.upd);
+}
+function agoText(t) {
+  const m = Math.floor((Date.now() - t) / 60000);
+  if (m < 2) return 'just now';
+  if (m < 60) return m + ' min ago';
+  const h = Math.floor(m / 60);
+  if (h < 24) return h + (h === 1 ? ' hour ago' : ' hours ago');
+  const d = Math.floor(h / 24);
+  return d === 1 ? 'yesterday' : d + ' days ago';
+}
+function cheerSpotHtml() {
+  const list = cheersNew();
+  if (!list.length) return '';
+  const rows = list.slice(0, 5).map(u => `<div class="spot-row"><span class="spot-ic ch">${CHEER}</span><span class="spot-t"><b>${esc(u.name)} says: Keep going!</b><small>${esc(agoText(u.upd))} · you have got this</small></span><button class="f-x" data-action="cheerack" data-code="${esc(u.code)}" aria-label="Dismiss the cheer from ${esc(u.name)}">${CROSS}</button></div>`).join('');
+  return `<section class="panel spot" id="cheerSpot" aria-live="polite"><span class="spot-h">Keep going cheer</span>${rows}${list.length > 5 ? `<p class="spot-more">and ${list.length - 5} more</p>` : ''}</section>`;
+}
+// When a new cheer arrives while you are on the Habits tab, only the cheer card is swapped in (no full redraw, so a tick effect is never cut short).
+function refreshCheerSpot() {
+  if (ui.tab !== 'habits' || ui.rescue || $('#overlay').classList.contains('show')) return;
+  const old = document.getElementById('cheerSpot'), html = cheerSpotHtml();
+  if (old) { if (html) old.outerHTML = html; else old.remove(); }
+  else if (html) { const p = document.querySelector('#view .panel.player'); if (p) p.insertAdjacentHTML('afterend', html); }
+}
+function ackCheer(code) {
+  if (ui.rescue || writesLocked) return;
+  const k = fCheers[code];
+  if (!k || S.friends.list.indexOf(code) < 0) return;
+  S.friends.cheerSeen[code] = k.upd; save({noCount: true});
+  if (ui.tab === 'friends') redrawFriends(); else refreshCheerSpot();
+}
+const waitText = ms => { const m = Math.ceil(ms / 60000); return m >= 60 ? Math.ceil(m / 60) + ' h' : m + ' min'; };
+async function sendCheer(code) {
+  if (!FB_READY || ui.rescue || writesLocked || fState.cheering) return;
+  const k = fcardOf(code), nm = k ? k.name : 'your friend', left = CHEER_GAP - (Date.now() - (S.friends.cheerSent[code] || 0));
+  if (left > 0) { toast('You cheered ' + nm + ' recently. You can send another in ' + waitText(left) + '.'); return; }
+  fState.cheering = true; toast('Sending your cheer…');
+  try {
+    ensureCode();
+    try { await fsPush(); } catch (e) {}   // makes sure your own card is online (the rules check that the code is yours)
+    const tok = await fbToken();
+    const body = JSON.stringify({fields: {owner: {stringValue: fAuth.uid}, from: {stringValue: S.friends.code}, to: {stringValue: code}, name: {stringValue: S.player.name}, upd: {integerValue: String(Date.now())}}});
+    const r = await fbFetch(fsCheerUrl(code, S.friends.code), {method: 'PATCH', headers: {Authorization: 'Bearer ' + tok, 'Content-Type': 'application/json'}, body: body});
+    if (!r.ok) throw httpErr(r.status);
+    S.friends.cheerSent[code] = Date.now(); save({noCount: true});
+    toast('Keep going cheer sent to ' + nm + '. They will see it in their spotlight.');
+  } catch (e) {
+    toast(e && (e.status === 403 || e.status === 401) ? 'Firebase refused the cheer. Check that the 2.9 rules were published.' : errText(e));
+  } finally { fState.cheering = false; }
+}
+
+/* ---- Focus time. A timer for one habit, started from the three-dot menu. ----
+   It is stored as an END TIME, not a count, so it stays right while the iPad sleeps or the app is closed.
+   focus = null | {id, dur (ms), end (ms, while running), left (ms, while paused)}. Kept on this device only (not in backups).
+   Finished minutes are added to the habit (habit.focus = {dayKey: minutes}) and shown in its Insights. */
+let focus = null, fTick = 0, fWake = null, fAudio = null;
+try {
+  const x = JSON.parse(localStorage.getItem(FOCUS_LS) || 'null');
+  if (x && typeof x === 'object' && typeof x.id === 'string' && Number(x.dur) > 0) focus = {id: x.id, dur: Number(x.dur), end: Number(x.end) || 0, left: Number(x.left) || 0};
+} catch (e) {}
+function focusSave() { try { if (focus) localStorage.setItem(FOCUS_LS, JSON.stringify(focus)); else localStorage.removeItem(FOCUS_LS); } catch (e) {} }
+const focusLeft = () => !focus ? 0 : focus.end ? Math.max(0, focus.end - Date.now()) : focus.left;
+const clock = ms => { const sec = Math.ceil(ms / 1000); return pad(Math.floor(sec / 60)) + ':' + pad(sec % 60); };
+const FOCUS_RING = 2 * Math.PI * 88;
+async function focusWake() {
+  try { if (navigator.wakeLock && !fWake && focus && focus.end) { fWake = await navigator.wakeLock.request('screen'); fWake.addEventListener('release', () => { fWake = null; }); } } catch (e) { fWake = null; }
+}
+function releaseWake() { try { if (fWake) fWake.release(); } catch (e) {} fWake = null; }
+function focusChime() {
+  try {
+    const a = fAudio; if (!a) return;
+    [0, .35, .7].forEach((t, i) => {
+      const o = a.createOscillator(), g = a.createGain(), at = a.currentTime + t;
+      o.type = 'sine'; o.frequency.value = [660, 880, 1100][i];
+      g.gain.setValueAtTime(0.0001, at); g.gain.exponentialRampToValueAtTime(0.25, at + .03); g.gain.exponentialRampToValueAtTime(0.0001, at + .5);
+      o.connect(g); g.connect(a.destination); o.start(at); o.stop(at + .55);
+    });
+  } catch (e) {}
+  try { if (navigator.vibrate) navigator.vibrate([200, 100, 200]); } catch (e) {}
+}
+// The small pill above the tab bar: shows the running timer while no pop-up is open. Tap it to open the timer again.
+function focusPill() {
+  let p = document.getElementById('focusPill');
+  const h = focus ? findHabit(focus.id) : null;
+  if (!focus || !h || ui.rescue || $('#overlay').classList.contains('show')) { if (p) p.hidden = true; return; }
+  if (!p) {
+    document.body.insertAdjacentHTML('beforeend', '<button class="fc-pill" id="focusPill" data-action="focusopen" aria-label="Open the focus timer"><i></i><b></b><small></small></button>');
+    p = document.getElementById('focusPill');
+  }
+  p.hidden = false;
+  p.classList.toggle('paused', !focus.end);
+  p.querySelector('b').textContent = clock(focusLeft());
+  p.querySelector('small').textContent = (focus.end ? '' : 'Paused · ') + h.name;
+}
+function focusTick() {
+  if (!focus || !findHabit(focus.id)) { if (focus) { focus = null; focusSave(); } clearInterval(fTick); fTick = 0; releaseWake(); focusPill(); return; }
+  if (focus.end && Date.now() >= focus.end) { focusFinish(true, false); return; }
+  const left = focusLeft(), t = document.getElementById('fcTime');
+  if (t) {
+    t.textContent = clock(left);
+    const a = document.getElementById('fcArc'); if (a) a.style.strokeDashoffset = (FOCUS_RING * (left / focus.dur)).toFixed(1);
+  }
+  focusPill();
+}
+function focusRunLoop() { if (!fTick) fTick = setInterval(focusTick, 500); }
+function focusRunHtml(h) {
+  const left = focusLeft(), run = !!focus.end;
+  return `
+    <div class="wtag"><span class="tag">Habsys</span></div>
+    <h3>Focus time</h3>
+    <p class="sub">${h.icon ? esc(h.icon) + ' ' : ''}${esc(h.name)}</p>
+    <div class="fc-ring"><svg viewBox="0 0 200 200" aria-hidden="true"><circle class="fc-t" cx="100" cy="100" r="88"/><circle class="fc-p" id="fcArc" cx="100" cy="100" r="88" stroke-dasharray="${FOCUS_RING.toFixed(1)}" stroke-dashoffset="${(FOCUS_RING * (left / focus.dur)).toFixed(1)}"/></svg>
+      <div class="fc-mid"><b id="fcTime" role="timer">${clock(left)}</b><small>${run ? 'Focus' : 'Paused'}</small></div></div>
+    <div class="actions two">
+      <button class="btn" data-action="focuspause">${run ? 'Pause' : 'Resume'}</button>
+      <button class="btn danger" data-action="focusstop">End</button>
+    </div>
+    <button class="btn ghost block" data-action="close" style="margin-top:10px">Hide timer</button>
+    <p class="hint" style="margin:14px 0 0">Hiding the timer does not stop it. Tap the small timer above the tab bar to come back. The screen stays awake while it runs.</p>`;
+}
+function openFocus(id) {
+  if (focus && !findHabit(focus.id)) { focus = null; focusSave(); }
+  if (focus && focus.id !== id) { toast('Finish the focus time of ' + findHabit(focus.id).name + ' first.'); id = focus.id; }
+  const h = findHabit(id); if (!h) return;
+  if (focus) { showModal(focusRunHtml(h), 'fc', true); focusRunLoop(); focusWake(); focusPill(); return; }
+  let last = 25;
+  try { const v = Math.floor(Number(localStorage.getItem(FOCUS_LS + '_min'))); if (v >= 1 && v <= FOCUS_MAX) last = v; } catch (e) {}
+  const chips = [5, 10, 15, 25, 45, 60].map(m => `<button class="chip${m === last ? ' on' : ''}" data-action="focusmin" data-m="${m}">${m} min</button>`).join('');
+  showModal(`
+    <div class="wtag"><span class="tag">Habsys</span></div>
+    <h3>Focus time</h3>
+    <p class="sub">${h.icon ? esc(h.icon) + ' ' : ''}${esc(h.name)}</p>
+    <div class="chips fc-chips">${chips}</div>
+    <label class="field"><span>Minutes (1 to ${FOCUS_MAX})</span><input class="input" id="fcmin" type="number" inputmode="numeric" min="1" max="${FOCUS_MAX}" value="${last}"></label>
+    <p class="hint">Put distractions away and do just this one habit while the timer counts down. The minutes you finish are saved in the Insights of this habit (the graph button).</p>
+    <div class="actions">
+      <button class="btn" data-action="focusgo" data-id="${esc(h.id)}">Start</button>
+      <button class="btn ghost" data-action="close">Cancel</button>
+    </div>`, 'fc');
+}
+function focusStart(id) {
+  const h = findHabit(id); if (!h || focus) return;
+  const el = $('#fcmin'), m = Math.floor(Number(el && el.value));
+  if (!(m >= 1 && m <= FOCUS_MAX)) { toast('Choose between 1 and ' + FOCUS_MAX + ' minutes.'); return; }
+  try { localStorage.setItem(FOCUS_LS + '_min', String(m)); } catch (e) {}
+  try { fAudio = fAudio || new (window.AudioContext || window.webkitAudioContext)(); if (fAudio.state === 'suspended') fAudio.resume(); } catch (e) {}   // opened by this tap, so the chime may play later
+  focus = {id: id, dur: m * 60000, end: Date.now() + m * 60000, left: 0};
+  focusSave(); openFocus(id);
+}
+function focusPause() {
+  if (!focus) { closeModal(); return; }
+  if (focus.end) { focus.left = Math.max(0, focus.end - Date.now()); focus.end = 0; releaseWake(); }
+  else { focus.end = Date.now() + focus.left; focus.left = 0; }
+  focusSave(); openFocus(focus.id);
+}
+// natural = the time ran out. late = it ran out while the app was closed or asleep (no chime, no sheet over what you are doing).
+function focusFinish(natural, late) {
+  if (!focus) return;
+  const f = focus, h = findHabit(f.id), mins = natural ? Math.round(f.dur / 60000) : Math.floor((f.dur - focusLeft()) / 60000);
+  focus = null; focusSave(); releaseWake(); clearInterval(fTick); fTick = 0;
+  if (!h) { focusPill(); return; }
+  if (mins >= 1) {
+    const k = dkey(new Date());
+    h.focus = h.focus || {}; h.focus[k] = Math.min(1440, (h.focus[k] || 0) + mins);
+    save({noCount: true});
+  }
+  if (!natural) { focusPill(); toast(mins >= 1 ? 'Focus time ended. ' + mins + ' min saved.' : 'Focus time ended.'); return; }
+  if (!late) focusChime();
+  const o = $('#overlay');
+  if (o.classList.contains('show') && !o.querySelector('.win.fc')) { focusPill(); toast('Focus time done: ' + mins + ' min on ' + h.name + '.'); return; }   // never replace a pop-up you are typing in
+  const open = !h.done[dkey(new Date())];
+  showModal(`
+    <div class="wtag"><span class="tag">Habsys</span></div>
+    <h3>Focus complete</h3>
+    <p class="sub">${h.icon ? esc(h.icon) + ' ' : ''}${esc(h.name)}</p>
+    <div class="fc-done"><b>${mins} min</b><small>of focused time saved</small></div>
+    <div class="actions">
+      ${open ? `<button class="btn" data-action="focusmark" data-id="${esc(h.id)}">Mark today done</button>` : ''}
+      <button class="btn ${open ? 'ghost' : ''}" data-action="close">Close</button>
+    </div>`, 'fc', true);
+  focusPill();
+  if (!late) confetti(30);
+  if (ui.tab === 'habits' || ui.tab === 'records') render();
+}
+// Called when the app opens and when you come back to it.
+function focusCheck() {
+  if (!focus || ui.rescue) return;
+  if (!findHabit(focus.id)) { focus = null; focusSave(); focusPill(); return; }
+  focusRunLoop();
+  if (focus.end && Date.now() >= focus.end) {
+    if (Date.now() - focus.end > 3 * 3600000) { focus = null; focusSave(); releaseWake(); focusPill(); toast('Your focus timer ended a while ago, so it was not saved.'); return; }
+    focusFinish(true, true);
+  } else { focusPill(); focusWake(); }
 }
 
 /* ============ modals + toast + effects + celebrations ============ */
@@ -2650,6 +3043,7 @@ function openExtras(id) {
     <h3>Habit options</h3>
     <p class="sub">${esc(h.name)}</p>
     <div class="actions">
+      <button class="btn" data-action="focus" data-id="${esc(h.id)}">Focus time${focus && focus.id === h.id ? ' · running' : ''}</button>
       <button class="btn" data-action="xid" data-id="${esc(h.id)}">Identity statement${on(h.identity)}</button>
       <button class="btn" data-action="xmini" data-id="${esc(h.id)}">2-minute habit${on(h.mini)}</button>
       <button class="btn" data-action="xnote" data-id="${esc(h.id)}">Note${on(h.note)}</button>
@@ -2697,6 +3091,7 @@ function openNote(id, next) {
     <p class="hint">When you tick this habit as done, the task clears so you can write the next one.</p>
     <div class="actions">
       <button class="btn" data-action="savenote" data-id="${esc(h.id)}">Save</button>
+      <button class="btn" data-action="focus" data-id="${esc(h.id)}">Focus time${focus && focus.id === h.id ? ' · running' : ''}</button>
       <button class="btn ghost" data-action="close">${next ? 'Later' : 'Cancel'}</button>
     </div>`);
     return;
@@ -3103,6 +3498,7 @@ function ackFriends(code) {
     if (!k || S.friends.list.indexOf(c) < 0) return;
     if (!s || s.l !== k.level || s.r !== k.rank) { S.friends.seen[c] = {l: k.level, r: k.rank}; ch = true; }
   });
+  if (!code) S.friends.list.forEach(c => { const k = fCheers[c]; if (k && k.upd > (S.friends.cheerSeen[c] || 0)) { S.friends.cheerSeen[c] = k.upd; ch = true; } });   // 2.9: cheers you have seen
   if (ch) save({noCount: true});
   return ch;
 }
@@ -3203,16 +3599,19 @@ async function syncFriends(force) {
     for (const c of S.friends.list.slice()) {
       try { const card = await fsGet(c); if (card) fCards[c] = card; }
       catch (e) { if (!e || !e.status || e.status >= 500) throw e; }   // a single refused card is skipped; network or server trouble stops the update
+      try { const ch = await fsGetCheer(c); if (ch) fCheers[c] = ch; }   // 2.9: a cheer from this friend (a refused read, e.g. before the new rules are published, is skipped)
+      catch (e) { if (!e || !e.status || e.status >= 500) throw e; }
     }
     fState.last = Date.now();
     reconcileSeen();
-    saveFCache();
+    saveFCache(); saveCCache();
   } catch (e) {
     fState.err = errText(e);
   } finally {
     fState.busy = false;
     refreshFriendsView();
     refreshPartnerCard();
+    refreshCheerSpot();
   }
 }
 async function addFriend() {
@@ -3363,6 +3762,43 @@ const actions = {
   tick: el => toggleDay(el.dataset.id, el.dataset.day),
   rec: el => { ui.rec = el.dataset.id; renderView(); playIn(0); },
   checkin: openCheckin,
+  // NEW 2.9.0: next goal, cheers, habit insights, focus time
+  goal: openGoal,
+  goalsave: () => {
+    const t = ($('#gtext').value || '').replace(/\s+/g, ' ').trim().slice(0, MAX_GOAL);
+    if (!t) { toast('Write your goal, or tap Cancel.'); return; }
+    const d = ($('#gdate').value || ''), date = /^\d{4}-\d{2}-\d{2}$/.test(d) ? d : '', had = !!S.goal.text;
+    S.goal = {text: t, date: date, set: had ? S.goal.set : dkey(new Date())};
+    save(); closeModal(); render(); toast(had ? 'Goal updated.' : 'Goal set. Your habits are the steps toward it.');
+  },
+  goalremove: () => confirmBox('Remove goal?', `<b>${esc(S.goal.text)}</b> will be removed. It is not counted as achieved.`, 'dogoalremove', 'Remove'),
+  dogoalremove: () => { S.goal = {text: '', date: '', set: ''}; save(); closeModal(); render(); },
+  goaldone: () => { if (S.goal.text) confirmBox('Goal achieved?', `Mark <b>${esc(S.goal.text)}</b> as achieved? It moves to your achieved goals and you can set the next one.`, 'dogoaldone', 'Yes, I did it'); },
+  dogoaldone: () => {
+    if (!S.goal.text) { closeModal(); return; }
+    const t = S.goal.text;
+    S.goals.unshift({text: t, at: dkey(new Date()), set: S.goal.set}); S.goals = S.goals.slice(0, 100);
+    S.goal = {text: '', date: '', set: ''}; S.bigMoment = true;
+    save(); closeModal(); render(); confetti(70, true); toast('Goal achieved: ' + t + '. Set your next one.');
+  },
+  fcheer: el => { closeModal(); sendCheer(el.dataset.code); },
+  cheerack: el => ackCheer(el.dataset.code),
+  insights: el => openInsights(el.dataset.id),
+  focus: el => openFocus(el.dataset.id),
+  focusmin: el => {
+    document.querySelectorAll('#overlay .fc-chips .chip').forEach(c => c.classList.toggle('on', c === el));
+    const i = $('#fcmin'); if (i) i.value = el.dataset.m;
+  },
+  focusgo: el => focusStart(el.dataset.id),
+  focuspause: focusPause,
+  focusstop: () => {
+    if (!focus) { closeModal(); return; }
+    const mins = Math.floor((focus.dur - focusLeft()) / 60000);
+    confirmBox('End focus time?', mins >= 1 ? `Your <b>${mins} min</b> so far will be saved.` : 'Less than a minute has passed, so nothing will be saved.', 'focusend', 'End now');
+  },
+  focusend: () => { closeModal(); focusFinish(false); },
+  focusopen: () => { if (focus) openFocus(focus.id); },
+  focusmark: el => { closeModal(); markDone(el.dataset.id, dkey(new Date()), false); },
   // NEW 2.8.0: Morning intention and reminders
   intent: openIntent,
   intentsave: saveIntent,
@@ -3487,6 +3923,7 @@ const actions = {
   dofdel: el => {
     const c = el.dataset.code;
     S.friends.list = S.friends.list.filter(x => x !== c); delete fCards[c]; delete S.friends.seen[c]; saveFCache();
+    delete fCheers[c]; delete S.friends.cheerSeen[c]; delete S.friends.cheerSent[c]; saveCCache();   // 2.9
     if (S.friends.partner === c) S.friends.partner = '';   // 2.6: a removed friend can no longer be your partner
     save(); closeModal(); render(); toast('Friend removed.');
   },
@@ -3500,6 +3937,7 @@ const actions = {
     <h3>Friend options</h3>
     <p class="sub">${nm}${isP ? ' · Your partner' : ''}</p>
     <div class="actions">
+      <button class="btn" data-action="fcheer" data-code="${esc(c)}">Send a Keep going cheer</button>
       <button class="btn" data-action="fpartner" data-code="${esc(c)}">${isP ? 'Stop being partners' : 'Make partner'}</button>
       <button class="btn danger" data-action="fdel" data-code="${esc(c)}">Remove friend</button>
       <button class="btn ghost" data-action="close">Close</button>
@@ -3535,7 +3973,7 @@ const actions = {
   askfresh: () => confirmBox('Start fresh?', 'The damaged copy on this device will be replaced by an empty start. If you have a backup file, use Restore instead.', 'startfresh', 'Start fresh'),
   startfresh: startFresh,
   erase: () => confirmBox('Erase everything?', 'All habits, XP, rewards, check-ins, journal lines and friends on this device will be deleted, including the app\'s automatic safety copies. <b>Save a backup first</b> if you may want them back.', 'doerase', 'Erase all'),
-  doerase: () => { S = defaultState(); fCards = {}; saveFCache(); fState.lastPush = ''; clearSnaps(); save({noCount:true}); closeModal(); ui.tab = 'habits'; render(); toast('All data erased.'); }
+  doerase: () => { S = defaultState(); fCards = {}; saveFCache(); fCheers = {}; saveCCache(); fState.lastPush = ''; clearSnaps(); save({noCount:true}); closeModal(); ui.tab = 'habits'; render(); toast('All data erased.'); }
 };
 
 document.addEventListener('click', e => {
@@ -3561,6 +3999,8 @@ document.addEventListener('input', e => {
 document.addEventListener('focusout', e => { if (e.target.id === 'jtoday') commitInput(); if (e.target.id === 'wplan') savePlanInput(); });
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') closeModal();
+  if (e.key === 'Enter' && e.target.id === 'gtext') { const b = document.querySelector('[data-action="goalsave"]'); if (b) b.click(); }
+  if (e.key === 'Enter' && e.target.id === 'fcmin') { const b = document.querySelector('[data-action="focusgo"]'); if (b) b.click(); }
   if (e.key === 'Enter' && e.target.id === 'hname') { const b = document.querySelector('[data-action="savehabit"]'); if (b) b.click(); }
   if (e.key === 'Enter' && (e.target.id === 'jtoday' || e.target.id === 'jsearch' || e.target.id === 'wplan')) e.target.blur();
   if (e.key === 'Enter' && e.target.id === 'intent') { const b = document.querySelector('[data-action="intentsave"]'); if (b) b.click(); }
@@ -3583,6 +4023,7 @@ document.addEventListener('visibilitychange', () => {
   adoptNewer(); refreshIfNewDay();
   if (!$('#overlay').classList.contains('show')) render();   // do not redraw underneath an open popup
   syncFriends();
+  focusCheck();   // 2.9: a focus timer may have finished while the iPad slept
   clearBadge(); remindSoon(); maybeAskIntent();   // 2.8: coming back clears the reminder badge, refreshes the reminder status and asks the morning question
 });
 window.addEventListener('pagehide', () => { if (ui.tab === 'friends') ackFriends(); flush(); });
@@ -3739,6 +4180,7 @@ async function boot() {
     syncFriends();   // 2.5: share your card and fetch your friends' cards in the background
     clearBadge(); remindSoon();   // 2.8
     setTimeout(maybeAskIntent, 600);   // 2.8: the morning question, once the app is on screen
+    focusCheck();   // 2.9: pick up a running or finished focus timer
   } else {
     writesLocked = true; ui.rescue = r.status;   // 'fresh' | 'damaged' | 'unreadable': nothing is written until the person decides
     render(); playIn(0);
