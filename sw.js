@@ -1,5 +1,5 @@
 // Habsys offline worker. Bump CACHE when releasing a new version.
-const CACHE = 'habsys-v2.9.0';
+const CACHE = 'habsys-v3.0.0';
 const SHELL = ['./', 'index.html', 'manifest.webmanifest', 'icon-180.png', 'icon-192.png', 'icon-512.png'];
 const NET_WAIT = 4000;   // 2.2.0: on a weak connection, give the network 4 seconds, then open the saved copy instead of hanging
 
@@ -24,6 +24,7 @@ self.addEventListener('fetch', e => {
     if (res && res.ok) { const copy = res.clone(); e.waitUntil(caches.open(CACHE).then(c => c.put(r, copy)).catch(() => {})); }
     return res;
   });
+  e.waitUntil(net.catch(() => {}));   // 2.9.9: a slow request that loses the 4-second race still finishes and refreshes the saved copy, and its failure is never left unhandled
   const timer = new Promise(resolve => setTimeout(() => resolve(null), NET_WAIT));
   e.respondWith(
     Promise.race([net, timer.then(() => fromCache().then(m => m || net))])

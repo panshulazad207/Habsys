@@ -13,7 +13,8 @@
 <link rel="apple-touch-icon" href="icon-180.png?v=199">
 <link rel="icon" type="image/png" href="icon-192.png?v=199">
 <style>
-/* ===== Habsys 2.9.0: Keep-going cheers for friends, a Next goal card, a graph button with Insights on every habit, and Focus time (a timer). Everything else as in 2.8.0 ===== */
+/* ===== Habsys 3.0.0: Year in pixels, Profile card, full-screen level-up and rank-up moments, premium UI polish. Everything else as in 2.9.9 ===== */
+/* ===== Habsys 2.9.9 (bug-fix and speed release, built on 2.9.0): Keep-going cheers for friends, a Next goal card, a graph button with Insights on every habit, and Focus time (a timer). Everything else as in 2.8.0 ===== */
 /* ===== Habsys 2.7.0: small XP for daily ticks, badges, streak flame, a stronger level-up moment, Evening wrap-up, habit icons. Everything else as in 2.6.6 ===== */
 /* ===== Habsys 2.6.6: each friend row has ONE three-dot button that opens a menu with Make partner / Stop being partners and Remove friend. ===== */
 /* ===== Habsys 2.6.0: level-up spotlight at the top of the Friends tab, and a partner goal (pick one friend, see your progress toward their level on the Habits tab). Everything else as in 2.5.0 ===== */
@@ -375,7 +376,7 @@ textarea.input.sm{min-height:76px}
 @keyframes pop{from{transform:scale(.4);opacity:0}to{transform:none;opacity:1}}
 
 /* effects layer: confetti and sparks are drawn by script (Web Animations) */
-.fx{position:fixed;inset:0;z-index:80;pointer-events:none;overflow:hidden}
+.fx{position:fixed;inset:0;z-index:130;pointer-events:none;overflow:hidden}
 .fx i{position:absolute;display:block}
 .fx i.sp{border-radius:50%}
 .fx i.rg{border:2px solid;border-radius:50%;background:none}
@@ -728,6 +729,134 @@ textarea.input.sm{min-height:76px}
 .fc-pill i{flex:none;width:9px;height:9px;border-radius:50%;background:#6ee7b7;box-shadow:0 0 10px #6ee7b7}
 .fc-pill.paused i{background:var(--gold);box-shadow:0 0 10px var(--gold)}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+/* 2.9.9: the endless glow/shimmer/flame animations pause while a pop-up covers the screen (less work for the iPad, no visible change) */
+body:has(#overlay.show) .bar i::after,body:has(#overlay.show) .box.today:not(.done)::after,body:has(#overlay.show) .fl.lit,body:has(#overlay.show) .btn.claim,body:has(#overlay.show) .btn.claim::after{animation-play-state:paused}
+/* ===== 3.0.0: premium polish, Year in pixels, Profile card, full-screen level-up / rank-up ===== */
+::selection{background:rgba(91,140,255,.35)}
+html{scrollbar-width:none}
+::-webkit-scrollbar{display:none}
+/* rank hexagon: a gold-rimmed hexagon in the colour of the rank (E steel, D bronze, C silver, B gold, A amethyst, S prismatic) */
+.hx{--s:64px;--r1:#86a6ff;--r2:#4a63f0;--rg:rgba(91,140,255,.5);position:relative;flex:none;display:grid;place-items:center;width:var(--s);height:calc(var(--s) * 1.125);filter:drop-shadow(0 6px calc(var(--s) * .26) var(--rg))}
+.hx::before,.hx i{content:"";position:absolute;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%)}
+.hx::before{inset:0;background:linear-gradient(155deg,var(--r1),var(--r2))}
+.hx i{inset:calc(var(--s) * .05);background:linear-gradient(160deg,rgba(255,255,255,.2),rgba(8,10,24,.36) 72%),linear-gradient(155deg,var(--r1),var(--r2))}
+.hx b{position:relative;font-family:var(--head);font-weight:800;font-size:calc(var(--s) * .5);line-height:1;color:#fff;text-shadow:0 2px 8px rgba(0,0,0,.4);font-variant-numeric:tabular-nums}
+.hx.big{--s:150px}
+.rk-E{--r1:#c3cce6;--r2:#6b7699;--rg:rgba(160,175,220,.5)}
+.rk-D{--r1:#f4b985;--r2:#a85f2a;--rg:rgba(230,150,80,.55)}
+.rk-C{--r1:#eef2fb;--r2:#8a93ad;--rg:rgba(210,220,245,.5)}
+.rk-B{--r1:#ffe28f;--r2:#d99a1f;--rg:rgba(255,200,80,.6)}
+.rk-A{--r1:#d2b6ff;--r2:#6d3fe0;--rg:rgba(150,100,255,.6)}
+.rk-S{--r1:#8ef0ff;--r2:#ff7ad9;--rg:rgba(190,140,255,.65)}
+.f-rk[class*="rk-"]{background:linear-gradient(160deg,var(--r1),var(--r2));text-shadow:0 1px 4px rgba(0,0,0,.35)}
+
+/* ---- polish: headings, surfaces, buttons, tab bar, sheets, motion ---- */
+.brand b{background:linear-gradient(180deg,#fff 30%,#b6c4ff);-webkit-background-clip:text;background-clip:text;color:transparent}
+h2.sec{display:flex;align-items:center;gap:12px;font-size:23px;letter-spacing:-.025em}
+h2.sec::before{content:"";flex:none;width:4px;height:21px;border-radius:3px;background:linear-gradient(180deg,#a9c0ff,#6a4be8)}
+.panel{border-color:rgba(255,255,255,.075);box-shadow:inset 0 1px 0 rgba(255,255,255,.065),0 1px 2px rgba(0,0,0,.35),0 24px 46px -26px rgba(0,0,0,.9)}
+.player{cursor:pointer;transition:transform .28s var(--spring)}
+.player:active{transform:scale(.988)}
+.p-name{font-size:25px}
+.p-go{margin-left:6px;font-weight:600;opacity:.55}
+.p-info .hx{margin-bottom:0}
+.player>.hx{--s:62px}
+.btn{border-radius:17px;background:linear-gradient(180deg,#7ea5ff 0%,#5176f8 55%,#4263ec 100%);box-shadow:inset 0 1px 0 rgba(255,255,255,.4),inset 0 -1px 0 rgba(0,0,0,.18),0 0 0 1px rgba(70,100,240,.55),0 14px 28px -14px rgba(74,108,245,1)}
+.btn.ghost{box-shadow:inset 0 1px 0 rgba(255,255,255,.07),inset 0 0 0 1px rgba(255,255,255,.08)}
+.btn.danger{box-shadow:inset 0 0 0 1px rgba(255,123,141,.2)}
+.tabs .in{border-radius:32px;background:rgba(21,23,34,.8)}
+.tab.on{font-weight:700}
+.tab.on svg{stroke:#c6d5ff;fill:rgba(148,178,255,.26);filter:drop-shadow(0 0 8px rgba(120,150,255,.65))}
+.tab-ind{background:linear-gradient(180deg,rgba(255,255,255,.17),rgba(255,255,255,.06));box-shadow:inset 0 1px 0 rgba(255,255,255,.2),inset 0 0 0 1px rgba(255,255,255,.06),0 6px 18px -8px rgba(80,110,255,.6)}
+#overlay{background:radial-gradient(120% 60% at 50% 100%,rgba(30,40,100,.4),rgba(0,0,0,.64))}
+.win{border-radius:36px;box-shadow:inset 0 1px 0 rgba(255,255,255,.1),0 -24px 90px -24px rgba(0,0,0,.85),0 0 0 1px rgba(255,255,255,.04)}
+.win h3{font-size:28px}
+.habit{border-radius:32px}
+.t-row,.frow,.stat,.jr{border-color:rgba(255,255,255,.075)}
+.chip.on{box-shadow:0 10px 24px -12px rgba(244,245,249,.6)}
+/* every tab: cards rise in one after another (before, only the Habits tab did) */
+#view.v-in>.panel,#view.v-in>h2.sec,#view.v-in>.chips,#view.v-in>.months,#view.v-in>.bdg-grid,#view.v-in>.ladder,#view.v-in>.log,#view.v-in>.note,#view.v-in>.legend{animation:rise .6s var(--ease) backwards}
+#view.v-in>:nth-child(2){animation-delay:.04s}#view.v-in>:nth-child(3){animation-delay:.08s}#view.v-in>:nth-child(4){animation-delay:.12s}
+#view.v-in>:nth-child(5){animation-delay:.16s}#view.v-in>:nth-child(6){animation-delay:.2s}#view.v-in>:nth-child(n+7){animation-delay:.24s}
+
+/* ---- Year in pixels ---- */
+.yp-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:18px}
+.yp-head small{display:block;margin-top:4px;font-size:12.5px;line-height:1.4;color:var(--muted)}
+.yp-head .panel-t{font-size:22px}
+.yp-nav{flex:none;display:flex;align-items:center;gap:2px;padding:3px;border-radius:999px;background:var(--surface2);border:1px solid var(--hair)}
+.yp-nav button{width:34px;height:34px;border-radius:50%;font-size:22px;line-height:1;color:var(--white);transition:background .2s,transform .2s var(--spring)}
+.yp-nav button:active{background:rgba(255,255,255,.12);transform:scale(.9)}
+.yp-nav button:disabled{opacity:.25;pointer-events:none}
+.yp-nav b{min-width:44px;text-align:center;font-family:var(--head);font-weight:800;font-size:14.5px;font-variant-numeric:tabular-nums}
+.yp-grid{display:grid;grid-template-columns:30px repeat(31,minmax(0,1fr));gap:3px;align-items:center}
+.yp-m{font-family:var(--body);font-weight:600;font-size:10.5px;color:var(--dim)}
+.yp,.yp-x{display:block;aspect-ratio:1;min-width:0}
+.yp{border-radius:32%;background:rgba(255,255,255,.075);transition:transform .16s var(--spring)}
+.yp:active{transform:scale(1.7);position:relative;z-index:2}
+.yp.pre{background:rgba(255,255,255,.025)}
+.yp.fu{background:none;box-shadow:inset 0 0 0 1px rgba(255,255,255,.07)}
+.yp.rs{background:rgba(255,255,255,.03);box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)}
+.yp.l1{background:#27356e}.yp.l2{background:#3b55c9}.yp.l3{background:#5b8cff;box-shadow:0 0 6px -1px rgba(91,140,255,.7)}
+.yp.l4{background:linear-gradient(145deg,#ffe28f,#ffa94d);box-shadow:0 0 9px -1px rgba(255,180,80,.7)}
+.yp.tdy{outline:1.5px solid #fff;outline-offset:1px}
+.yp-leg{display:flex;align-items:center;justify-content:flex-end;gap:4px;margin-top:14px;font-size:11.5px;color:var(--muted)}
+.yp-leg .yp{width:13px;height:13px;flex:none;aspect-ratio:auto}
+.yp-leg span:first-child{margin-right:3px}.yp-leg span:last-child{margin-left:3px}
+.yp-st{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:16px}
+.yp-st div{padding:13px 6px;text-align:center;border-radius:18px;background:var(--surface2);border:1px solid var(--hair)}
+.yp-st b{display:block;font-family:var(--head);font-weight:800;font-size:25px;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.yp-st small{font-size:11.5px;color:var(--muted)}
+@media (max-width:420px){.yp-grid{gap:2px;grid-template-columns:26px repeat(31,minmax(0,1fr))}.yp-m{font-size:9.5px}}
+
+/* ---- Profile card ---- */
+.win.prof{padding:0;overflow:hidden;text-align:center;--ac:var(--r1)}
+.pf-top{padding:46px 22px 20px;background:radial-gradient(90% 110% at 50% 0%,color-mix(in srgb,var(--r2) 60%,transparent),transparent 72%)}
+.pf-top .hx{margin:0 auto 16px}
+.pf-name{font-family:var(--head);font-weight:800;font-size:31px;letter-spacing:-.025em;overflow-wrap:anywhere}
+.pf-sub{margin-top:4px;font-family:var(--body);font-weight:700;font-size:15px;color:var(--r1)}
+.pf-ttl{margin-top:3px;font-size:13px;color:var(--muted)}
+.pf-body{padding:0 20px 22px}
+.pf-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:16px 0}
+.pf-st{padding:14px 6px 12px;border-radius:18px;background:var(--surface2);border:1px solid var(--hair)}
+.pf-st b{display:flex;align-items:center;justify-content:center;min-height:32px;font-family:var(--head);font-weight:800;font-size:26px;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.pf-st small{font-size:11.5px;color:var(--muted)}
+.pf-bdgs{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.pf-b{display:grid;justify-items:center;gap:7px;min-width:0}
+.pf-b .bdg-ic{width:50px;height:56px;font-size:24px}
+.pf-b.lock .bdg-ic{background:rgba(255,255,255,.08);filter:grayscale(1);opacity:.7}
+.pf-b small{font-size:11px;line-height:1.25;color:var(--muted);overflow-wrap:anywhere}
+.pf-b:not(.lock) small{color:var(--white)}
+
+/* ---- Full-screen level-up and rank-up ---- */
+.mom{position:fixed;inset:0;z-index:120;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:30px;padding:24px calc(env(safe-area-inset-right) + 24px) calc(env(safe-area-inset-bottom) + 24px) calc(env(safe-area-inset-left) + 24px);text-align:center;overflow:hidden;background:radial-gradient(120% 80% at 50% 36%,color-mix(in srgb,var(--r2) 34%,#0a0c1c),#04050a 72%);animation:momIn .5s ease both}
+.mom.out{animation:momOut .28s ease forwards;pointer-events:none}
+@keyframes momIn{from{opacity:0}to{opacity:1}}
+@keyframes momOut{to{opacity:0}}
+.mom-rays{position:absolute;left:50%;top:36%;width:1200px;height:1200px;margin:-600px 0 0 -600px;border-radius:50%;pointer-events:none;opacity:0;transition:opacity 1s ease;
+  background:repeating-conic-gradient(from 0deg,color-mix(in srgb,var(--r1) 34%,transparent) 0 4deg,transparent 4deg 16deg);
+  -webkit-mask:radial-gradient(circle,#000 0,#000 18%,transparent 56%);mask:radial-gradient(circle,#000 0,#000 18%,transparent 56%);animation:spin 50s linear infinite}
+.mom.boom .mom-rays{opacity:1}
+.mom-stage{position:relative;width:260px;height:260px;display:grid;place-items:center;flex:none}
+.mom-stage::before{content:"";position:absolute;inset:-60px;border-radius:50%;background:radial-gradient(circle,color-mix(in srgb,var(--r1) 50%,transparent),transparent 66%);opacity:.55;animation:breathe 2.6s ease-in-out infinite}
+.mom-ring{position:absolute;left:50%;top:50%;width:150px;height:150px;margin:-75px 0 0 -75px;border-radius:50%;border:3px solid var(--r1);opacity:0;pointer-events:none}
+.mom-ring.r2{border-color:var(--r2)}.mom-ring.r3{border-color:#fff;border-width:2px}
+.mom.boom .mom-ring{animation:shock 1.5s var(--ease) both}
+.mom.boom .mom-ring.r2{animation-delay:.16s}.mom.boom .mom-ring.r3{animation-delay:.34s}
+.mom .hx.big{position:relative;z-index:1}
+.mom.charge #momhx{animation:charge .45s ease-in-out infinite alternate}
+.mom.boom #momhx{animation:hxPop .9s var(--spring) both}
+@keyframes charge{from{transform:scale(.9) rotate(-1.5deg);filter:brightness(.8) drop-shadow(0 0 10px var(--rg))}to{transform:scale(1.02) rotate(1.5deg);filter:brightness(1.25) drop-shadow(0 0 34px var(--rg))}}
+@keyframes hxPop{0%{transform:scale(.55)}55%{transform:scale(1.22)}100%{transform:scale(1)}}
+.mom-card{position:relative;z-index:1;width:100%;max-width:460px;opacity:0;transform:translateY(26px)}
+.mom.in .mom-card{opacity:1;transform:none;transition:opacity .7s var(--ease),transform .8s var(--ease)}
+.mom-lbl{padding-left:.42em;font-family:var(--body);font-weight:700;font-size:13px;letter-spacing:.42em;text-transform:uppercase;color:var(--r1)}
+.mom-title{margin:10px 0 6px;font-family:var(--head);font-weight:800;font-size:clamp(40px,10vw,64px);letter-spacing:-.03em;line-height:1.03;background:linear-gradient(180deg,#fff 20%,color-mix(in srgb,var(--r1) 75%,#fff));-webkit-background-clip:text;background-clip:text;color:transparent}
+.mom-s1{font-family:var(--body);font-weight:600;font-size:16px;color:rgba(255,255,255,.78)}
+.mom-chips{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin:18px 0 14px}
+.mom-chips span{padding:7px 14px;border-radius:999px;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.07);font-family:var(--body);font-weight:700;font-size:13px;color:#fff;font-variant-numeric:tabular-nums}
+.mom-p{margin:0 auto 24px;max-width:340px;font-size:15px;line-height:1.5;color:rgba(255,255,255,.66)}
+.mom-btn{min-width:210px}
+.mom-card .mom-chips + .mom-btn{margin-top:10px}
 </style>
 </head>
 <body>
@@ -772,7 +901,7 @@ textarea.input.sm{min-height:76px}
 'use strict';
 
 /* ============ constants ============ */
-const APP_VERSION = '2.9.0';
+const APP_VERSION = '3.0.0';
 // 2.5.0: Friends. These two values come from your free Firebase project (they are an address, not a password).
 // While they still say PASTE..., the Friends tab explains that it is not switched on yet and the rest of the app works as before.
 const FB_API_KEY = 'AIzaSyCCW0tJgzxmgOoOf304Q6elV-D18ZyH0AM', FB_PROJECT = 'habsys-9977a';
@@ -845,6 +974,9 @@ const TIERS = [
 ];
 // Rank letters by player LEVEL.
 const RANKS = [{min:1,l:'E'},{min:50,l:'D'},{min:100,l:'C'},{min:150,l:'B'},{min:200,l:'A'},{min:365,l:'S'}];
+// 3.0: every rank has a name (shown on the rank-up title card and the profile card) and a line of encouragement.
+const RANK_NAMES = {E:'Rookie', D:'Challenger', C:'Contender', B:'Veteran', A:'Master', S:'Grandmaster'};
+const RANK_LINES = {E:'Every journey starts here.', D:'Fifty levels of showing up. This is no longer a phase. It is who you are.', C:'One hundred levels. Your habits now run deeper than motivation.', B:'You stand where very few people ever stand. Discipline is your default.', A:'Mastery is built from ordinary days, and you have stacked hundreds of them.', S:'The highest rank. A full year of showing up, and you never stopped. Legendary.'};
 // Level 1 to 2 costs LV_BASE XP. Every next level costs LV_STEP XP more than the one before.
 const LV_BASE = 25, LV_STEP = 2;
 const DAY_LETTERS = 'MTWTFSS';
@@ -1253,8 +1385,11 @@ async function loadAll() {
     const best = good[0];
     // Progress can only go up by itself (XP and rewards never shrink unless you erase or restore, and both of those
     // reset the safety copies). A safety copy with more progress than the live data means something went wrong.
+    // 2.9.9: un-ticking a day takes its tick XP back, so XP CAN go down legitimately. A safety copy only counts as "more progress"
+    // when it is ahead by more than the XP that could have been taken back from the ticks it holds itself (before, tick + un-tick + reopen restored an old copy).
+    const takeable = st => st.habits.reduce((n, h) => n + Object.keys(h.xpd || {}).reduce((m, k) => m + (h.xpd[k] || 0), 0), 0);
     const lost = snaps
-      .filter(s => s.state.player.xp > best.state.player.xp || s.state.rewards.length > best.state.rewards.length)
+      .filter(s => s.state.player.xp - best.state.player.xp > takeable(s.state) || s.state.rewards.length > best.state.rewards.length)
       .sort((a, b) => (b.state.player.xp - a.state.player.xp) || (b.at - a.at))[0];
     if (lost) return {state:lost.state, status:'recovered', app:lost.app};
     return {state:best.state, status:'ok', app:best.app};
@@ -1623,7 +1758,7 @@ function chartHtml(cols, max) {
 const TABS = ['habits', 'vault', 'records', 'friends', 'system'];
 // fx = which habit/day was just ticked (set only for the moment the screen is redrawn, so the tick effects play once).
 // jq = journal search text. jback = the journal line editor was opened from the Mood & journal sheet, so it returns there.
-const ui = { tab: 'habits', day: dkey(new Date()), rec: null, rescue: null, pend: null, fx: null, jq: '', jback: false, wrap: null };  // rescue: null | 'fresh' | 'damaged' | 'unreadable'.
+const ui = { tab: 'habits', day: dkey(new Date()), rec: null, rescue: null, pend: null, fx: null, jq: '', jback: false, wrap: null, yr: new Date().getFullYear() };  // rescue: null | 'fresh' | 'damaged' | 'unreadable'.
 
 function renderNav() {
   document.querySelectorAll('.tab').forEach(t => {
@@ -1832,10 +1967,10 @@ function viewHabits() {
   const top = Math.max(0, ...S.habits.map(h => h.claimed));
   const title = top ? TIERS[top - 1].title : 'Newcomer';
   let html = `
-  <section class="panel player">
-    <div class="rank">${rankOf(L)}</div>
+  <section class="panel player" data-action="profile" role="button" tabindex="0" aria-label="Open your profile card">
+    ${hxHtml(rankOf(L), 62)}
     <div class="p-info">
-      <div class="p-name">${esc(S.player.name)}</div>
+      <div class="p-name">${esc(S.player.name)}<span class="p-go" aria-hidden="true">›</span></div>
       <div class="p-sub">Title · ${esc(title)}</div>
       <div class="bar"><i data-k="xp" style="width:${pct}%"></i></div>
       <div class="xp-txt">XP ${S.player.xp.toLocaleString()} / ${b.toLocaleString()}</div>
@@ -2161,10 +2296,11 @@ function viewRecords() {
     html += '<section class="panel empty"><div class="tag">Habsys</div><h3>No history yet</h3><p>Add a habit in the Habits tab. Every day you complete will be recorded here.</p></section>';
     return html + (hasMood ? moodDataButton() : '');
   }
+  html += yearPanel();   // 3.0: Year in pixels
   // 1. weekly reflection
   const thisWk = weekKey(new Date()), lastWk = weekKey(addDays(new Date(), -7));
   const has = wk => S.reflections.some(r => r.week === wk);
-  html += `<h2 class="sec" style="margin-top:6px">Weekly reflection</h2><section class="panel"><p class="note">Once a week, look back: what worked, what got in the way, and the one thing you will focus on next. Reflection turns streaks into learning.</p>
+  html += `<h2 class="sec">Weekly reflection</h2><section class="panel"><p class="note">Once a week, look back: what worked, what got in the way, and the one thing you will focus on next. Reflection turns streaks into learning.</p>
     <div class="stack">
       <button class="btn block" data-action="reflect" data-week="${thisWk}">${has(thisWk) ? 'Edit this week' : 'Reflect on this week'}</button>
       <button class="btn ghost block" data-action="reflect" data-week="${lastWk}">${has(lastWk) ? 'Edit last week' : 'Reflect on last week'}</button>
@@ -2246,7 +2382,7 @@ function friendRow(r) {
   const sm = (known ? 'Rank ' + esc(r.rank) : 'Not loaded yet') + (r.partner ? ' · Your partner' : '');
   // 2.6.6: ONE three-dot button after the level. It opens a small menu with Make partner / Stop being partners and Remove friend.
   const more = r.me ? '' : `<button class="f-x f-m" data-action="fmenu" data-code="${esc(r.code)}" aria-label="Options for ${known ? esc(r.name) : 'this friend'}: partner or remove">${DOTS}</button>`;
-  return `<div class="frow${r.me ? ' me' : ''}${r.partner ? ' pt' : ''}"><span class="f-rk">${rk}</span><span class="f-nm"><b>${nm}</b><small>${sm}</small></span><span class="f-lv">${known ? r.level : '–'}<small>LEVEL</small></span>${more}</div>`;
+  return `<div class="frow${r.me ? ' me' : ''}${r.partner ? ' pt' : ''}"><span class="f-rk${known && /^[EDCBAS]$/.test(String(r.rank)) ? ' rk-' + r.rank : ''}">${rk}</span><span class="f-nm"><b>${nm}</b><small>${sm}</small></span><span class="f-lv">${known ? r.level : '–'}<small>LEVEL</small></span>${more}</div>`;
 }
 function friendStatus() {
   if (fState.busy) return '<p class="fstat">Updating…</p>';
@@ -2294,6 +2430,7 @@ function viewSystem() {
   <h2 class="sec">Player</h2>
   <section class="panel">
     <label class="field"><span>Player name</span><input class="input" id="pname" maxlength="24" value="${esc(S.player.name)}" autocomplete="off"></label>
+    <button class="btn ghost block" data-action="profile">View profile card</button>
   </section>
 
   <h2 class="sec">Guide</h2>
@@ -2301,6 +2438,7 @@ function viewSystem() {
     <p class="note">See how XP, levels and ranks work, and how far you are from the next rank.</p>
     <button class="btn ghost block" data-action="info">Levels &amp; ranks info</button>
     <button class="btn ghost block" data-action="wrap" style="margin-top:10px">Evening wrap-up</button>
+    <div class="fbtns" style="margin-top:10px"><button class="btn ghost block" data-action="prevlv">Preview level-up</button><button class="btn ghost block" data-action="prevrank">Preview rank-up</button></div>
   </section>
 
   ${remindersSection()}
@@ -2818,6 +2956,12 @@ function celebrate(id, k, bounced, lv, nb) {
 }
 // The celebration sheet. One sheet can carry several things (a level up AND a badge AND a day complete); the biggest one gets the hero.
 function momentSheet(o) {
+  // 3.0: a level up (or rank up) now takes the whole screen first. Anything else earned at the same time (badge, day complete, streak) follows on the sheet.
+  if (o.lv && !o.lvShown) {
+    const more = (o.nb && o.nb.length) || o.all || o.ms || o.bounced || o.claim;
+    levelScreen(o.lv.from, o.lv.to, {sub: o.sub, btn: more ? 'Continue' : o.btn, after: more ? () => setTimeout(() => momentSheet(Object.assign({}, o, {lv: null})), 250) : null});
+    return;
+  }
   const tk = dkey(new Date()), h = o.h, nb = o.nb || [], lv = o.lv, ms = o.ms || 0, all = !!o.all;
   const rankUp = !!lv && rankOf(lv.to) !== rankOf(lv.from);
   const votes = S.habits.filter(x => x.identity && x.done[tk] === 1).map(x => esc(x.identity));
@@ -2849,6 +2993,237 @@ function momentSheet(o) {
     <div class="actions"><button class="btn" data-action="close">${o.btn || 'Keep going'}</button></div>`, 'cel' + (lv ? ' lvlwin' : ''));
   confetti(lv ? 70 : ms >= 30 ? 110 : 64, !lv && ms >= 30);
   if (lv) setTimeout(() => levelBoom(lv.from, lv.to), 700);
+}
+
+/* ============ NEW 3.0.0: Year in pixels, Profile card, full-screen level-up and rank-up ============ */
+const FONT = '-apple-system, "SF Pro Rounded", "SF Pro Display", system-ui, sans-serif';
+const MON3 = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const RANK_COL = {E:['#c3cce6','#6b7699'], D:['#f4b985','#a85f2a'], C:['#eef2fb','#8a93ad'], B:['#ffe28f','#d99a1f'], A:['#d2b6ff','#6d3fe0'], S:['#8ef0ff','#ff7ad9']};
+const hxHtml = (l, s) => '<span class="hx rk-' + l + '"' + (s ? ' style="--s:' + s + 'px"' : '') + '><i></i><b>' + l + '</b></span>';
+const bestStreak = () => Math.max(0, ...S.habits.map(longestStreak));
+const totalDone = () => S.habits.reduce((n, h) => n + Object.keys(h.done).filter(k => h.done[k] === 1).length, 0);
+
+/* ---- Year in pixels: one square per day, coloured by how many habits were done (gold = every habit that was due) ---- */
+function dayScore(k) {
+  const d = parseKey(k); let done = 0, due = 0;
+  for (const h of S.habits) {
+    if (h.done[k] === 1) { done++; due++; }
+    else if (k >= h.created && isSched(h, d)) due++;
+  }
+  return {done: done, due: due};
+}
+function firstTracked() {
+  let f = '';
+  for (const h of S.habits) { const ks = Object.keys(h.done).sort(); const s = ks.length && ks[0] < h.created ? ks[0] : h.created; if (!f || s < f) f = s; }
+  return f;
+}
+function pixelClass(k, tk, f) {
+  if (k > tk) return 'fu';
+  if (k < f) return 'pre';
+  const s = dayScore(k);
+  if (!s.due && !s.done) return 'rs';
+  if (!s.done) return 'l0';
+  if (s.done >= s.due) return 'l4';
+  const r = s.done / s.due;
+  return r <= 1 / 3 ? 'l1' : r <= 2 / 3 ? 'l2' : 'l3';
+}
+function yearStats(y) {
+  const tk = dkey(new Date()), f = firstTracked() || tk;
+  let active = 0, perfect = 0, sd = 0, sdue = 0;
+  for (let m = 0; m < 12; m++) {
+    const n = new Date(y, m + 1, 0).getDate();
+    for (let d = 1; d <= n; d++) {
+      const k = y + '-' + pad(m + 1) + '-' + pad(d);
+      if (k > tk || k < f) continue;
+      const s = dayScore(k);
+      if (s.done > 0) active++;
+      if (s.due > 0 && s.done === s.due) perfect++;
+      sd += s.done; sdue += s.due;
+    }
+  }
+  return {active: active, perfect: perfect, rate: sdue ? Math.round(sd / sdue * 100) : 0};
+}
+function yearBounds() { const f = firstTracked(); return [f ? Math.min(+f.slice(0, 4), new Date().getFullYear()) : new Date().getFullYear(), new Date().getFullYear()]; }
+function yearPanel() {
+  const b = yearBounds();
+  if (ui.yr < b[0]) ui.yr = b[0];
+  if (ui.yr > b[1]) ui.yr = b[1];
+  const y = ui.yr, tk = dkey(new Date()), f = firstTracked() || tk, st = yearStats(y);
+  let g = '';
+  for (let m = 0; m < 12; m++) {
+    const n = new Date(y, m + 1, 0).getDate();
+    g += '<span class="yp-m">' + MON3[m] + '</span>';
+    for (let d = 1; d <= 31; d++) {
+      if (d > n) { g += '<i class="yp-x"></i>'; continue; }
+      const k = y + '-' + pad(m + 1) + '-' + pad(d);
+      g += '<button class="yp ' + pixelClass(k, tk, f) + (k === tk ? ' tdy' : '') + '" data-action="yday" data-day="' + k + '" aria-label="' + esc(fmtKey(k)) + '"></button>';
+    }
+  }
+  return `<h2 class="sec" style="margin-top:6px">Year in pixels</h2>
+  <section class="panel yearp">
+    <div class="yp-head"><div><span class="panel-t" style="margin:0">${y}</span><small>Every square is a day. The more habits you finish, the brighter it glows. Gold means a perfect day.</small></div>
+      <div class="yp-nav"><button data-action="yprev" aria-label="Previous year"${y <= b[0] ? ' disabled' : ''}>‹</button><b>${y}</b><button data-action="ynext" aria-label="Next year"${y >= b[1] ? ' disabled' : ''}>›</button></div></div>
+    <div class="yp-grid">${g}</div>
+    <div class="yp-leg"><span>Less</span><i class="yp l0"></i><i class="yp l1"></i><i class="yp l2"></i><i class="yp l3"></i><i class="yp l4"></i><span>Perfect</span></div>
+    <div class="yp-st"><div><b>${st.active}</b><small>Active days</small></div><div><b>${st.perfect}</b><small>Perfect days</small></div><div><b>${st.rate}%</b><small>Completion</small></div></div>
+    <button class="btn ghost block" data-action="yshare" style="margin-top:14px">Share as picture</button>
+  </section>`;
+}
+function openYearDay(k) {
+  const tk = dkey(new Date()), s = dayScore(k), d = parseKey(k), c = S.checkins[k], j = S.journal[k];
+  const rows = S.habits.filter(h => h.done[k] || (k >= h.created && isSched(h, d))).map(h =>
+    `<div class="kv"><span>${h.icon ? esc(h.icon) + ' ' : ''}${esc(h.name)}</span><b>${h.done[k] === 1 ? 'Done ✓' : h.done[k] === 2 ? 'Saver used' : (k < tk ? 'Missed' : 'To do')}</b></div>`).join('');
+  showModal(`<h3>${esc(d.toLocaleDateString(undefined, {weekday:'long', day:'numeric', month:'long', year:'numeric'}))}</h3>
+    <p class="sub">${k > tk ? 'This day is still ahead' : s.due ? s.done + ' of ' + s.due + ' habits done' : 'Nothing was due'}</p>
+    ${rows ? '<div class="grp">' + rows + '</div>' : ''}
+    ${c && c.m ? '<div class="reward"><b>Mood</b>' + MOODS[c.m - 1] + ' ' + MOOD_NAMES[c.m - 1] + (c.e ? ' · Energy ' + c.e + '/5' : '') + '</div>' : ''}
+    ${j ? '<div class="reward"><b>Journal</b>' + esc(j) + '</div>' : ''}
+    <div class="actions"><button class="btn" data-action="close">Close</button></div>`, '', true);
+}
+
+/* ---- pictures to share (drawn on a canvas: only your name, level, rank, badges and the coloured squares leave the app, never habit names) ---- */
+function rr(c, x, y, w, h, r) { c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r); c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath(); }
+function hexPath(c, cx, cy, w) { const h = w * 1.125; c.beginPath(); c.moveTo(cx, cy - h / 2); c.lineTo(cx + w / 2, cy - h / 4); c.lineTo(cx + w / 2, cy + h / 4); c.lineTo(cx, cy + h / 2); c.lineTo(cx - w / 2, cy + h / 4); c.lineTo(cx - w / 2, cy - h / 4); c.closePath(); }
+function drawHex(c, cx, cy, w, letter) {
+  const k = RANK_COL[letter] || RANK_COL.E;
+  c.save(); c.shadowColor = k[1]; c.shadowBlur = w * .4;
+  hexPath(c, cx, cy, w);
+  const g = c.createLinearGradient(cx - w / 2, cy - w / 2, cx + w / 2, cy + w / 2); g.addColorStop(0, k[0]); g.addColorStop(1, k[1]);
+  c.fillStyle = g; c.fill(); c.restore();
+  hexPath(c, cx, cy, w * .91); c.fillStyle = 'rgba(8,10,24,.3)'; c.fill();
+  c.fillStyle = '#fff'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.font = '800 ' + Math.round(w * .5) + 'px ' + FONT;
+  c.fillText(letter, cx, cy + w * .03);
+}
+function posterBase(w, h, letter) {
+  const cv = document.createElement('canvas'); cv.width = w; cv.height = h;
+  const c = cv.getContext('2d'), g = c.createLinearGradient(0, 0, 0, h);
+  g.addColorStop(0, '#11142a'); g.addColorStop(1, '#06070c'); c.fillStyle = g; c.fillRect(0, 0, w, h);
+  const rg = c.createRadialGradient(w / 2, 0, 0, w / 2, 0, w * .85); rg.addColorStop(0, (RANK_COL[letter] || RANK_COL.E)[1] + '99'); rg.addColorStop(1, 'rgba(0,0,0,0)');
+  c.fillStyle = rg; c.fillRect(0, 0, w, h);
+  return {cv: cv, c: c};
+}
+function posterText(c, t, x, y, size, color, weight, align) { c.fillStyle = color; c.font = (weight || 700) + ' ' + size + 'px ' + FONT; c.textAlign = align || 'left'; c.textBaseline = 'alphabetic'; c.fillText(t, x, y); }
+function posterBox(c, x, y, w, h, big, small) {
+  rr(c, x, y, w, h, 28); c.fillStyle = 'rgba(255,255,255,.07)'; c.fill(); c.strokeStyle = 'rgba(255,255,255,.1)'; c.lineWidth = 2; c.stroke();
+  posterText(c, big, x + w / 2, y + h * .56, 56, '#fff', 800, 'center'); posterText(c, small, x + w / 2, y + h * .8, 22, '#9aa0b8', 600, 'center');
+}
+const PIX = {l0:'rgba(255,255,255,.08)', l1:'#27356e', l2:'#3b55c9', l3:'#5b8cff', l4:'#ffc15e', rs:'rgba(255,255,255,.04)', pre:'rgba(255,255,255,.03)', fu:'rgba(255,255,255,.03)'};
+function yearPoster(y) {
+  const L = levelOf(S.player.xp), r = rankOf(L), P = posterBase(1080, 1080, r), c = P.c, tk = dkey(new Date()), f = firstTracked() || tk, st = yearStats(y);
+  drawHex(c, 130, 140, 112, r);
+  posterText(c, S.player.name, 215, 130, 46, '#fff', 800);
+  posterText(c, 'Level ' + L + ' · Rank ' + r + ' ' + RANK_NAMES[r], 215, 176, 27, '#b8bfd8', 600);
+  posterText(c, y + ' in pixels', 60, 300, 66, '#fff', 800);
+  const x0 = 130, y0 = 350, step = 29;
+  for (let m = 0; m < 12; m++) {
+    posterText(c, MON3[m], 60, y0 + m * step + 20, 20, '#7d839c', 600);
+    const n = new Date(y, m + 1, 0).getDate();
+    for (let d = 1; d <= n; d++) {
+      const k = y + '-' + pad(m + 1) + '-' + pad(d), cl = pixelClass(k, tk, f);
+      rr(c, x0 + (d - 1) * step, y0 + m * step, 25, 25, 7); c.fillStyle = PIX[cl]; c.fill();
+    }
+  }
+  posterBox(c, 60, 740, 300, 140, String(st.active), 'Active days'); posterBox(c, 390, 740, 300, 140, String(st.perfect), 'Perfect days'); posterBox(c, 720, 740, 300, 140, st.rate + '%', 'Completion');
+  posterText(c, 'Gold = every habit done', 60, 940, 26, '#ffc15e', 700);
+  posterText(c, 'Habsys', 540, 1030, 30, '#6f7590', 800, 'center');
+  return P.cv;
+}
+function profilePoster() {
+  const L = levelOf(S.player.xp), r = rankOf(L), P = posterBase(1080, 1350, r), c = P.c;
+  const top = Math.max(0, ...S.habits.map(h => h.claimed)), title = top ? TIERS[top - 1].title : 'Newcomer';
+  drawHex(c, 540, 330, 300, r);
+  posterText(c, S.player.name, 540, 600, 80, '#fff', 800, 'center');
+  posterText(c, 'Level ' + L + ' · Rank ' + r + ' ' + RANK_NAMES[r], 540, 660, 36, '#c9cfe6', 700, 'center');
+  posterText(c, 'Title · ' + title, 540, 712, 28, '#8f96b2', 600, 'center');
+  const a = lvlStart(L), b = lvlStart(L + 1), p = Math.max(0, Math.min(1, (S.player.xp - a) / (b - a)));
+  rr(c, 190, 760, 700, 18, 9); c.fillStyle = 'rgba(255,255,255,.1)'; c.fill();
+  rr(c, 190, 760, Math.max(18, 700 * p), 18, 9); c.fillStyle = (RANK_COL[r] || RANK_COL.E)[0]; c.fill();
+  posterBox(c, 60, 840, 300, 190, String(bestStreak()), 'Best streak'); posterBox(c, 390, 840, 300, 190, String(totalDone()), 'Days done'); posterBox(c, 720, 840, 300, 190, BADGES.filter(x => S.badges[x.id]).length + '/' + BADGES.length, 'Badges');
+  const bw = 200, gap = (960 - bw * 4) / 3;
+  BADGES.forEach((bd, i) => {
+    const got = !!S.badges[bd.id], cx = 60 + i * (bw + gap) + bw / 2;
+    hexPath(c, cx, 1180, 110); c.fillStyle = got ? '#ffb04f' : 'rgba(255,255,255,.08)'; c.fill();
+    c.font = '48px ' + FONT; c.textAlign = 'center'; c.textBaseline = 'middle'; c.globalAlpha = got ? 1 : .35; c.fillText(got ? bd.ic : '🔒', cx, 1184); c.globalAlpha = 1;
+  });
+  posterText(c, 'Habsys', 540, 1310, 30, '#6f7590', 800, 'center');
+  return P.cv;
+}
+function shareCanvas(cv, fname, title) {
+  cv.toBlob(async blob => {
+    if (!blob) { toast('Could not make the picture.'); return; }
+    try {
+      const f = new File([blob], fname, {type: 'image/png'});
+      if (navigator.canShare && navigator.canShare({files: [f]})) { await navigator.share({files: [f], title: title}); return; }
+    } catch (e) { if (e && e.name === 'AbortError') return; }
+    const u = URL.createObjectURL(blob), a = document.createElement('a');
+    a.href = u; a.download = fname; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(u), 4000);
+    toast('Picture saved.');
+  }, 'image/png');
+}
+
+/* ---- Profile card ---- */
+function openProfile() {
+  const L = levelOf(S.player.xp), a = lvlStart(L), b = lvlStart(L + 1), pct = Math.round((S.player.xp - a) / (b - a) * 100), r = rankOf(L);
+  const top = Math.max(0, ...S.habits.map(h => h.claimed)), title = top ? TIERS[top - 1].title : 'Newcomer';
+  const nx = RANKS.find(x => x.min > L), best = bestStreak();
+  const bd = BADGES.map(x => { const got = S.badges[x.id]; return `<div class="pf-b${got ? '' : ' lock'}" title="${esc(x.name)}"><span class="bdg-ic">${got ? x.ic : '🔒'}</span><small>${esc(x.name.replace(' ×5', ''))}</small></div>`; }).join('');
+  showModal(`
+    <div class="pf-top">${hxHtml(r, 108)}<div class="pf-name">${esc(S.player.name)}</div><div class="pf-sub">Level ${L} · Rank ${r} ${RANK_NAMES[r]}</div><div class="pf-ttl">Title · ${esc(title)}</div></div>
+    <div class="pf-body">
+      <div class="bar"><i style="width:${pct}%"></i></div>
+      <div class="xpl"><span>${S.player.xp.toLocaleString()} XP</span><span>${nx ? (nx.min - L) + ' levels to Rank ' + nx.l : 'Top rank reached'}</span></div>
+      <div class="pf-stats"><div class="pf-st"><b><span class="sn">${best >= 3 ? flameHtml({done: {[dkey(new Date())]: 1}, days: []}, best) : ''}${best}</span></b><small>Best streak</small></div><div class="pf-st"><b>${totalDone()}</b><small>Days done</small></div><div class="pf-st"><b>${BADGES.filter(x => S.badges[x.id]).length}/${BADGES.length}</b><small>Badges</small></div></div>
+      <div class="pf-bdgs">${bd}</div>
+      <div class="actions" style="margin-top:20px"><button class="btn" data-action="pshare">Share card</button><button class="btn ghost" data-action="close">Close</button></div>
+    </div>`, 'prof rk-' + r, true);
+}
+
+/* ---- Full-screen level-up and rank-up ---- */
+let momDone = null, momTimers = [];
+const momAt = (fn, ms) => { momTimers.push(setTimeout(fn, ms)); };
+function closeMoment() {
+  const m = $('#moment'); if (!m || m.classList.contains('out')) return;
+  momTimers.forEach(clearTimeout); momTimers = [];
+  const cb = momDone; momDone = null;
+  m.classList.add('out');
+  setTimeout(() => { if (m.parentNode) m.remove(); }, reduceMotion() ? 0 : 280);
+  if (cb) { try { cb(); } catch (e) {} }
+}
+// from/to = levels. o: {r0, r1} to force a rank change (preview), sub, btn, preview, after (runs when the person taps Continue).
+function levelScreen(from, to, o) {
+  o = o || {};
+  const r0 = o.r0 || rankOf(from), r1 = o.r1 || rankOf(to), up = r0 !== r1;
+  const old = $('#moment'); if (old) { momTimers.forEach(clearTimeout); momTimers = []; old.remove(); }
+  momDone = o.after || null;
+  const left = xpFor(to + 1) - S.player.xp;
+  const line = o.preview ? 'This is only a preview. Nothing in your progress was changed.' : up ? RANK_LINES[r1] : (left > 0 ? left.toLocaleString() + ' XP to reach level ' + (to + 1) + '.' : '');
+  const m = document.createElement('div');
+  m.id = 'moment'; m.className = 'mom ' + (up ? 'rankup' : 'lvlup') + ' rk-' + r1;
+  m.setAttribute('role', 'dialog'); m.setAttribute('aria-modal', 'true'); m.setAttribute('aria-label', up ? 'New rank ' + r1 : 'Level up');
+  m.innerHTML = `<i class="mom-rays"></i>
+    <div class="mom-stage"><i class="mom-ring"></i><i class="mom-ring r2"></i><i class="mom-ring r3"></i><span class="hx big rk-${up ? r0 : r1}" id="momhx"><i></i><b id="momtxt">${up ? r0 : from}</b></span></div>
+    <div class="mom-card">
+      <div class="mom-lbl">${up ? 'New rank unlocked' : 'Level up'}</div>
+      <h2 class="mom-title">${up ? esc(RANK_NAMES[r1]) : 'Level ' + to}</h2>
+      <div class="mom-s1">${up ? 'Rank ' + r1 + ' · Level ' + to : esc(o.sub || 'Your daily ticks added up')}</div>
+      <div class="mom-chips"><span>Level ${from} → ${to}</span>${up ? '<span>Rank ' + r0 + ' → ' + r1 + '</span>' : '<span>Rank ' + r1 + '</span>'}</div>
+      ${line ? '<p class="mom-p">' + esc(line) + '</p>' : ''}
+      <button class="btn mom-btn" data-action="momclose">${esc(o.btn || 'Continue')}</button>
+    </div>`;
+  document.body.appendChild(m);
+  const hx = $('#momhx'), tx = $('#momtxt');
+  const land = () => { if (up) { hx.className = 'hx big rk-' + r1; tx.textContent = r1; } else tx.textContent = to; };
+  if (!canFx()) { land(); m.classList.add('boom', 'in'); return; }
+  m.classList.add('charge');
+  const boom = () => {
+    m.classList.remove('charge'); m.classList.add('boom');
+    if (up) land(); else countUp(tx, from, to, 700);
+    flash(); confetti(up ? 150 : 90, true);
+    try { if (navigator.vibrate) navigator.vibrate(up ? [40, 60, 40, 60, 220] : [30, 60, 30, 60, 140]); } catch (e) {}
+  };
+  momAt(boom, up ? 1500 : 650);
+  momAt(() => m.classList.add('in'), up ? 2100 : 1200);
 }
 
 /* ---- NEW 2.7.0: Evening wrap-up. Three short steps: close your habits, check in, plan tomorrow. ---- */
@@ -3175,9 +3550,9 @@ function doClaim(id) {
   const pOld = pctOf(oldXp, oldL), pNew = pctOf(newXp, newL);
   showModal(`
     <div class="wtag"><span class="tag">Habsys</span></div>
-    <div class="cel-hero${leveled ? ' lvl' : ''}">${leveled ? '<i class="rays"></i><i class="shock"></i><i class="shock s2"></i>' : ''}<div class="cel-ic${leveled ? ' big' : ''}"><span class="num" id="celnum">${leveled ? oldL : t.n}</span></div></div>
-    <div class="cel-lbl${leveled ? ' lv' : ''}">${leveled ? (rankUp ? 'Rank up' : 'Level up') : 'Reward claimed'}</div>
-    <h3${leveled ? ' class="lvh"' : ''}>${leveled ? 'Level ' + newL : esc(t.title)}</h3>
+    <div class="cel-hero"><div class="cel-ic"><span class="num" id="celnum">${t.n}</span></div></div>
+    <div class="cel-lbl">Reward claimed</div>
+    <h3>${esc(t.title)}</h3>
     <p class="sub">${esc(t.title)} · ${esc(h.name)}</p>
     <div class="reward xpbox"><b>XP earned</b><span class="xpg">+<span id="celxp">0</span> XP</span>
       <div class="bar"><i id="celbar" style="width:${pOld}%"></i></div>
@@ -3186,8 +3561,8 @@ function doClaim(id) {
     ${t.savers ? `<div class="reward"><b>Streak savers</b>+${t.savers} · you now have ${S.savers}</div>` : ''}
     <div class="reward"><b>Go enjoy it</b>${esc(S.rewards[0].text)}</div>
     <p style="color:var(--muted);font-size:14px">Mark it as enjoyed in the Vault once you have had it. Then save a backup on the Habits tab to lock in this win.</p>
-    <div class="actions"><button class="btn" data-action="afterclaim" data-id="${esc(h.id)}">${more ? 'Next reward' : 'Continue'}</button></div>`, 'cel' + (leveled ? ' lvlwin' : ''));
-  confetti(leveled ? 50 : 70);
+    <div class="actions"><button class="btn" data-action="afterclaim" data-id="${esc(h.id)}">${more ? 'Next reward' : 'Continue'}</button></div>`, 'cel');
+  confetti(leveled ? 30 : 70);
   setTimeout(() => {
     countUp($('#celxp'), 0, t.xp, 900);
     const bar = $('#celbar'); if (!bar) return;
@@ -3195,11 +3570,14 @@ function doClaim(id) {
     bar.style.width = '100%';                       // fill to the top of the old level ...
     setTimeout(() => {
       const b2 = $('#celbar'); if (!b2) return;
-      levelBoom(oldL, newL);                        // ... the level number rolls up, with flash, shock rings, cannons and a buzz (2.7) ...
-      b2.style.transition = 'none'; b2.style.width = '0%';
-      void b2.offsetWidth;
-      b2.style.transition = ''; b2.style.width = pNew + '%';   // ... and the bar refills for the new level
-      const lv = $('#cellv'); if (lv) lv.textContent = 'LV ' + newL;
+      // ... the full-screen level-up (or rank-up) takes over (3.0); when it is closed, the bar refills for the new level underneath
+      levelScreen(oldL, newL, {after: () => {
+        const b3 = $('#celbar'); if (!b3) return;
+        b3.style.transition = 'none'; b3.style.width = '0%';
+        void b3.offsetWidth;
+        b3.style.transition = ''; b3.style.width = pNew + '%';
+        const lv = $('#cellv'); if (lv) lv.textContent = 'LV ' + newL;
+      }});
     }, 1000);
   }, 450);
 }
@@ -3280,7 +3658,7 @@ function openInfo() {
   const need = xpFor(L + 1) - S.player.xp;
   const ranks = RANKS.map((r, i) => {
     const nx = RANKS[i + 1];
-    return `<div class="kv ${r.l === cur ? 'here' : ''}"><span>Rank ${r.l}${r.l === cur ? ' · you' : ''}</span><b>${nx ? 'Level ' + r.min + ' to ' + (nx.min - 1) : 'Level ' + r.min + ' and above'}</b></div>`;
+    return `<div class="kv ${r.l === cur ? 'here' : ''}"><span>Rank ${r.l} · ${RANK_NAMES[r.l]}${r.l === cur ? ' · you' : ''}</span><b>${nx ? 'Level ' + r.min + ' to ' + (nx.min - 1) : 'Level ' + r.min + ' and above'}</b></div>`;
   }).join('');
   const marks = [2, 10, 25, 50, 100, 150, 200, 365].map(n => `<div class="kv"><span>Level ${n}</span><b>${xpFor(n).toLocaleString()} XP in total</b></div>`).join('');
   showModal(`
@@ -3596,11 +3974,16 @@ async function syncFriends(force) {
     for (let i = 0; i < 2; i++) {
       try { await fsPush(); break; } catch (e) { if (e && e.retry && i === 0) continue; throw e; }
     }
-    for (const c of S.friends.list.slice()) {
-      try { const card = await fsGet(c); if (card) fCards[c] = card; }
-      catch (e) { if (!e || !e.status || e.status >= 500) throw e; }   // a single refused card is skipped; network or server trouble stops the update
-      try { const ch = await fsGetCheer(c); if (ch) fCheers[c] = ch; }   // 2.9: a cheer from this friend (a refused read, e.g. before the new rules are published, is skipped)
-      catch (e) { if (!e || !e.status || e.status >= 500) throw e; }
+    // 2.9.9: friends are read 5 at a time instead of one after the other (a full list of 20 took 40 requests in a row).
+    await fbToken();   // one sign-in check first, so the parallel requests share the same token
+    const codes = S.friends.list.slice();
+    for (let i = 0; i < codes.length; i += 5) {
+      await Promise.all(codes.slice(i, i + 5).map(async c => {
+        try { const card = await fsGet(c); if (card && S.friends.list.indexOf(c) >= 0) fCards[c] = card; }
+        catch (e) { if (!e || !e.status || e.status >= 500) throw e; }   // a single refused card is skipped; network or server trouble stops the update
+        try { const ch = await fsGetCheer(c); if (ch && S.friends.list.indexOf(c) >= 0) fCheers[c] = ch; }   // 2.9: a cheer from this friend (a refused read, e.g. before the new rules are published, is skipped)
+        catch (e) { if (!e || !e.status || e.status >= 500) throw e; }
+      }));
     }
     fState.last = Date.now();
     reconcileSeen();
@@ -3757,9 +4140,16 @@ function startFresh() {
   save({noCount:true}); render(); askPersist();
 }
 
+const lastTick = {key: '', at: 0};
 const actions = {
   tab: el => switchTab(el.dataset.tab),
-  tick: el => toggleDay(el.dataset.id, el.dataset.day),
+  // 2.9.9: a quick accidental double tap on a circle no longer ticks and un-ticks it straight away (which also refunded the XP).
+  tick: el => {
+    const key = el.dataset.id + '|' + el.dataset.day, now = Date.now();
+    if (key === lastTick.key && now - lastTick.at < 400) return;
+    lastTick.key = key; lastTick.at = now;
+    toggleDay(el.dataset.id, el.dataset.day);
+  },
   rec: el => { ui.rec = el.dataset.id; renderView(); playIn(0); },
   checkin: openCheckin,
   // NEW 2.9.0: next goal, cheers, habit insights, focus time
@@ -3954,6 +4344,19 @@ const actions = {
   },
   // NEW 2.6.0: the small X on a spotlight line.
   fack: el => { ackFriends(el.dataset.code); redrawFriends(); },
+  // NEW 3.0.0: profile card, year in pixels, full-screen level-up / rank-up
+  profile: openProfile,
+  pshare: () => shareCanvas(profilePoster(), 'habsys-profile.png', S.player.name + ' on Habsys'),
+  yprev: () => { ui.yr--; renderView(); },
+  ynext: () => { ui.yr++; renderView(); },
+  yday: el => openYearDay(el.dataset.day),
+  yshare: () => shareCanvas(yearPoster(ui.yr), 'habsys-' + ui.yr + '-in-pixels.png', ui.yr + ' in pixels'),
+  momclose: closeMoment,
+  prevlv: () => { const L = levelOf(S.player.xp); levelScreen(L, L + 1, {preview: true, r0: rankOf(L), r1: rankOf(L)}); },
+  prevrank: () => {
+    const i = Math.min(RANKS.length - 1, Math.max(1, RANKS.findIndex(x => x.l === rankOf(levelOf(S.player.xp))) + 1));
+    levelScreen(RANKS[i].min - 1, RANKS[i].min, {preview: true, r0: RANKS[i - 1].l, r1: RANKS[i].l});
+  },
   backup: doBackup,
   restore: () => { const f = $('#restoreFile'); f.value = ''; f.click(); },
   dorestore: () => {
@@ -3976,10 +4379,13 @@ const actions = {
   doerase: () => { S = defaultState(); fCards = {}; saveFCache(); fCheers = {}; saveCCache(); fState.lastPush = ''; clearSnaps(); save({noCount:true}); closeModal(); ui.tab = 'habits'; render(); toast('All data erased.'); }
 };
 
+// 2.9.9: a pop-up closes from a tap on the dark area only when the press STARTED there (selecting text and letting go outside no longer closes it and loses what you typed).
+let downT = null;
+document.addEventListener('pointerdown', e => { downT = e.target; }, true);
 document.addEventListener('click', e => {
-  const el = e.target.closest('[data-action]');
+  const el = e.target.closest('[data-action]'), started = downT; downT = null;
   if (!el) {
-    if (e.target.id === 'overlay') closeModal();
+    if (e.target.id === 'overlay' && (!started || started.id === 'overlay')) closeModal();
     return;
   }
   const fn = actions[el.dataset.action];
@@ -3998,7 +4404,8 @@ document.addEventListener('input', e => {
 });
 document.addEventListener('focusout', e => { if (e.target.id === 'jtoday') commitInput(); if (e.target.id === 'wplan') savePlanInput(); });
 document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') closeModal();
+  if (e.key === 'Escape') { if ($('#moment.in')) closeMoment(); else closeModal(); }
+  if ((e.key === 'Enter' || e.key === ' ') && e.target.classList && e.target.classList.contains('player')) { e.preventDefault(); openProfile(); }
   if (e.key === 'Enter' && e.target.id === 'gtext') { const b = document.querySelector('[data-action="goalsave"]'); if (b) b.click(); }
   if (e.key === 'Enter' && e.target.id === 'fcmin') { const b = document.querySelector('[data-action="focusgo"]'); if (b) b.click(); }
   if (e.key === 'Enter' && e.target.id === 'hname') { const b = document.querySelector('[data-action="savehabit"]'); if (b) b.click(); }
