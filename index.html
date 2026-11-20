@@ -13,6 +13,7 @@
 <link rel="apple-touch-icon" href="icon-180.png?v=199">
 <link rel="icon" type="image/png" href="icon-192.png?v=199">
 <style>
+/* ===== Habsys 3.0.6: the Next goal now sits inside the Today card, right after "Keep going" (beside it on a wide iPad, under it on a narrow screen). Everything else as in 3.0.5 ===== */
 /* ===== Habsys 3.0.5: two daily check-ins (morning and evening), Sunday weekly reflection with a history of all past reflections. Everything else as in 3.0.0 ===== */
 /* ===== Habsys 3.0.0: Year in pixels, Profile card, full-screen level-up and rank-up moments, premium UI polish. Everything else as in 2.9.9 ===== */
 /* ===== Habsys 2.9.9 (bug-fix and speed release, built on 2.9.0): Keep-going cheers for friends, a Next goal card, a graph button with Insights on every habit, and Focus time (a timer). Everything else as in 2.8.0 ===== */
@@ -858,6 +859,17 @@ h2.sec::before{content:"";flex:none;width:4px;height:21px;border-radius:3px;back
 .mom-p{margin:0 auto 24px;max-width:340px;font-size:15px;line-height:1.5;color:rgba(255,255,255,.66)}
 .mom-btn{min-width:210px}
 .mom-card .mom-chips + .mom-btn{margin-top:10px}
+/* 3.0.6: the Next goal inside the Today card */
+.t-top.has-goal{display:grid;grid-template-columns:auto minmax(0,1fr);gap:16px 20px;align-items:center}
+.t-top.has-goal .goal{grid-column:1/-1}
+.goal.in{margin:0;padding:14px 16px 16px;border-radius:18px;box-shadow:none}
+.goal.in .goal-t{font-size:20px;margin:2px 0 6px}
+.goal.in .goal-s{margin:8px 0 12px}
+.goal.in.empty b{font-size:18px}
+@media (min-width:900px){
+  .t-top.has-goal{grid-template-columns:auto minmax(0,1fr) minmax(300px,400px)}
+  .t-top.has-goal .goal{grid-column:auto}
+}
 /* 3.0.5 */
 .jr.rf,.jr.ck{margin-bottom:0}
 .jr.ck{cursor:default}
@@ -909,7 +921,7 @@ h2.sec::before{content:"";flex:none;width:4px;height:21px;border-radius:3px;back
 'use strict';
 
 /* ============ constants ============ */
-const APP_VERSION = '3.0.5';
+const APP_VERSION = '3.0.6';
 // 2.5.0: Friends. These two values come from your free Firebase project (they are an address, not a password).
 // While they still say PASTE..., the Friends tab explains that it is not switched on yet and the rest of the app works as before.
 const FB_API_KEY = 'AIzaSyCCW0tJgzxmgOoOf304Q6elV-D18ZyH0AM', FB_PROJECT = 'habsys-9977a';
@@ -1917,12 +1929,13 @@ function todayPanel() {
   const celeb = full && ui.fx && ui.fx.day === tk;
   return `
   <section class="panel today">
-    <div class="t-top">
+    <div class="t-top has-goal">
       <div class="ring${full ? ' full' : ''}${celeb ? ' celeb' : ''}" role="img" aria-label="${done} of ${n} habits done today">
         <svg viewBox="0 0 112 112"><circle class="rt" cx="56" cy="56" r="46"/><circle class="rp" data-k="ring" data-off="1" cx="56" cy="56" r="46" stroke-dasharray="${C.toFixed(1)}" stroke-dashoffset="${off}" style="stroke-dashoffset:${off}"/></svg>
         <div class="rc"><span>${n ? done + '/' + n : '–'}</span><small>TODAY</small></div>
       </div>
       <div class="t-msg"><h3>${title}</h3><p>${esc(msg)}</p>${win ? `<button class="t-win" data-action="intent" aria-label="Today's win. Tap to change"><b>Today is a win if</b>${esc(win)}</button>` : (new Date().getHours() < INTENT_BEFORE ? `<button class="t-win ask" data-action="intent"><b>Morning check-in</b>How are you today? What will make it a win?</button>` : '')}${plan ? `<div class="t-focus"><b>Your first move</b>${esc(plan)}</div>` : ''}${focus ? `<div class="t-focus"><b>This week's focus</b>${esc(focus)}</div>` : ''}</div>
+      ${goalCard(true)}
     </div>
     ${rows ? `<div class="t-list">${rows}</div>` : ''}
   </section>`;
@@ -2020,7 +2033,7 @@ function viewHabits() {
   if (!S.habits.length) {
     html += `<section class="panel empty"><div class="tag">Habsys</div><h3>Welcome, ${esc(S.player.name)}</h3><p>You have no habits yet. Add your first one (up to ${MAX_HABITS}) and start your first quest.</p></section>`;
   }
-  html += goalCard();   // 2.9: the next goal sits right above the habits
+  if (!S.habits.length) html += goalCard();   // 3.0.6: with habits, the goal lives inside the Today card; with none, it shows here
   // Arrange button: only useful with two or more habits.
   if (S.habits.length > 1) {
     html += `<div class="arrbar"><button class="btn ghost sm" data-action="arrange">Arrange habits</button></div>`;
@@ -2518,10 +2531,10 @@ function goalLeft() {
   if (!g.text || !g.date) return null;
   return Math.round((parseKey(g.date) - parseKey(dkey(new Date()))) / 86400000);
 }
-function goalCard() {
-  const g = S.goal, n = S.goals.length;
+function goalCard(inside) {
+  const g = S.goal, n = S.goals.length, ic = inside ? ' in' : '';
   if (!g.text) {
-    return `<button class="panel goal empty" data-action="goal" aria-label="Set your next goal"><span class="tag">Next goal</span><b>What are you working toward?</b><small>${n ? n + (n === 1 ? ' goal' : ' goals') + ' achieved so far. ' : ''}Pick one big goal your habits lead to, like a 5K run.</small><span class="goal-plus">+ Set a goal</span></button>`;
+    return `<button class="panel goal empty${ic}" data-action="goal" aria-label="Set your next goal"><span class="tag">Next goal</span><b>What are you working toward?</b><small>${n ? n + (n === 1 ? ' goal' : ' goals') + ' achieved so far. ' : ''}Pick one big goal your habits lead to, like a 5K run.</small><span class="goal-plus">+ Set a goal</span></button>`;
   }
   const left = goalLeft();
   let chip = '', bar = '', sub = 'Working on it since ' + fmtKey(g.set) + '.';
@@ -2532,7 +2545,7 @@ function goalCard() {
     bar = `<div class="bar" style="--ac:#6ee7b7"><i style="width:${pct}%"></i></div>`;
     sub = 'Target date ' + fmtKey(g.date) + '. The bar shows how much of the time has passed.';
   }
-  return `<section class="panel goal">
+  return `<section class="panel goal${ic}">
     <div class="goal-top"><span class="tag">Next goal</span>${chip ? '<span class="goal-chip">' + esc(chip) + '</span>' : ''}</div>
     <button class="goal-t" data-action="goal" aria-label="Edit your goal: ${esc(g.text)}"><span>${esc(g.text)}</span>${PENCIL}</button>
     ${bar}<span class="goal-s">${esc(sub)}</span>
