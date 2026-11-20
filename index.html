@@ -13,6 +13,7 @@
 <link rel="apple-touch-icon" href="icon-180.png?v=199">
 <link rel="icon" type="image/png" href="icon-192.png?v=199">
 <style>
+/* ===== Habsys 3.0.5: two daily check-ins (morning and evening), Sunday weekly reflection with a history of all past reflections. Everything else as in 3.0.0 ===== */
 /* ===== Habsys 3.0.0: Year in pixels, Profile card, full-screen level-up and rank-up moments, premium UI polish. Everything else as in 2.9.9 ===== */
 /* ===== Habsys 2.9.9 (bug-fix and speed release, built on 2.9.0): Keep-going cheers for friends, a Next goal card, a graph button with Insights on every habit, and Focus time (a timer). Everything else as in 2.8.0 ===== */
 /* ===== Habsys 2.7.0: small XP for daily ticks, badges, streak flame, a stronger level-up moment, Evening wrap-up, habit icons. Everything else as in 2.6.6 ===== */
@@ -857,6 +858,13 @@ h2.sec::before{content:"";flex:none;width:4px;height:21px;border-radius:3px;back
 .mom-p{margin:0 auto 24px;max-width:340px;font-size:15px;line-height:1.5;color:rgba(255,255,255,.66)}
 .mom-btn{min-width:210px}
 .mom-card .mom-chips + .mom-btn{margin-top:10px}
+/* 3.0.5 */
+.jr.rf,.jr.ck{margin-bottom:0}
+.jr.ck{cursor:default}
+.jr.rf p+p,.jr.ck p+p{margin-top:8px}
+.jr.rf p b,.jr.ck p b{display:block;margin-bottom:2px;font-family:var(--body);font-weight:600;font-size:12px;color:var(--muted)}
+.reward.rf-m{font-size:14px;line-height:1.5}
+.reward.rf-m b{margin-bottom:4px}
 </style>
 </head>
 <body>
@@ -901,7 +909,7 @@ h2.sec::before{content:"";flex:none;width:4px;height:21px;border-radius:3px;back
 'use strict';
 
 /* ============ constants ============ */
-const APP_VERSION = '3.0.0';
+const APP_VERSION = '3.0.5';
 // 2.5.0: Friends. These two values come from your free Firebase project (they are an address, not a password).
 // While they still say PASTE..., the Friends tab explains that it is not switched on yet and the rest of the app works as before.
 const FB_API_KEY = 'AIzaSyCCW0tJgzxmgOoOf304Q6elV-D18ZyH0AM', FB_PROJECT = 'habsys-9977a';
@@ -916,6 +924,8 @@ const MAX_JOURNAL = 160;   // one sentence about the day
 const XP_TICK = 2, XP_LITE = 1;   // small XP for a daily tick: 2 for a full day, 1 for the 2-minute version (quests still give the big XP)
 const WRAP_HOUR = 18;             // the Evening wrap-up card shows on the Habits tab from this hour (6 pm)
 const MAX_PLAN = 100;             // "first move tomorrow" line
+// NEW 3.0.5: evening check-in notes
+const MAX_EVE = 200;              // what went well / what did not, each
 // NEW 2.8.0: morning intention + reminders
 const MAX_INTENT = 100;           // the one thing that makes today a win
 const INTENT_BEFORE = WRAP_HOUR;  // the morning question is not asked from this hour on (the Evening wrap-up takes over)
@@ -1046,7 +1056,7 @@ function sum53(str) {
 // NEW 2.6: friends.partner = the code of the ONE friend you chose as your partner ('' = none).
 //          friends.seen = {code: {l: level, r: rank}} = the level and rank of each friend the last time you looked at the Friends tab (for the level-up spotlight).
 function defaultState() {
-  return { v:2, player:{name:'Player', xp:0}, savers:0, habits:[], rewards:[], rewardText:{}, reflections:[], cel:{}, allDay:'', checkins:{}, journal:{}, friends:{code:'', list:[], partner:'', seen:{}, cheerSeen:{}, cheerSent:{}}, goal:{text:'', date:'', set:''}, goals:[], badges:{}, wrap:'', plan:{day:'', text:''}, intents:{}, askedDay:'', lastBackup:null, changes:0, bigMoment:false, updatedAt:0 };
+  return { v:2, player:{name:'Player', xp:0}, savers:0, habits:[], rewards:[], rewardText:{}, reflections:[], cel:{}, allDay:'', checkins:{}, journal:{}, friends:{code:'', list:[], partner:'', seen:{}, cheerSeen:{}, cheerSent:{}}, goal:{text:'', date:'', set:''}, goals:[], badges:{}, wrap:'', plan:{day:'', text:''}, intents:{}, askedDay:'', mor:{}, eve:{}, askedRef:'', lastBackup:null, changes:0, bigMoment:false, updatedAt:0 };
 }
 function validState(s) { return !!s && typeof s === 'object' && Array.isArray(s.habits); }
 function normalize(raw) {
@@ -1168,6 +1178,21 @@ function normalize(raw) {
     if (okDay(k) && t) s.intents[k] = t;
   }
   s.askedDay = okDay(String(raw.askedDay)) ? raw.askedDay : '';
+  // Morning and evening check-ins (new in 3.0.5). S.mor[day] = {m,e}; S.eve[day] = {m,e,good,bad}. Older data and backups simply have none.
+  const c5 = v => { v = Math.floor(Number(v)); return v >= 1 && v <= 5 ? v : 0; };
+  const t5 = v => String(v == null ? '' : v).replace(/\s+/g, ' ').trim().slice(0, MAX_EVE);
+  const mo5 = raw.mor && typeof raw.mor === 'object' ? raw.mor : {};
+  for (const k of Object.keys(mo5).sort().slice(-4000)) {
+    const o = mo5[k]; if (!okDay(k) || !o || typeof o !== 'object') continue;
+    const m = c5(o.m), e = c5(o.e); if (m || e) s.mor[k] = {m: m, e: e};
+  }
+  const ev5 = raw.eve && typeof raw.eve === 'object' ? raw.eve : {};
+  for (const k of Object.keys(ev5).sort().slice(-4000)) {
+    const o = ev5[k]; if (!okDay(k) || !o || typeof o !== 'object') continue;
+    const m = c5(o.m), e = c5(o.e), good = t5(o.good), bad = t5(o.bad);
+    if (m || e || good || bad) s.eve[k] = {m: m, e: e, good: good, bad: bad};
+  }
+  s.askedRef = okDay(String(raw.askedRef)) ? raw.askedRef : '';
   // Next goal and achieved goals (new in 2.9). Older data and backups simply have none.
   const gl = raw.goal && typeof raw.goal === 'object' ? raw.goal : {};
   const gt = String(gl.text == null ? '' : gl.text).replace(/\s+/g, ' ').trim().slice(0, MAX_GOAL);
@@ -1758,7 +1783,7 @@ function chartHtml(cols, max) {
 const TABS = ['habits', 'vault', 'records', 'friends', 'system'];
 // fx = which habit/day was just ticked (set only for the moment the screen is redrawn, so the tick effects play once).
 // jq = journal search text. jback = the journal line editor was opened from the Mood & journal sheet, so it returns there.
-const ui = { tab: 'habits', day: dkey(new Date()), rec: null, rescue: null, pend: null, fx: null, jq: '', jback: false, wrap: null, yr: new Date().getFullYear() };  // rescue: null | 'fresh' | 'damaged' | 'unreadable'.
+const ui = { tab: 'habits', day: dkey(new Date()), rec: null, rescue: null, pend: null, fx: null, jq: '', jback: false, wrap: null, yr: new Date().getFullYear(), refback: false, ckn: 40 };  // rescue: null | 'fresh' | 'damaged' | 'unreadable'.
 
 function renderNav() {
   document.querySelectorAll('.tab').forEach(t => {
@@ -1897,7 +1922,7 @@ function todayPanel() {
         <svg viewBox="0 0 112 112"><circle class="rt" cx="56" cy="56" r="46"/><circle class="rp" data-k="ring" data-off="1" cx="56" cy="56" r="46" stroke-dasharray="${C.toFixed(1)}" stroke-dashoffset="${off}" style="stroke-dashoffset:${off}"/></svg>
         <div class="rc"><span>${n ? done + '/' + n : '–'}</span><small>TODAY</small></div>
       </div>
-      <div class="t-msg"><h3>${title}</h3><p>${esc(msg)}</p>${win ? `<button class="t-win" data-action="intent" aria-label="Today's win. Tap to change"><b>Today is a win if</b>${esc(win)}</button>` : (new Date().getHours() < INTENT_BEFORE ? `<button class="t-win ask" data-action="intent"><b>Morning intention</b>What is the one thing that makes today a win?</button>` : '')}${plan ? `<div class="t-focus"><b>Your first move</b>${esc(plan)}</div>` : ''}${focus ? `<div class="t-focus"><b>This week's focus</b>${esc(focus)}</div>` : ''}</div>
+      <div class="t-msg"><h3>${title}</h3><p>${esc(msg)}</p>${win ? `<button class="t-win" data-action="intent" aria-label="Today's win. Tap to change"><b>Today is a win if</b>${esc(win)}</button>` : (new Date().getHours() < INTENT_BEFORE ? `<button class="t-win ask" data-action="intent"><b>Morning check-in</b>How are you today? What will make it a win?</button>` : '')}${plan ? `<div class="t-focus"><b>Your first move</b>${esc(plan)}</div>` : ''}${focus ? `<div class="t-focus"><b>This week's focus</b>${esc(focus)}</div>` : ''}</div>
     </div>
     ${rows ? `<div class="t-list">${rows}</div>` : ''}
   </section>`;
@@ -1907,14 +1932,15 @@ function todayPanel() {
 // and opens the Check-in pop-up (mood faces, energy 1 to 5, one line about the day).
 function checkinButton() {
   if (!S.habits.length) return '';
-  const tk = dkey(new Date()), c = S.checkins[tk] || {m: 0, e: 0}, hasLine = !!S.journal[tk];
-  const sub = c.m || c.e || hasLine
-    ? 'Mood ' + (c.m ? MOODS[c.m - 1] : '–') + ' · Energy ' + (c.e || '–') + (hasLine ? ' · Line saved' : '')
-    : 'Mood, energy and one line';
-  const done = !!(c.m && c.e);
-  return `<button class="panel cibtn${done ? ' done' : ''}" data-action="checkin" aria-label="Open the daily check-in">
-    <span class="cib-ic">${c.m ? MOODS[c.m - 1] : '🙂'}</span>
-    <span class="cib-t"><b>Daily check-in</b><small>${esc(sub)}</small></span>
+  const tk = dkey(new Date()), c = S.mor[tk] || {m: 0, e: 0}, win = S.intents[tk];
+  const done = !!(c.m && c.e && win);
+  if (new Date().getHours() >= WRAP_HOUR && !done) return '';   // from the evening, the Evening wrap-up takes over
+  const sub = c.m || c.e || win
+    ? 'Mood ' + (c.m ? MOODS[c.m - 1] : '–') + ' · Energy ' + (c.e || '–') + (win ? ' · Win set' : '')
+    : "Mood, energy and today's win";
+  return `<button class="panel cibtn${done ? ' done' : ''}" data-action="intent" aria-label="Open the morning check-in">
+    <span class="cib-ic">${c.m ? MOODS[c.m - 1] : '🌅'}</span>
+    <span class="cib-t"><b>Morning check-in</b><small>${esc(sub)}</small></span>
     <span class="cib-s">${done ? 'Done ✓' : 'Open'}</span>
   </button>`;
 }
@@ -1925,7 +1951,7 @@ function wrapCard() {
   const tk = dkey(new Date()), fin = S.wrap === tk;
   if (!fin && new Date().getHours() < WRAP_HOUR) return '';
   const due = dueToday(), open = due.filter(h => !h.done[tk]).length;
-  const sub = fin ? 'Day closed. Rest well.' : open ? open + ' habit' + (open === 1 ? '' : 's') + ' still open · check-in · plan tomorrow' : 'Check in and plan tomorrow';
+  const sub = fin ? 'Day closed. Rest well.' : open ? open + ' habit' + (open === 1 ? '' : 's') + ' still open · evening check-in · plan tomorrow' : 'Evening check-in and plan tomorrow';
   return `<button class="panel cibtn wrapbtn${fin ? ' done' : ''}" data-action="wrap" aria-label="Open the evening wrap-up">
     <span class="cib-ic">🌙</span>
     <span class="cib-t"><b>Evening wrap-up</b><small>${esc(sub)}</small></span>
@@ -2212,7 +2238,7 @@ function trendsSection() {
 function moodBody() {
   const keys = Object.keys(S.checkins);
   if (!keys.length) {
-    return '<p class="note">No check-ins yet. Open the Daily check-in on the Habits tab and tap your mood and energy. After a few weeks, Habsys shows which habits lift you.</p>';
+    return '<p class="note">No check-ins yet. Do the Morning check-in on the Habits tab and the Evening wrap-up at night. After a few weeks, Habsys shows which habits lift you.</p>';
   }
   const now = new Date(), cols = [];
   let sm = 0, cm = 0, se = 0, ce = 0;
@@ -2242,7 +2268,7 @@ function journalList() {
   let ks = journalKeys();
   if (q) ks = ks.filter(k => S.journal[k].toLowerCase().indexOf(q) >= 0 || fmtKey(k).toLowerCase().indexOf(q) >= 0);
   if (!ks.length) {
-    return `<p class="note" style="margin:0">${q ? 'No lines match "' + esc(ui.jq.trim()) + '".' : 'No journal lines yet. Write one in the Daily check-in on the Habits tab.'}</p>`;
+    return `<p class="note" style="margin:0">${q ? 'No lines match "' + esc(ui.jq.trim()) + '".' : 'No journal lines yet. Lines written in older versions appear here.'}</p>`;
   }
   const out = ks.slice(0, 60).map(k => {
     const c = S.checkins[k], tg = c ? ' · ' + [c.m ? MOODS[c.m - 1] : '', c.e ? 'Energy ' + c.e : ''].filter(Boolean).join(' · ') : '';
@@ -2255,14 +2281,41 @@ function journalBody() {
   return `${n ? `<label class="field"><span>Search your ${n} line${n === 1 ? '' : 's'}</span><input class="input" id="jsearch" type="text" enterkeyhint="search" placeholder="A word or a month" value="${esc(ui.jq || '')}" autocomplete="off"></label>` : ''}<div class="jlist" id="jlist">${journalList()}</div>`;
 }
 // The Records button that opens the Mood & journal pop-up.
+const checkinDays = () => [...new Set([...Object.keys(S.mor), ...Object.keys(S.eve), ...Object.keys(S.intents), ...Object.keys(S.checkins), ...Object.keys(S.journal)])].sort().reverse();
 function moodDataButton() {
-  const n = Object.keys(S.checkins).length, j = Object.keys(S.journal).length;
-  return `<h2 class="sec">Mood, energy &amp; journal</h2>
+  const n = Object.keys(S.checkins).length, j = Object.keys(S.journal).length, nm = Object.keys(S.mor).length, ne = Object.keys(S.eve).length;
+  return `<h2 class="sec">Check-ins &amp; mood</h2>
+  <button class="panel cibtn" data-action="ckhist" aria-label="Open all daily check-ins">
+    <span class="cib-ic">🗓️</span>
+    <span class="cib-t"><b>Daily check-ins</b><small>${nm} morning · ${ne} evening</small></span>
+    <span class="cib-s">Open</span>
+  </button>
   <button class="panel cibtn" style="margin-bottom:0" data-action="mooddata" aria-label="Open mood, energy and journal data">
     <span class="cib-ic">📊</span>
-    <span class="cib-t"><b>View mood &amp; journal</b><small>${n} check-in${n === 1 ? '' : 's'} · ${j} journal line${j === 1 ? '' : 's'}</small></span>
+    <span class="cib-t"><b>View mood &amp; journal</b><small>${n} mood day${n === 1 ? '' : 's'} · ${j} journal line${j === 1 ? '' : 's'}</small></span>
     <span class="cib-s">Open</span>
   </button>`;
+}
+// 3.0.5: every morning and evening check-in, newest day first (older versions' check-ins and journal lines are included).
+function ckDayHtml(k) {
+  const mo = S.mor[k], ev = S.eve[k], win = S.intents[k], c = S.checkins[k], j = S.journal[k];
+  const tag = x => x ? [x.m ? MOODS[x.m - 1] : '', x.e ? 'Energy ' + x.e + '/5' : ''].filter(Boolean).join(' · ') : '';
+  let b = '';
+  if (mo || win) b += '<p><b>🌅 Morning</b>' + [esc(tag(mo)), win ? 'Win: ' + esc(win) : ''].filter(Boolean).join('<br>') + '</p>';
+  if (ev) b += '<p><b>🌙 Evening</b>' + [esc(tag(ev)), ev.good ? 'Went well: ' + esc(ev.good) : '', ev.bad ? 'Did not go well: ' + esc(ev.bad) : ''].filter(Boolean).join('<br>') + '</p>';
+  if (!mo && !ev && c && tag(c)) b += '<p><b>Check-in</b>' + esc(tag(c)) + '</p>';
+  if (j) b += '<p><b>Journal</b>' + esc(j) + '</p>';
+  return b ? `<div class="jr ck"><small>${esc(fmtKey(k))}</small>${b}</div>` : '';
+}
+function openCheckinHistory() {
+  const ks = checkinDays(), shown = ks.slice(0, ui.ckn);
+  const tile = (l, v) => `<div class="stat"><small>${l}</small><b>${v}</b></div>`;
+  const body = ks.length
+    ? '<div class="stats">' + tile('Days logged', ks.length) + tile('Morning', Object.keys(S.mor).length) + tile('Evening', Object.keys(S.eve).length) + '</div><div class="jlist" style="margin-top:14px">' + shown.map(ckDayHtml).join('') + '</div>'
+      + (ks.length > shown.length ? `<button class="btn ghost block" style="margin-top:12px" data-action="ckmore">Show more (${ks.length - shown.length} older)</button>` : '')
+    : '<p class="note">No check-ins yet. Do the Morning check-in on the Habits tab and the Evening wrap-up at night.</p>';
+  showModal(`<div class="wtag"><span class="tag">Habsys</span></div><h3>Daily check-ins</h3><p class="sub">Morning and evening, every day</p>${body}
+    <div class="actions" style="margin-top:16px"><button class="btn" data-action="close">Close</button></div>`, '', true);
 }
 // Streak of one habit at the end of each of the last 12 weeks.
 function streakTimeHtml(h, bare) {
@@ -2291,7 +2344,7 @@ function taskLogHtml(h) {
 // 2.3.5 order in Records: Weekly reflection, Habit history (with quests cleared and the full calendar), Insights, Trends, then the Mood & journal button.
 function viewRecords() {
   let html = '<h2 class="sec">Records</h2>';
-  const hasMood = Object.keys(S.checkins).length || journalKeys().length;
+  const hasMood = checkinDays().length;
   if (!S.habits.length) {
     html += '<section class="panel empty"><div class="tag">Habsys</div><h3>No history yet</h3><p>Add a habit in the Habits tab. Every day you complete will be recorded here.</p></section>';
     return html + (hasMood ? moodDataButton() : '');
@@ -2300,20 +2353,12 @@ function viewRecords() {
   // 1. weekly reflection
   const thisWk = weekKey(new Date()), lastWk = weekKey(addDays(new Date(), -7));
   const has = wk => S.reflections.some(r => r.week === wk);
-  html += `<h2 class="sec">Weekly reflection</h2><section class="panel"><p class="note">Once a week, look back: what worked, what got in the way, and the one thing you will focus on next. Reflection turns streaks into learning.</p>
+  html += `<h2 class="sec">Weekly reflection</h2><section class="panel"><p class="note">Habsys asks you every Sunday. Once a week, look back: what worked, what got in the way, and the one thing you will focus on next. Reflection turns streaks into learning.</p>
     <div class="stack">
       <button class="btn block" data-action="reflect" data-week="${thisWk}">${has(thisWk) ? 'Edit this week' : 'Reflect on this week'}</button>
       <button class="btn ghost block" data-action="reflect" data-week="${lastWk}">${has(lastWk) ? 'Edit last week' : 'Reflect on last week'}</button>
+      <button class="btn ghost block" data-action="refhist">All previous reflections (${S.reflections.length})</button>
     </div></section>`;
-  if (S.reflections.length) {
-    html += '<div class="log" style="margin-top:12px">' + S.reflections.slice(0, 12).map(r => `
-      <div class="panel log-item">
-        <div class="row"><h4>${esc(weekRange(r.week))}</h4><span class="tag">${r.rate}%</span></div>
-        ${r.win ? `<p class="rl"><b>Win:</b> ${esc(r.win)}</p>` : ''}
-        ${r.hard ? `<p class="rl"><b>Got in the way:</b> ${esc(r.hard)}</p>` : ''}
-        ${r.focus ? `<p class="rl"><b>Focus:</b> ${esc(r.focus)}</p>` : ''}
-      </div>`).join('') + '</div>';
-  }
   // 2. habit history
   html += '<h2 class="sec">Habit history</h2>';
   const h = findHabit(ui.rec) || S.habits[0];
@@ -3077,6 +3122,9 @@ function openYearDay(k) {
     <p class="sub">${k > tk ? 'This day is still ahead' : s.due ? s.done + ' of ' + s.due + ' habits done' : 'Nothing was due'}</p>
     ${rows ? '<div class="grp">' + rows + '</div>' : ''}
     ${c && c.m ? '<div class="reward"><b>Mood</b>' + MOODS[c.m - 1] + ' ' + MOOD_NAMES[c.m - 1] + (c.e ? ' · Energy ' + c.e + '/5' : '') + '</div>' : ''}
+    ${S.intents[k] ? '<div class="reward"><b>Win for the day</b>' + esc(S.intents[k]) + '</div>' : ''}
+    ${S.eve[k] && S.eve[k].good ? '<div class="reward"><b>Went well</b>' + esc(S.eve[k].good) + '</div>' : ''}
+    ${S.eve[k] && S.eve[k].bad ? '<div class="reward"><b>Did not go well</b>' + esc(S.eve[k].bad) + '</div>' : ''}
     ${j ? '<div class="reward"><b>Journal</b>' + esc(j) + '</div>' : ''}
     <div class="actions"><button class="btn" data-action="close">Close</button></div>`, '', true);
 }
@@ -3273,12 +3321,13 @@ function openWrap(step) {
       <div class="reward" id="wsum">${wrapSumHtml()}</div>
       <div class="wlist" id="wlist">${wrapRows()}</div>
       <p class="hint" style="margin-top:0">Tap a habit to mark it done. Anything left open is fine: tomorrow is your comeback day.</p>
-      <div class="actions"><button class="btn" data-action="wnext" data-step="2">Next: check-in</button><button class="btn ghost" data-action="wquit">Not now</button></div>`;
+      <div class="actions"><button class="btn" data-action="wnext" data-step="2">Next: evening check-in</button><button class="btn ghost" data-action="wquit">Not now</button></div>`;
   } else if (step === 2) {
-    body = `<p class="sub">Step 2 of 3 · How was today?</p>${wrapSteps(2)}
-      <div class="ci-blk"><span>How was your mood?</span><div class="ci-pick" id="cipm">${ciPick('m')}</div></div>
-      <div class="ci-blk"><span>How was your energy?</span><div class="ci-pick" id="cipe">${ciPick('e')}</div><div class="ci-ends"><span>1 low</span><span>5 high</span></div></div>
-      <label class="field"><span>One line about your day</span><input class="input" id="jtoday" maxlength="${MAX_JOURNAL}" placeholder="e.g. Tough morning, strong finish" value="${esc(S.journal[tk] || '')}" autocomplete="off"></label>
+    body = `<p class="sub">Step 2 of 3 · Evening check-in</p>${wrapSteps(2)}
+      <div class="ci-blk"><span>How was your mood?</span><div class="ci-pick" id="cipm">${ciPick('m', 'pm')}</div></div>
+      <div class="ci-blk"><span>How was your energy?</span><div class="ci-pick" id="cipe">${ciPick('e', 'pm')}</div><div class="ci-ends"><span>1 low</span><span>5 high</span></div></div>
+      <label class="field"><span>What went well today?</span><textarea class="input sm" id="wgood" maxlength="${MAX_EVE}" placeholder="A win, big or small">${esc((S.eve[tk] || {}).good || '')}</textarea></label>
+      <label class="field"><span>What did not go well?</span><textarea class="input sm" id="wbad" maxlength="${MAX_EVE}" placeholder="Be honest, not harsh">${esc((S.eve[tk] || {}).bad || '')}</textarea></label>
       <div class="actions two"><button class="btn ghost" data-action="wnext" data-step="1">Back</button><button class="btn" data-action="wnext" data-step="3">Next: tomorrow</button></div>`;
   } else {
     const plan = S.plan.day === tm ? S.plan.text : '';
@@ -3322,10 +3371,12 @@ function openIntent() {
   const tk = dkey(new Date()), cur = S.intents[tk] || '', hr = new Date().getHours();
   const hi = hr < 12 ? 'Good morning' : hr < 18 ? 'Good afternoon' : 'Good evening';
   showModal(`<div class="wtag"><span class="tag">Habsys</span></div><h3>${hi}</h3>
-    <p class="sub">Morning intention</p>
-    <label class="field"><span>What is the one thing that makes today a win?</span><input class="input" id="intent" maxlength="${MAX_INTENT}" placeholder="e.g. Finish the report before lunch" value="${esc(cur)}" autocomplete="off"></label>
-    <p class="hint">Just one thing. It stays on your Today card all day.</p>
-    <div class="actions two"><button class="btn" data-action="intentsave">Save</button><button class="btn ghost" data-action="intentskip">${cur ? 'Cancel' : 'Skip today'}</button></div>`, '', true);
+    <p class="sub">Morning check-in</p>
+    <div class="ci-blk"><span>How is your mood?</span><div class="ci-pick" id="cipm">${ciPick('m', 'am')}</div></div>
+    <div class="ci-blk"><span>How is your energy?</span><div class="ci-pick" id="cipe">${ciPick('e', 'am')}</div><div class="ci-ends"><span>1 low</span><span>5 high</span></div></div>
+    <label class="field"><span>What will make today a win?</span><input class="input" id="intent" maxlength="${MAX_INTENT}" placeholder="e.g. Finish the report before lunch" value="${esc(cur)}" autocomplete="off"></label>
+    <p class="hint">Mood and energy save when you tap. Your win stays on your Today card all day.</p>
+    <div class="actions two"><button class="btn" data-action="intentsave">Save</button><button class="btn ghost" data-action="intentskip">${cur || S.mor[tk] ? 'Cancel' : 'Skip today'}</button></div>`, '', true);
 }
 function saveIntent() {
   if (ui.rescue || writesLocked) { closeModal(); return; }
@@ -3335,12 +3386,14 @@ function saveIntent() {
   S.askedDay = tk;
   save();
   closeModal(); render();
-  toast(v ? 'Intention set. Make it happen.' : 'Intention cleared.');
+  toast('Morning check-in saved. Make it happen.');
+  setTimeout(maybeAskReflect, 900);
 }
 function skipIntent() {
   const tk = dkey(new Date());
-  if (!S.intents[tk] && S.askedDay !== tk && !ui.rescue && !writesLocked) { S.askedDay = tk; save({noCount: true}); }
+  if (S.askedDay !== tk && !ui.rescue && !writesLocked) { S.askedDay = tk; save({noCount: true}); }
   closeModal();
+  setTimeout(maybeAskReflect, 900);
 }
 // Asked once a day when the app is opened (before the evening, and not in the small hours). Never on top of another pop-up.
 function maybeAskIntent() {
@@ -3349,6 +3402,18 @@ function maybeAskIntent() {
   if (S.askedDay === tk || S.intents[tk] || hr >= INTENT_BEFORE || hr < 4) return;
   if ($('#overlay').classList.contains('show')) return;
   openIntent();
+}
+// NEW 3.0.5: every Sunday Habsys offers the weekly reflection once (after the morning check-in, never on top of another pop-up).
+function maybeAskReflect() {
+  if (ui.rescue || writesLocked || document.hidden || !S.habits.length) return;
+  const t = new Date(), tk = dkey(t);
+  if (wdOf(t) !== 6 || S.askedRef === tk || t.getHours() < 4) return;
+  if ($('#overlay').classList.contains('show') || $('#moment.in')) return;
+  const wk = weekKey(t);
+  if (reflectDueWeek() !== wk) return;
+  S.askedRef = tk; save({noCount: true});
+  ui.refback = false;
+  openReflect(wk);
 }
 
 // 2.4: the New habit pop-up first asks for the TYPE: Regular habit (identity + flexible days, as before) or Daily task
@@ -3596,20 +3661,53 @@ function openReflect(wk) {
   const st = weekStats(wk), ex = S.reflections.find(r => r.week === wk) || {};
   const rows = st.rows.filter(r => r.due > 0).map(r => `<div class="kv"><span>${esc(r.h.name)}</span><b>${r.done} / ${r.due}</b></div>`).join('');
   const votes = st.rows.filter(r => r.h.identity && r.done > 0).map(r => esc(r.h.identity) + ' · ' + r.done + ' vote' + (r.done === 1 ? '' : 's')).join('<br>');
+  // 3.0.5: the week's mood and energy, and what you wrote in your evening check-ins
+  let sm = 0, cm = 0, se = 0, ce = 0; const goods = [], bads = [];
+  for (let i = 0; i < 7; i++) {
+    const d = addDays(parseKey(wk), i), k = dkey(d), c = S.checkins[k], v = S.eve[k], wd = d.toLocaleDateString(undefined, {weekday: 'short'});
+    if (c && c.m) { sm += c.m; cm++; } if (c && c.e) { se += c.e; ce++; }
+    if (v && v.good) goods.push('<b>' + wd + ':</b> ' + esc(v.good));
+    if (v && v.bad) bads.push('<b>' + wd + ':</b> ' + esc(v.bad));
+  }
+  const moodLine = cm || ce ? 'Mood ' + (cm ? (sm / cm).toFixed(1) + ' ' + MOODS[Math.min(5, Math.max(1, Math.round(sm / cm))) - 1] : '–') + ' · Energy ' + (ce ? (se / ce).toFixed(1) : '–') + ' (average)' : '';
   showModal(`
     <div class="wtag"><span class="tag">Habsys</span></div>
     <h3>Weekly reflection</h3>
     <p class="sub">${esc(weekRange(wk))}</p>
     <div class="reward"><b>Your week</b>${st.rate === null ? 'No tracked days yet' : st.rate + '% · ' + st.done + ' of ' + st.due + ' days done'}${st.perfect.length ? '<br>Perfect week: ' + st.perfect.map(esc).join(', ') : ''}</div>
+    ${moodLine ? `<div class="reward"><b>Mood &amp; energy</b>${moodLine}</div>` : ''}
     ${votes ? `<div class="reward"><b>Identity votes</b>${votes}</div>` : ''}
     ${rows ? `<div class="grp">${rows}</div>` : ''}
+    ${goods.length ? `<div class="reward rf-m"><b>Went well in your evenings</b>${goods.join('<br>')}</div>` : ''}
+    ${bads.length ? `<div class="reward rf-m"><b>Did not go well in your evenings</b>${bads.join('<br>')}</div>` : ''}
     <label class="field"><span>What went well?</span><textarea class="input sm" id="rwin" maxlength="${MAX_REF}" placeholder="A win, big or small">${esc(ex.win || '')}</textarea></label>
     <label class="field"><span>What got in the way?</span><textarea class="input sm" id="rhard" maxlength="${MAX_REF}" placeholder="Be honest, not harsh">${esc(ex.hard || '')}</textarea></label>
     <label class="field"><span>My one focus for next week</span><textarea class="input sm" id="rfocus" maxlength="${MAX_REF}" placeholder="One clear thing">${esc(ex.focus || '')}</textarea></label>
     <div class="actions">
       <button class="btn" data-action="savereflect" data-week="${wk}">Save reflection</button>
-      <button class="btn ghost" data-action="close">Cancel</button>
+      <button class="btn ghost" data-action="${ui.refback ? 'refcancel' : 'close'}">Cancel</button>
     </div>`);
+}
+// 3.0.5: every saved reflection, newest first, grouped by month. Tap one to read or edit it.
+function openReflectHistory() {
+  ui.refback = false;
+  const rs = S.reflections, n = rs.length;
+  let body;
+  if (!n) body = '<p class="note">No reflections yet. Habsys asks you every Sunday, or tap Reflect on this week in Records.</p>';
+  else {
+    const avg = Math.round(rs.reduce((a, r) => a + r.rate, 0) / n), best = rs.reduce((a, r) => r.rate > a.rate ? r : a, rs[0]);
+    const tile = (l, v) => `<div class="stat"><small>${l}</small><b>${v}</b></div>`;
+    body = '<div class="stats">' + tile('Reflections', n) + tile('Average week', avg + '%') + tile('Best week', best.rate + '%') + '</div>';
+    let last = '';
+    for (const r of rs) {
+      const mon = addDays(parseKey(r.week), 6).toLocaleDateString(undefined, {month: 'long', year: 'numeric'});
+      if (mon !== last) { body += `<span class="panel-t" style="margin:20px 0 8px">${esc(mon)}</span>`; last = mon; }
+      body += `<button class="jr rf" data-action="refedit" data-week="${r.week}"><small>${esc(weekRange(r.week))} · ${r.rate}% of days done</small>`
+        + (r.win ? `<p><b>Went well</b>${esc(r.win)}</p>` : '') + (r.hard ? `<p><b>Got in the way</b>${esc(r.hard)}</p>` : '') + (r.focus ? `<p><b>Focus</b>${esc(r.focus)}</p>` : '') + '</button>';
+    }
+  }
+  showModal(`<div class="wtag"><span class="tag">Habsys</span></div><h3>All reflections</h3><p class="sub">Your weeks, looking back</p>${body}
+    <div class="actions" style="margin-top:16px"><button class="btn" data-action="close">Close</button></div>`, '', true);
 }
 function saveReflect(wk) {
   const g = id => ($(id).value || '').trim().slice(0, MAX_REF);
@@ -3619,8 +3717,9 @@ function saveReflect(wk) {
   if (rec.win || rec.hard || rec.focus) S.reflections.push(rec);
   S.reflections.sort((a, b) => a.week < b.week ? 1 : -1);
   S.reflections = S.reflections.slice(0, 156);
-  save(); closeModal(); render();
+  save(); render();
   toast(rec.win || rec.hard || rec.focus ? 'Reflection saved.' : 'Reflection cleared.');
+  if (ui.refback) openReflectHistory(); else closeModal();
 }
 function confirmBox(title, text, action, label, data) {
   showModal(`
@@ -3675,11 +3774,12 @@ function openInfo() {
 }
 // 2.3.5: the Check-in pop-up (opened from the button on the Habits tab). Mood is five faces, energy is 1 to 5, and one line about the day.
 // Each tap saves at once. The keyboard does not open by itself.
-function ciPick(f) {
-  const c = S.checkins[dkey(new Date())] || {m: 0, e: 0};
+function ciPick(f, slot) {
+  slot = slot === 'pm' ? 'pm' : 'am';
+  const c = (slot === 'pm' ? S.eve : S.mor)[dkey(new Date())] || {m: 0, e: 0};
   return [1, 2, 3, 4, 5].map(n => f === 'm'
-    ? `<button class="ci-b mo${c.m === n ? ' on' : ''}" data-action="ci" data-f="m" data-v="${n}" aria-pressed="${c.m === n}" aria-label="Mood: ${MOOD_NAMES[n - 1]}">${MOODS[n - 1]}</button>`
-    : `<button class="ci-b en${c.e === n ? ' on' : ''}" data-action="ci" data-f="e" data-v="${n}" aria-pressed="${c.e === n}" aria-label="Energy ${n} of 5">${n}</button>`).join('');
+    ? `<button class="ci-b mo${c.m === n ? ' on' : ''}" data-action="ci" data-f="m" data-v="${n}" data-slot="${slot}" aria-pressed="${c.m === n}" aria-label="Mood: ${MOOD_NAMES[n - 1]}">${MOODS[n - 1]}</button>`
+    : `<button class="ci-b en${c.e === n ? ' on' : ''}" data-action="ci" data-f="e" data-v="${n}" data-slot="${slot}" aria-pressed="${c.e === n}" aria-label="Energy ${n} of 5">${n}</button>`).join('');
 }
 function openCheckin() {
   if (!S.habits.length) return;
@@ -3788,23 +3888,47 @@ function handleRestoreFile(file) {
 
 /* ============ check-in + journal ============ */
 // Mood / energy: one tap sets it, tapping the same value again clears it. (2.3.5: the buttons inside the open Check-in pop-up are updated in place.)
-function setCheckin(f, v) {
+// 3.0.5: two check-ins a day. slot 'am' = morning (S.mor), 'pm' = evening (S.eve). S.checkins[day] is kept up to date from both (evening wins), so the mood charts and "what lifts you" keep working.
+function syncDayCheckin(k) {
+  const a = S.mor[k] || {}, b = S.eve[k] || {}, m = b.m || a.m || 0, e = b.e || a.e || 0;
+  if (m || e) S.checkins[k] = {m: m, e: e}; else delete S.checkins[k];
+}
+function setCheckin(f, v, slot) {
   if (f !== 'm' && f !== 'e') return;
+  slot = slot === 'pm' ? 'pm' : 'am';
   v = Math.min(5, Math.max(1, Math.floor(Number(v) || 0)));
   commitInput();
-  const tk = dkey(new Date()), c = S.checkins[tk] || {m: 0, e: 0};
+  const tk = dkey(new Date()), store = slot === 'pm' ? S.eve : S.mor;
+  if (!S.mor[tk] && !S.eve[tk] && S.checkins[tk]) S.mor[tk] = {m: S.checkins[tk].m || 0, e: S.checkins[tk].e || 0};   // a check-in made earlier today in 3.0.0 counts as the morning one
+  const c = store[tk] || (slot === 'pm' ? {m: 0, e: 0, good: '', bad: ''} : {m: 0, e: 0});
   c[f] = c[f] === v ? 0 : v;
-  if (c.m || c.e) S.checkins[tk] = c; else delete S.checkins[tk];
+  if (c.m || c.e || c.good || c.bad) store[tk] = c; else delete store[tk];
+  syncDayCheckin(tk);
   save(); render();
   const pm = $('#cipm'), pe = $('#cipe');
-  if (pm) pm.innerHTML = ciPick('m');
-  if (pe) pe.innerHTML = ciPick('e');
+  if (pm) pm.innerHTML = ciPick('m', slot);
+  if (pe) pe.innerHTML = ciPick('e', slot);
   try { if (navigator.vibrate) navigator.vibrate(8); } catch (e) {}
 }
 // Saves the journal line that is typed in the Check-in pop-up (if it changed). Safe to call at any time.
-let jTimer;
+let jTimer, eTimer;
+// 3.0.5: saves the "went well" and "did not go well" notes typed in the Evening check-in (if they changed). Safe to call at any time.
+function saveEveInput() {
+  clearTimeout(eTimer);
+  const g = document.getElementById('wgood'), b = document.getElementById('wbad');
+  if ((!g && !b) || ui.rescue || writesLocked) return;
+  const tk = dkey(new Date()), cl = el => el ? (el.value || '').replace(/\s+/g, ' ').trim().slice(0, MAX_EVE) : null;
+  const e = S.eve[tk] || {m: 0, e: 0, good: '', bad: ''}, gv = cl(g), bv = cl(b);
+  let ch = false;
+  if (gv !== null && gv !== e.good) { e.good = gv; ch = true; }
+  if (bv !== null && bv !== e.bad) { e.bad = bv; ch = true; }
+  if (!ch) return;
+  if (e.m || e.e || e.good || e.bad) S.eve[tk] = e; else delete S.eve[tk];
+  save();
+}
 function commitInput() {
   clearTimeout(jTimer);
+  saveEveInput();
   const el = document.getElementById('jtoday');
   if (!el || ui.rescue || writesLocked) return;
   const tk = dkey(new Date()), v = (el.value || '').replace(/\s+/g, ' ').trim().slice(0, MAX_JOURNAL);
@@ -4209,7 +4333,7 @@ const actions = {
     if (on) { el.classList.add('on'); el.setAttribute('aria-pressed', 'true'); }
   },
   mooddata: openMoodData,
-  ci: el => setCheckin(el.dataset.f, el.dataset.v),
+  ci: el => setCheckin(el.dataset.f, el.dataset.v, el.dataset.slot),
   jedit: el => { ui.jback = !!document.querySelector('#overlay #jlist'); openJournalEdit(el.dataset.day); },
   savejedit: el => saveJournalEdit(el.dataset.day),
   jcancel: () => { if (ui.jback) { ui.jback = false; openMoodData(); } else closeModal(); },
@@ -4261,7 +4385,12 @@ const actions = {
     setDays(el.dataset.id, a);
   },
   alldays: el => setDays(el.dataset.id, []),
-  reflect: el => openReflect(el.dataset.week),
+  reflect: el => { ui.refback = false; openReflect(el.dataset.week); },
+  refhist: openReflectHistory,
+  refedit: el => { ui.refback = true; openReflect(el.dataset.week); },
+  refcancel: openReflectHistory,
+  ckhist: () => { ui.ckn = 40; openCheckinHistory(); },
+  ckmore: () => { ui.ckn += 40; openCheckinHistory(); },
   savereflect: el => saveReflect(el.dataset.week),
   close: closeModal,
   savehabit: el => {
@@ -4400,9 +4529,10 @@ document.addEventListener('change', e => {
 // The journal line saves a moment after you stop typing. The Journal search only redraws its own list, so the keyboard stays open.
 document.addEventListener('input', e => {
   if (e.target.id === 'jtoday') { clearTimeout(jTimer); jTimer = setTimeout(commitInput, 900); }
+  if (e.target.id === 'wgood' || e.target.id === 'wbad') { clearTimeout(eTimer); eTimer = setTimeout(saveEveInput, 900); }
   if (e.target.id === 'jsearch') { ui.jq = e.target.value || ''; const l = $('#jlist'); if (l) l.innerHTML = journalList(); }
 });
-document.addEventListener('focusout', e => { if (e.target.id === 'jtoday') commitInput(); if (e.target.id === 'wplan') savePlanInput(); });
+document.addEventListener('focusout', e => { if (e.target.id === 'jtoday') commitInput(); if (e.target.id === 'wgood' || e.target.id === 'wbad') saveEveInput(); if (e.target.id === 'wplan') savePlanInput(); });
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') { if ($('#moment.in')) closeMoment(); else closeModal(); }
   if ((e.key === 'Enter' || e.key === ' ') && e.target.classList && e.target.classList.contains('player')) { e.preventDefault(); openProfile(); }
@@ -4418,7 +4548,7 @@ document.addEventListener('keydown', e => {
 /* new day / back to app => refresh */
 function refreshIfNewDay() {
   const k = dkey(new Date());
-  if (k !== ui.day) { commitInput(); ui.day = k; ui.wrap = null; let got = []; if (!ui.rescue) { snapshot('daily'); if (!writesLocked) got = awardBadges(); } render(); badgeToast(got); setTimeout(maybeAskIntent, 400); }   // 2.7: a week that just ended can earn Perfect week
+  if (k !== ui.day) { commitInput(); ui.day = k; ui.wrap = null; let got = []; if (!ui.rescue) { snapshot('daily'); if (!writesLocked) got = awardBadges(); } render(); badgeToast(got); setTimeout(maybeAskIntent, 400); setTimeout(maybeAskReflect, 1200); }   // 2.7: a week that just ended can earn Perfect week
 }
 // If another window of the app saved newer data, take it instead of overwriting it with old data.
 function adoptNewer() {
@@ -4431,7 +4561,7 @@ document.addEventListener('visibilitychange', () => {
   if (!$('#overlay').classList.contains('show')) render();   // do not redraw underneath an open popup
   syncFriends();
   focusCheck();   // 2.9: a focus timer may have finished while the iPad slept
-  clearBadge(); remindSoon(); maybeAskIntent();   // 2.8: coming back clears the reminder badge, refreshes the reminder status and asks the morning question
+  clearBadge(); remindSoon(); maybeAskIntent(); setTimeout(maybeAskReflect, 300);   // 2.8: coming back clears the reminder badge, refreshes the reminder status and asks the morning question
 });
 window.addEventListener('pagehide', () => { if (ui.tab === 'friends') ackFriends(); flush(); });
 window.addEventListener('online', () => { syncFriends(true); remindSoon(); });
@@ -4586,6 +4716,7 @@ async function boot() {
     else if (caught.length) toast(caught.length === 1 ? 'Badge found in your history: ' + caught[0].name : caught.length + ' badges found in your history. See the Vault.');
     syncFriends();   // 2.5: share your card and fetch your friends' cards in the background
     clearBadge(); remindSoon();   // 2.8
+    setTimeout(maybeAskReflect, 1200);   // 3.0.5: Sunday reflection
     setTimeout(maybeAskIntent, 600);   // 2.8: the morning question, once the app is on screen
     focusCheck();   // 2.9: pick up a running or finished focus timer
   } else {
