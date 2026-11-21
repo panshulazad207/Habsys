@@ -13,6 +13,14 @@
 <link rel="apple-touch-icon" href="icon-180.png?v=199">
 <link rel="icon" type="image/png" href="icon-192.png?v=199">
 <style>
+/* ===== Habsys 3.1.0: Surprise bonus (a rare lucky tick) and the Perfect day chest. Everything else as in 3.0.6 ===== */
+.chest{position:relative;width:96px;height:96px;margin:0 auto}
+.chest svg{width:96px;height:96px;overflow:visible;filter:drop-shadow(0 6px 18px rgba(255,200,90,.35))}
+.chest .lid{transform-origin:10px 30px;animation:chestLid .9s .25s cubic-bezier(.3,1.4,.5,1) forwards}
+.chest .glow{opacity:0;animation:chestGlow 1.2s .45s ease-out forwards}
+@keyframes chestLid{to{transform:rotate(-58deg)}}
+@keyframes chestGlow{0%{opacity:0;transform:scale(.4)}40%{opacity:1}100%{opacity:.85;transform:scale(1)}}
+@media (prefers-reduced-motion:reduce){.chest .lid{animation:none;transform:rotate(-58deg)}.chest .glow{animation:none;opacity:.85}}
 /* ===== Habsys 3.0.6: the Next goal now sits inside the Today card, right after "Keep going" (beside it on a wide iPad, under it on a narrow screen). Everything else as in 3.0.5 ===== */
 /* ===== Habsys 3.0.5: two daily check-ins (morning and evening), Sunday weekly reflection with a history of all past reflections. Everything else as in 3.0.0 ===== */
 /* ===== Habsys 3.0.0: Year in pixels, Profile card, full-screen level-up and rank-up moments, premium UI polish. Everything else as in 2.9.9 ===== */
@@ -921,7 +929,7 @@ h2.sec::before{content:"";flex:none;width:4px;height:21px;border-radius:3px;back
 'use strict';
 
 /* ============ constants ============ */
-const APP_VERSION = '3.0.6';
+const APP_VERSION = '3.1.0';
 // 2.5.0: Friends. These two values come from your free Firebase project (they are an address, not a password).
 // While they still say PASTE..., the Friends tab explains that it is not switched on yet and the rest of the app works as before.
 const FB_API_KEY = 'AIzaSyCCW0tJgzxmgOoOf304Q6elV-D18ZyH0AM', FB_PROJECT = 'habsys-9977a';
@@ -1099,7 +1107,7 @@ function normalize(raw) {
     // 2.7: XP given for recent ticks (max 7 days kept) and the habit icon
     const xpd = {};
     if (h && h.xpd && typeof h.xpd === 'object') {
-      for (const k of Object.keys(h.xpd).sort().slice(-7)) { const n = Math.floor(Number(h.xpd[k])); if (/^\d{4}-\d{2}-\d{2}$/.test(k) && n >= 1 && n <= 5) xpd[k] = n; }
+      for (const k of Object.keys(h.xpd).sort().slice(-7)) { const n = Math.floor(Number(h.xpd[k])); if (/^\d{4}-\d{2}-\d{2}$/.test(k) && n >= 1 && n <= 7) xpd[k] = n; }
     }
     // 2.9: minutes of focus time per day (last 400 days kept)
     const focus = {};
@@ -1520,10 +1528,23 @@ const findHabit = id => S.habits.find(h => h.id === id);
 
 /* ---- NEW 2.7.0: small XP for daily ticks ---- */
 // Each tick pays XP once per habit and day (h.xpd remembers it). An un-tick takes exactly that XP back, so ticking and un-ticking cannot be used to farm XP.
+// 3.1.0: Surprise bonus. About 1 tick in 50 pays XP_LUCKY extra. The bonus is added into the same number the tick is stored with, so it looks and behaves like any
+// other tick everywhere (Records, Today so far, un-tick refund). The roll comes from the habit and the day, so un-ticking and ticking again gives the same result (no re-rolling).
+const XP_LUCKY = 5;
+let luckyNow = false;   // true only for the tick that just happened; used once for the sparkle
+function luckyRoll(h, k) {
+  let x = 2166136261;
+  const t = String(h.id) + '|' + k + '|lucky';
+  for (let i = 0; i < t.length; i++) { x ^= t.charCodeAt(i); x = Math.imul(x, 16777619) >>> 0; }
+  x ^= x >>> 15; x = Math.imul(x, 2246822519) >>> 0; x ^= x >>> 13;
+  return (x >>> 0) % 50 === 0;
+}
 function giveXp(h, k, lite) {
+  luckyNow = false;
   if (!h.xpd) h.xpd = {};
   if (h.xpd[k]) return 0;
-  const n = lite ? XP_LITE : XP_TICK;
+  let n = lite ? XP_LITE : XP_TICK;
+  if (luckyRoll(h, k)) { n += XP_LUCKY; luckyNow = true; }
   h.xpd[k] = n; S.player.xp += n;
   const ks = Object.keys(h.xpd).sort();
   for (let i = 0; i < ks.length - 7; i++) delete h.xpd[ks[i]];
@@ -2993,6 +3014,53 @@ function levelBoom(from, to) {
   try { if (navigator.vibrate) navigator.vibrate([30, 60, 30, 60, 140]); } catch (e) {}
 }
 
+// 3.1.0: the lucky tick: a bigger sparkle, a gold flash and the words "Lucky tick! +5 XP" floating up from the circle.
+function luckySparkle(els, col) {
+  if (!canFx()) return;
+  for (const el of els) { if (el) spark(el, '#ffdd85'); }
+  const old = document.querySelector('.fx-lucky'); if (old) old.remove();
+  for (const el of els) {
+    if (!el) continue;
+    const r = el.getBoundingClientRect();
+    if (!r.width || r.bottom < 0 || r.top > window.innerHeight) continue;
+    const w = fxLayer(1900), t = document.createElement('i');
+    t.className = 'fx-lucky';
+    t.textContent = '✨ Lucky tick! +' + XP_LUCKY + ' XP';
+    t.style.cssText = 'left:' + Math.max(90, Math.min(window.innerWidth - 90, r.left + r.width / 2)) + 'px;top:' + (r.top - 34) + 'px;font:800 17px/1 var(--head);color:#fff3c4;text-shadow:0 0 14px rgba(255,200,80,.9),0 2px 10px rgba(0,0,0,.7);white-space:nowrap;opacity:0';
+    w.appendChild(t);
+    t.animate([{transform:'translate(-50%,8px) scale(.8)', opacity:0}, {transform:'translate(-50%,-8px) scale(1.12)', opacity:1, offset:.2}, {transform:'translate(-50%,-14px) scale(1)', opacity:1, offset:.7}, {transform:'translate(-50%,-44px) scale(1)', opacity:0}], {duration:1700, easing:'ease-out', fill:'forwards'});
+    break;
+  }
+  try { if (navigator.vibrate) navigator.vibrate([20, 40, 20]); } catch (e) {}
+}
+
+// 3.1.0: Perfect day chest. The first time every habit due today is done, a chest opens: +10 XP and a motivational line. Once per day (S.allDay remembers it).
+const XP_CHEST = 10;
+const CHEST_LINES = [
+  'Every habit, one day. This is how a life is built.',
+  'You did all of it today. That is who you are becoming.',
+  'A whole day kept. Proof beats promises.',
+  'Nothing left open. Rest knowing you showed up.',
+  'Small steps, all of them taken. That is real discipline.',
+  'Today you kept every promise you made to yourself.',
+  'A perfect day is just a lot of small yeses in a row.',
+  'You finished what you started today. Do it again tomorrow.',
+  'Consistency looks exactly like this.',
+  'The person you want to be showed up today.'
+];
+const CHEST_SVG = '<div class="chest"><svg viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="chg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe9a8"/><stop offset="1" stop-color="#d99a1f"/></linearGradient></defs><ellipse class="glow" cx="32" cy="30" rx="26" ry="14" fill="#ffe28f" opacity=".0"/><rect x="10" y="30" width="44" height="26" rx="4" fill="#8a5a1c"/><rect x="10" y="30" width="44" height="7" fill="#b9791f"/><rect x="29" y="34" width="6" height="9" rx="1.5" fill="url(#chg)"/><g class="lid"><path d="M10 30 V22 a4 4 0 0 1 4-4 h36 a4 4 0 0 1 4 4 v8z" fill="url(#chg)"/><rect x="10" y="26" width="44" height="4" fill="#b9791f"/></g></svg></div>';
+function awardChest() {
+  const tk = dkey(new Date());
+  if (S.allDay === tk || !allDueDone()) return null;
+  const from = levelOf(S.player.xp);
+  S.allDay = tk;
+  S.player.xp += XP_CHEST;
+  const to = levelOf(S.player.xp);
+  if (to !== from) syncFriends(true);
+  const d = parseKey(tk), i = (d.getFullYear() * 400 + d.getMonth() * 31 + d.getDate()) % CHEST_LINES.length;
+  return {xp: XP_CHEST, line: CHEST_LINES[i], from: from, to: to};
+}
+
 // Called after a habit is marked done. Shows the celebration that fits: level up, new badge, day complete, streak milestone, or a comeback.
 // If another popup is open (a quest to claim), it waits and runs when that popup is closed.
 // 2.7: lv = {from, to} when the tick XP lifted you a level; nb = badges that were just earned.
@@ -3006,11 +3074,16 @@ function celebrate(id, k, bounced, lv, nb) {
   nb = nb || [];
   if (!ms && !all && !lv && !nb.length) { if (bounced) toast('Back on track. You never missed twice.'); return; }
   if (ms) S.cel['m:' + h.id + ':' + ms] = 1;
-  if (all) S.allDay = tk;
+  let chest = null;
+  if (all) {
+    chest = awardChest();   // 3.1.0: sets S.allDay and gives the chest XP
+    if (chest && chest.to > chest.from) lv = lv ? {from: lv.from, to: chest.to} : {from: chest.from, to: chest.to};
+    if (chest) nb = nb.concat(awardBadges());
+  }
   const ks = Object.keys(S.cel);
   for (let i = 0; i < ks.length - 400; i++) delete S.cel[ks[i]];
   save({noCount:true});
-  momentSheet({h: h, ms: ms, all: all, bounced: bounced, lv: lv, nb: nb});
+  momentSheet({h: h, ms: ms, all: all, bounced: bounced, lv: lv, nb: nb, chest: chest});
 }
 // The celebration sheet. One sheet can carry several things (a level up AND a badge AND a day complete); the biggest one gets the hero.
 function momentSheet(o) {
@@ -3026,6 +3099,7 @@ function momentSheet(o) {
   let body = '';
   if (lv) body += `<div class="reward"><b>Level up</b>LV ${lv.from} → LV ${lv.to} · Rank ${rankOf(lv.to)}${rankUp ? ' · New rank!' : ''}<br>${(xpFor(lv.to + 1) - S.player.xp).toLocaleString()} XP to reach level ${lv.to + 1}.</div>`;
   nb.forEach(b => { body += `<div class="reward"><b>Badge unlocked · ${esc(b.name)}</b>${esc(b.text)}</div>`; });
+  if (o.chest) body += `<div class="reward"><b>Perfect day chest · +${o.chest.xp} XP</b>${esc(o.chest.line)}</div>`;
   if (all) body += `<div class="reward"><b>Today's votes</b>${votes.length ? votes.join('<br>') : 'Every habit done. This is how days become a life.'}</div>`;
   if (ms && h) body += `<div class="reward"><b>${ms}-day streak</b>${esc(h.name)}: ${ms} real days in a row. ${h.identity ? esc(h.identity) + '. You are proving it.' : 'This is no longer luck. It is who you are.'}</div>`;
   if (o.bounced) body += `<div class="reward"><b>Never missed twice</b>You came straight back after a miss. That is the skill that matters most.</div>`;
@@ -3042,9 +3116,9 @@ function momentSheet(o) {
     title = `<h3>${esc(nb[0].name)}</h3>`;
     sub = nb.length > 1 ? '+ ' + (nb.length - 1) + ' more badge' + (nb.length > 2 ? 's' : '') : (o.sub || 'A new goal reached');
   } else {
-    hero = `<div class="cel-hero"><div class="cel-ic">${all ? CHECK : '<span class="num">' + ms + '</span>'}</div></div>`;
-    lbl = `<div class="cel-lbl">${all ? 'Every habit done' : 'Streak milestone'}</div>`;
-    title = `<h3>${all ? 'Day complete' : ms + '-day streak'}</h3>`;
+    hero = o.chest ? `<div class="cel-hero">${CHEST_SVG}</div>` : `<div class="cel-hero"><div class="cel-ic">${all ? CHECK : '<span class="num">' + ms + '</span>'}</div></div>`;
+    lbl = `<div class="cel-lbl">${o.chest ? 'Perfect day' : all ? 'Every habit done' : 'Streak milestone'}</div>`;
+    title = `<h3>${o.chest ? 'The chest opens' : all ? 'Day complete' : ms + '-day streak'}</h3>`;
     sub = all ? 'All ' + dueToday().length + ' habits done' : (h ? esc(h.name) : '');
   }
   showModal(`${hero}${lbl}${title}<p class="sub">${sub}</p>${body}
@@ -3362,7 +3436,7 @@ function wrapTick(id, lite) {
   const s = $('#wsum'); if (s) s.innerHTML = wrapSumHtml();
   if (gain) {
     const col = HCOL[Math.max(0, S.habits.indexOf(h)) % HCOL.length], dot = document.querySelector('#wlist .t-row[data-id="' + id + '"] .t-dot');
-    requestAnimationFrame(() => { spark(dot, col); xpFloat([dot], '+' + gain + ' XP'); });
+    requestAnimationFrame(() => { spark(dot, col); xpFloat([dot], '+' + gain + ' XP'); if (ui.luckyQ) luckySparkle([dot], col); ui.luckyQ = false; });
     try { if (navigator.vibrate) navigator.vibrate(12); } catch (e) {}
   }
 }
@@ -3370,11 +3444,14 @@ function wrapFinish() {
   savePlanInput(); commitInput();
   const w = ui.wrap || {l0: levelOf(S.player.xp), nb: []};
   S.wrap = dkey(new Date());
+  const chest = awardChest();   // 3.1.0: ticking the last habit in the wrap-up also opens the Perfect day chest
+  if (chest) w.nb = w.nb.concat(awardBadges());
   save();
   ui.wrap = null;
   closeModal(); render();
   const L = levelOf(S.player.xp), lv = L > w.l0 ? {from: w.l0, to: L} : null, claim = S.habits.some(x => claimableCount(x) > 0);
-  if (lv || w.nb.length) momentSheet({lv: lv, nb: w.nb, claim: claim, sub: 'Evening wrap-up complete', btn: 'Good night'});
+  if (chest) momentSheet({lv: lv, nb: w.nb, claim: claim, all: true, chest: chest, sub: 'All ' + dueToday().length + ' habits done', btn: 'Good night'});
+  else if (lv || w.nb.length) momentSheet({lv: lv, nb: w.nb, claim: claim, sub: 'Evening wrap-up complete', btn: 'Good night'});
   else toast(claim ? 'Day closed. A quest reward is waiting for you.' : 'Day closed. Rest well.');
 }
 
@@ -4198,12 +4275,14 @@ function markDone(id, k, lite, quiet) {
     if (lite) h.lite[k] = true; else delete h.lite[k];
   }
   const gain = giveXp(h, k, lite);
+  const lucky = luckyNow; luckyNow = false;
   const newL = levelOf(S.player.xp), lv = newL > oldL ? {from: oldL, to: newL} : null;
   if (newL !== oldL) syncFriends(true);   // your new level is shared with friends
   if (quiet) {
     save(); render();
     const got = awardBadges();
     if (ui.wrap) ui.wrap.nb = ui.wrap.nb.concat(got);
+    if (lucky) ui.luckyQ = true;
     return gain;
   }
   ui.fx = {id: id, day: k};
@@ -4217,6 +4296,7 @@ function markDone(id, k, lite, quiet) {
     spark(box, col);
     if (dot) spark(dot, col);
     if (gain) xpFloat([dot, box], '+' + gain + ' XP');
+    if (lucky) luckySparkle([dot, box], col);
   });
   if (lite) toast('2-minute version done. +' + gain + ' XP. Streak kept alive.');
   const got = awardBadges();
