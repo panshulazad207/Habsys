@@ -1,0 +1,9 @@
+{
+  "appId": "com.habsys.app",
+  "appName": "Habsys",
+  "webDir": "www",
+  "backgroundColor": "#0a0b10",
+  "android": {
+    "allowMixedContent": false
+  }
+}
