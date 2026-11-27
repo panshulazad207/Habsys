@@ -985,13 +985,12 @@ h2.sec::before{width:4px;height:22px;background:linear-gradient(180deg,#f3dfb2,#
 @media (prefers-reduced-motion:reduce){.btn::before{display:none}}
 
 /* ===== 3.3.0: difficulty, mastery, repair ===== */
-.h-meta{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;margin:8px 0 2px;font-size:12.5px;font-weight:600;color:var(--muted)}
-.dtag{min-height:30px;padding:5px 12px;border-radius:999px;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.06);color:#fff;font:700 12px var(--body);cursor:pointer}
-.dtag.d-e{border-color:#25c795;color:#7df0c9}
-.dtag.d-m{border-color:#5b8cff;color:#a9c3ff}
-.dtag.d-h{border-color:#f5a524;color:#ffd27a}
-.dtag.d-v{border-color:#ff5f9e;color:#ff9cc2}
-.dtag.d-none{border-style:dashed}
+.lvl{flex:none;display:inline-flex;align-items:flex-end;gap:2px;height:12px;margin-left:-3px;color:var(--muted)}
+.lvl b{width:3px;border-radius:2px;background:currentColor;opacity:.25}
+.lvl b:nth-child(1){height:5px}.lvl b:nth-child(2){height:7px}.lvl b:nth-child(3){height:9px}.lvl b:nth-child(4){height:12px}
+.lvl b.on{opacity:1}
+.lvl.l-e{color:#25c795}.lvl.l-m{color:#5b8cff}.lvl.l-h{color:#f5a524}.lvl.l-v{color:#ff5f9e}
+.medal{flex:none;margin-left:-4px;font-style:normal;font-size:13px}
 .dpick{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
 .dopt{min-height:52px;padding:6px 4px;border-radius:14px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.05);color:#fff;font-family:var(--body);cursor:pointer}
 .dopt b{display:block;font-size:13px}
@@ -1775,9 +1774,15 @@ const saverDayOk = k => { const n = gapDays(k, dkey(new Date())); return n >= 1 
 const canReturnSaver = (h, k) => h.done[k] === 2 && ((h.svd && h.svd[k]) ? h.svd[k] === dkey(new Date()) : k === dkey(addDays(new Date(), -1)));
 const canReturnToday = h => Object.keys(h.done).some(k => canReturnSaver(h, k));
 const doneDays = h => Object.keys(h.done).reduce((n, k) => n + (h.done[k] === 1 ? 1 : 0), 0);
-function masteryLine(h) {
-  const n = doneDays(h), got = MASTERY.filter(m => n >= m.n).pop(), nx = MASTERY.find(m => n < m.n);
-  return (got ? got.ic + ' ' + got.name + ' · ' : '') + n + ' day' + (n === 1 ? '' : 's') + (nx ? ' · ' + nx.name + ' at ' + nx.n : ' · Mastered');
+// Tiny difficulty marker beside the name: 1 to 4 bars (all faint = not rated), plus the mastery medal once one is earned.
+function levelMark(h) {
+  const n = ['e', 'm', 'h', 'v'].indexOf(h.diff) + 1, got = MASTERY.filter(m => doneDays(h) >= m.n).pop();
+  return `<i class="lvl l-${h.diff || 'none'}" aria-hidden="true">${[1, 2, 3, 4].map(i => `<b${i <= n ? ' class="on"' : ''}></b>`).join('')}</i>${got ? `<i class="medal" aria-hidden="true">${got.ic}</i>` : ''}`;
+}
+// Short mastery text for the Insights tile: the medal earned, or the days toward Bronze.
+function masteryShort(h) {
+  const n = doneDays(h), got = MASTERY.filter(m => n >= m.n).pop();
+  return got ? got.name : n + ' / ' + MASTERY[0].n + ' days';
 }
 function diffPicker(cur, locked) {
   return `<div class="dpick">${Object.keys(DIFF).map(d => `<button class="dopt${d === cur ? ' on' : ''}" data-action="pickdiff" data-d="${d}" aria-pressed="${d === cur}"${locked ? ' disabled' : ''}><b>${DIFF[d].name}</b><small>${DIFF[d].xp} XP${DIFF[d].sv ? ' · savers' : ''}</small></button>`).join('')}</div>`;
@@ -2386,12 +2391,11 @@ function habitCard(h) {
   return `
   <section class="panel habit">
     <div class="h-head">
-      <button class="h-name${h.icon ? ' hasic' : ''}" data-action="edit" data-id="${esc(h.id)}" aria-label="Edit ${esc(h.name)}">${h.icon ? '<span class="h-ic" aria-hidden="true">' + esc(h.icon) + '</span>' : ''}<span>${esc(h.name)}</span>${PENCIL}</button>
+      <button class="h-name${h.icon ? ' hasic' : ''}" data-action="edit" data-id="${esc(h.id)}" aria-label="Edit ${esc(h.name)}, difficulty ${h.diff ? DIFF[h.diff].name : 'not set'}">${h.icon ? '<span class="h-ic" aria-hidden="true">' + esc(h.icon) + '</span>' : ''}<span>${esc(h.name)}</span>${levelMark(h)}${PENCIL}</button>
       <button class="h-ins" data-action="insights" data-id="${esc(h.id)}" aria-label="Insights for ${esc(h.name)}">${GRAPH}</button>
       <button class="h-more" data-action="extras" data-id="${esc(h.id)}" aria-label="${h.task ? 'Write the task for ' + esc(h.name) : 'Options for ' + esc(h.name) + ': identity, 2-minute habit, note, flexible days'}">${DOTS}</button>
       <div class="streak"><small>STREAK</small><span class="sn">${flameHtml(h, cur, fxOn ? ' ign' : '')}<b${fxOn ? ' class="bump"' : ''}>${cur}</b></span></div>
     </div>
-    <div class="h-meta"><button class="dtag d-${h.diff || 'none'}" data-action="diff" data-id="${esc(h.id)}">${h.diff ? DIFF[h.diff].name + ' · ' + DIFF[h.diff].xp + ' XP' : 'Set difficulty'}</button><span>${esc(masteryLine(h))}</span></div>
     ${extrasHtml(h)}${nmt}${S.savers > 0 && missedRecent(h).some(m => m.ok) ? `<button class="btn ghost sm repair" data-action="repair" data-id="${esc(h.id)}">${SHIELD} Missed a day? Repair streak</button>` : canReturnToday(h) ? `<button class="btn ghost sm repair" data-action="repair" data-id="${esc(h.id)}">${SHIELD} Savers used today</button>` : ''}
     <div class="week${flex ? ' flex' : ''}"${flex ? ` style="grid-template-columns:repeat(${vis.length},minmax(0,1fr))"` : ''}>${boxes}</div>${rest}${yrow}
     <div class="quest">${quest}<div class="pips">${pips}<span>${h.claimed}/${TIERS.length} cleared</span></div></div>
@@ -2887,7 +2891,7 @@ function openInsights(id) {
       ${tile('Days done', st.nDone)}${tile('Success rate', st.rate === null ? '—' : st.rate + '%')}
       ${tile('Current streak', currentStreak(h))}${tile('Longest streak', longestStreak(h))}
       ${tile('Missed days', st.missed)}${tile('Bounce-backs', st.bounce)}
-      ${h.task ? tile('Tasks done', Object.keys(h.tlog || {}).length) : tile('Quests cleared', h.claimed + ' / ' + TIERS.length)}${tile('Focus this week', fmtMin(fs.week))}
+      ${h.task ? tile('Tasks done', Object.keys(h.tlog || {}).length) : tile('Quests cleared', h.claimed + ' / ' + TIERS.length)}${tile('Focus this week', fmtMin(fs.week))}${tile('Difficulty', h.diff ? DIFF[h.diff].name : 'Not set')}${tile('Mastery', masteryShort(h))}
     </div>
     <div class="mini">Patterns</div>
     ${cards}
