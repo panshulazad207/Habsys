@@ -13,7 +13,7 @@
 <link rel="apple-touch-icon" href="icon-180.png?v=199">
 <link rel="icon" type="image/png" href="icon-192.png?v=199">
 <style>
-/* ===== Habsys 3.2.0: Aurora premium look (colours, buttons, streak, tab bar; block at the end of this style). Earlier: 3.1.0 Surprise bonus (a rare lucky tick) and the Perfect day chest. Everything else as in 3.0.6 ===== */
+/* ===== Habsys 3.3.0: habit difficulty, new XP and saver rules, 7-day streak repair, habit mastery. 3.2.0: Aurora premium look (colours, buttons, streak, tab bar; block at the end of this style). Earlier: 3.1.0 Surprise bonus (a rare lucky tick) and the Perfect day chest. Everything else as in 3.0.6 ===== */
 .chest{position:relative;width:96px;height:96px;margin:0 auto}
 .chest svg{width:96px;height:96px;overflow:visible;filter:drop-shadow(0 6px 18px rgba(255,200,90,.35))}
 .chest .lid{transform-origin:10px 30px;animation:chestLid .9s .25s cubic-bezier(.3,1.4,.5,1) forwards}
@@ -983,6 +983,26 @@ h2.sec::before{width:4px;height:22px;background:linear-gradient(180deg,#f3dfb2,#
 .nmt{background:linear-gradient(180deg,rgba(255,217,138,.13),rgba(255,217,138,.04));border-color:rgba(255,217,138,.34);box-shadow:inset 0 1px 0 rgba(255,255,255,.06)}
 .x-tag{background:linear-gradient(180deg,color-mix(in srgb,var(--ac) 24%,transparent),color-mix(in srgb,var(--ac) 10%,transparent))}
 @media (prefers-reduced-motion:reduce){.btn::before{display:none}}
+
+/* ===== 3.3.0: difficulty, mastery, repair ===== */
+.h-meta{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;margin:8px 0 2px;font-size:12.5px;font-weight:600;color:var(--muted)}
+.dtag{min-height:30px;padding:5px 12px;border-radius:999px;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.06);color:#fff;font:700 12px var(--body);cursor:pointer}
+.dtag.d-e{border-color:#25c795;color:#7df0c9}
+.dtag.d-m{border-color:#5b8cff;color:#a9c3ff}
+.dtag.d-h{border-color:#f5a524;color:#ffd27a}
+.dtag.d-v{border-color:#ff5f9e;color:#ff9cc2}
+.dtag.d-none{border-style:dashed}
+.dpick{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+.dopt{min-height:52px;padding:6px 4px;border-radius:14px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.05);color:#fff;font-family:var(--body);cursor:pointer}
+.dopt b{display:block;font-size:13px}
+.dopt small{display:block;font-size:11px;color:var(--muted)}
+.dopt.on{border-color:#a78bfa;background:rgba(139,92,246,.28);box-shadow:0 0 0 1px #a78bfa inset}
+.dopt.on small{color:#fff}
+.dopt:disabled{opacity:.45;cursor:default}
+.dopt.on:disabled{opacity:.85}
+.repair{margin:10px 0 12px;align-self:flex-start;display:inline-flex;align-items:center;gap:7px}
+.repair svg{width:16px;height:16px}
+.actions .btn:disabled{opacity:.4}
 </style>
 </head>
 <body>
@@ -1037,7 +1057,7 @@ h2.sec::before{width:4px;height:22px;background:linear-gradient(180deg,#f3dfb2,#
 'use strict';
 
 /* ============ constants ============ */
-const APP_VERSION = '3.2.0';
+const APP_VERSION = '3.3.0';
 // 2.5.0: Friends. These two values come from your free Firebase project (they are an address, not a password).
 // While they still say PASTE..., the Friends tab explains that it is not switched on yet and the rest of the app works as before.
 const FB_API_KEY = 'AIzaSyCCW0tJgzxmgOoOf304Q6elV-D18ZyH0AM', FB_PROJECT = 'habsys-9977a';
@@ -1049,7 +1069,14 @@ const MAX_HABITS = 10;
 const MAX_NOTE = 200, MAX_MINI = 60, MAX_ID = 60, MAX_REF = 200;   // length limits: note, 2-minute version, identity, reflection answers
 const MAX_JOURNAL = 160;   // one sentence about the day
 // NEW 2.7.0
-const XP_TICK = 2, XP_LITE = 1;   // small XP for a daily tick: 2 for a full day, 1 for the 2-minute version (quests still give the big XP)
+const XP_LITE = 1;   // 2-minute version: always 1 XP. A full day pays by difficulty (see DIFF).
+// 3.3.0: difficulty. xp = XP for a full day, q = quest XP multiplier, sv = this level can earn streak savers.
+const DIFF = {e:{name:'Easy', xp:1, q:0.5, sv:false}, m:{name:'Medium', xp:2, q:1, sv:false}, h:{name:'Hard', xp:4, q:1.5, sv:true}, v:{name:'Very hard', xp:6, q:2, sv:true}};
+const DIFF_LOCK = 30;       // days before a difficulty can be changed again
+const SAVER_MAX = 5;        // most savers held (savers you already had above this are kept)
+const SAVER_BACK = 7;       // a saver can repair a missed day up to this many days back
+const SAVER_FULL = 0.8;     // share of full (not 2-minute) days a saver quest needs
+const MASTERY = [{n:25, name:'Bronze', ic:'🥉'}, {n:75, name:'Silver', ic:'🥈'}, {n:200, name:'Gold', ic:'🥇'}];   // total done days per habit
 const WRAP_HOUR = 18;             // the Evening wrap-up card shows on the Habits tab from this hour (6 pm)
 const MAX_PLAN = 100;             // "first move tomorrow" line
 // NEW 3.0.5: evening check-in notes
@@ -1215,8 +1242,13 @@ function normalize(raw) {
     // 2.7: XP given for recent ticks (max 7 days kept) and the habit icon
     const xpd = {};
     if (h && h.xpd && typeof h.xpd === 'object') {
-      for (const k of Object.keys(h.xpd).sort().slice(-7)) { const n = Math.floor(Number(h.xpd[k])); if (/^\d{4}-\d{2}-\d{2}$/.test(k) && n >= 1 && n <= 7) xpd[k] = n; }
+      for (const k of Object.keys(h.xpd).sort().slice(-7)) { const n = Math.floor(Number(h.xpd[k])); if (/^\d{4}-\d{2}-\d{2}$/.test(k) && n >= 1 && n <= 11) xpd[k] = n; }
     }
+    // 3.3.0: difficulty and the day each streak saver was used
+    const okK = k => /^\d{4}-\d{2}-\d{2}$/.test(k), lv = x => (DIFF.hasOwnProperty(x) ? x : ''), dk = x => (okK(x) ? x : '');
+    const pv = h && h.diffPrev && typeof h.diffPrev === 'object' ? h.diffPrev : null;
+    const svd = {};
+    if (h && h.svd && typeof h.svd === 'object') for (const k of Object.keys(h.svd)) if (done[k] === 2 && okK(h.svd[k])) svd[k] = h.svd[k];
     // 2.9: minutes of focus time per day (last 400 days kept)
     const focus = {};
     if (h && h.focus && typeof h.focus === 'object') {
@@ -1237,7 +1269,12 @@ function normalize(raw) {
       claimed: Math.min(TIERS.length, Math.max(0, Math.floor(Number(h && h.claimed) || 0))),
       icon: ICONS.indexOf(h && h.icon) >= 0 ? h.icon : '',
       xpd: xpd,
-      focus: focus
+      focus: focus,
+      diff: lv(h && h.diff),
+      diffAt: dk(h && h.diffAt),
+      hardSince: dk(h && h.hardSince),
+      diffPrev: pv ? {d: lv(pv.d), at: dk(pv.at), hs: dk(pv.hs)} : null,
+      svd: svd
     };
   });
   // FIX 2.2.0: an empty entry in the rewards list no longer stops the app from loading.
@@ -1245,7 +1282,8 @@ function normalize(raw) {
     id: String(r.id || uid()), habitId: String(r.habitId || ''), habitName: String(r.habitName || 'Habit').slice(0, 30),
     tier: Math.min(TIERS.length, Math.max(1, Math.floor(Number(r.tier) || 1))), title: String(r.title || '').slice(0, 30),
     xp: Math.max(0, Math.floor(Number(r.xp) || 0)), text: String(r.text || '').slice(0, 160),
-    at: String(r.at || ''), enjoyed: !!r.enjoyed
+    at: String(r.at || ''), enjoyed: !!r.enjoyed,
+    ...(r.savers === undefined ? {} : {savers: Math.max(0, Math.floor(Number(r.savers) || 0))})
   }));
   // Data from version 1.0 has no savers yet: give the savers for quests already claimed.
   s.savers = raw.savers === undefined
@@ -1651,7 +1689,7 @@ function giveXp(h, k, lite) {
   luckyNow = false;
   if (!h.xpd) h.xpd = {};
   if (h.xpd[k]) return 0;
-  let n = lite ? XP_LITE : XP_TICK;
+  let n = lite ? XP_LITE : diffOf(h).xp;
   if (luckyRoll(h, k)) { n += XP_LUCKY; luckyNow = true; }
   h.xpd[k] = n; S.player.xp += n;
   const ks = Object.keys(h.xpd).sort();
@@ -1664,6 +1702,116 @@ function takeXp(h, k) {
   delete h.xpd[k];
   S.player.xp = Math.max(0, S.player.xp - n);
   return n;
+}
+/* ---- 3.3.0: difficulty, savers, mastery ---- */
+const diffOf = h => DIFF[h.diff] || DIFF.m;   // a habit that is not rated yet pays like Medium and earns no savers
+const questXp = (h, t) => Math.round(t.xp * diffOf(h).q);
+function canChangeDiff(h) {
+  if (!h.diff) return true;
+  const tk = dkey(new Date());
+  if (h.diffAt === tk && h.diffPrev) return true;   // a mistake can be corrected the same day
+  if (claimableCount(h) > 0) return false;           // no raising the level just before claiming
+  return !h.diffAt || gapDays(h.diffAt, tk) >= DIFF_LOCK;
+}
+function diffLockText(h) {
+  if (claimableCount(h) > 0) return 'Claim the waiting quest first. The level cannot change while a reward is waiting.';
+  const left = Math.max(1, DIFF_LOCK - gapDays(h.diffAt, dkey(new Date())));
+  return 'Locked for ' + left + ' more day' + (left > 1 ? 's' : '') + '. A level can change once in ' + DIFF_LOCK + ' days.';
+}
+function setDiff(h, d) {
+  if (!DIFF[d] || h.diff === d || !canChangeDiff(h)) return false;
+  const tk = dkey(new Date());
+  if (!(h.diffAt === tk && h.diffPrev)) h.diffPrev = {d: h.diff || '', at: h.diffAt || '', hs: h.hardSince || ''};
+  const p = h.diffPrev;
+  if (d === p.d) { h.diff = d; h.diffAt = p.at; h.hardSince = p.hs; h.diffPrev = null; }   // back to where the day started: no lock used
+  else {
+    h.diff = d; h.diffAt = tk;
+    // Savers count only days since the habit became Hard. A first rating counts the whole history.
+    h.hardSince = !DIFF[d].sv || !p.d ? '' : DIFF[p.d].sv ? p.hs : tk;
+  }
+  // Today's tick (if already made) is re-priced, so switching level and back cannot add XP.
+  const old = h.xpd && h.xpd[tk];
+  if (old && !(h.lite && h.lite[tk])) {
+    const now = diffOf(h).xp + (luckyRoll(h, tk) ? XP_LUCKY : 0);
+    h.xpd[tk] = now; S.player.xp = Math.max(0, S.player.xp + now - old);
+  }
+  return true;
+}
+// Has there been one unbroken run with "days" done days (since hardSince), at least 80% of them full?
+function hasFullRun(h, days) {
+  const ks = Object.keys(h.done).sort();
+  if (!ks.length) return false;
+  const need = Math.ceil(days * SAVER_FULL - 1e-9), end = parseKey(ks[ks.length - 1]);
+  let run = [], full = 0;
+  for (let d = parseKey(ks[0]); d <= end; d = addDays(d, 1)) {
+    const k = dkey(d), v = h.done[k];
+    if (!v) { if (isSched(h, d)) { run = []; full = 0; } continue; }
+    if (v !== 1 || (h.hardSince && k < h.hardSince)) continue;
+    const f = h.lite && h.lite[k] ? 0 : 1;
+    run.push(f); full += f;
+    if (run.length > days) full -= run[run.length - days - 1];
+    if (run.length >= days && full >= need) return true;
+  }
+  return false;
+}
+// How many savers a claim of tier t gives, and if fewer than listed, why.
+function saverGain(h, t) {
+  if (!t.savers) return {give: 0, why: ''};
+  if (!diffOf(h).sv || !h.diff) return {give: 0, why: 'Streak savers come only from Hard and Very hard habits.'};
+  if (!hasFullRun(h, t.days)) return {give: 0, why: 'No saver yet: it needs at least ' + Math.ceil(t.days * SAVER_FULL - 1e-9) + ' full days in a ' + t.days + '-day run' + (h.hardSince ? ', counted from ' + fmtKey(h.hardSince) + ' when this habit became Hard' : '') + '.'};
+  const give = Math.max(0, Math.min(t.savers, SAVER_MAX - S.savers));
+  return {give: give, why: give < t.savers ? 'You can hold ' + SAVER_MAX + ' savers at most.' : ''};
+}
+// Missed scheduled days of the last 7 days, oldest first. ok = a streak runs up to that day, so a saver can be used on it now.
+function missedRecent(h) {
+  const out = [], t = new Date();
+  for (let i = SAVER_BACK; i >= 1; i--) {
+    const d = addDays(t, -i), k = dkey(d);
+    if (k >= h.created && !h.done[k] && isSched(h, d)) out.push({k: k, ok: chainBefore(h, k) > 0});
+  }
+  return out;
+}
+const saverDayOk = k => { const n = gapDays(k, dkey(new Date())); return n >= 1 && n <= SAVER_BACK; };
+const canReturnSaver = (h, k) => h.done[k] === 2 && ((h.svd && h.svd[k]) ? h.svd[k] === dkey(new Date()) : k === dkey(addDays(new Date(), -1)));
+const canReturnToday = h => Object.keys(h.done).some(k => canReturnSaver(h, k));
+const doneDays = h => Object.keys(h.done).reduce((n, k) => n + (h.done[k] === 1 ? 1 : 0), 0);
+function masteryLine(h) {
+  const n = doneDays(h), got = MASTERY.filter(m => n >= m.n).pop(), nx = MASTERY.find(m => n < m.n);
+  return (got ? got.ic + ' ' + got.name + ' · ' : '') + n + ' day' + (n === 1 ? '' : 's') + (nx ? ' · ' + nx.name + ' at ' + nx.n : ' · Mastered');
+}
+function diffPicker(cur, locked) {
+  return `<div class="dpick">${Object.keys(DIFF).map(d => `<button class="dopt${d === cur ? ' on' : ''}" data-action="pickdiff" data-d="${d}" aria-pressed="${d === cur}"${locked ? ' disabled' : ''}><b>${DIFF[d].name}</b><small>${DIFF[d].xp} XP${DIFF[d].sv ? ' · savers' : ''}</small></button>`).join('')}</div>`;
+}
+function rateRows() {
+  return S.habits.filter(h => !h.diff).map(h => `<div class="field"><span>${h.icon ? esc(h.icon) + ' ' : ''}${esc(h.name)}</span><div class="dpick">${Object.keys(DIFF).map(d => `<button class="dopt" data-action="ratediff" data-id="${esc(h.id)}" data-d="${d}"><b>${DIFF[d].name}</b><small>${DIFF[d].xp} XP${DIFF[d].sv ? ' · savers' : ''}</small></button>`).join('')}</div></div>`).join('');
+}
+function openRate() {
+  const rows = rateRows();
+  if (!rows) { closeModal(); render(); toast('All habits are rated.'); return; }
+  showModal(`
+    <div class="wtag"><span class="tag">Habsys</span></div>
+    <h3>How hard is each habit?</h3>
+    <p class="sub">Be honest with yourself</p>
+    <p class="hint">Rate how hard it is for <b>you</b> to do it. You can correct a mistake today; after that the level is locked for ${DIFF_LOCK} days.</p>
+    ${rows}
+    <div class="actions"><button class="btn ghost" data-action="close">Later</button></div>`);
+}
+function openRepair(id) {
+  const h = findHabit(id); if (!h) return;
+  const miss = missedRecent(h), first = miss.findIndex(m => m.ok), need = first < 0 ? 0 : miss.length - first;
+  const back = Object.keys(h.done).filter(k => canReturnSaver(h, k)).sort();
+  const day = k => parseKey(k).toLocaleDateString(undefined, {weekday:'short', day:'numeric', month:'short'});
+  showModal(`
+    <div class="wtag"><span class="tag">Habsys</span></div>
+    <h3>Repair streak</h3>
+    <p class="sub">${esc(h.name)}</p>
+    <div class="reward"><b>Streak savers · ${S.savers}</b>Streak now: ${currentStreak(h)}.${need ? ' Covering every missed day shown below needs ' + need + ' saver' + (need > 1 ? 's' : '') + '.' : ''}${need > S.savers ? ' You do not have enough to reconnect the whole streak.' : ''}</div>
+    <div class="actions">
+      ${miss.slice(first < 0 ? miss.length : first).map(m => `<button class="btn ghost" data-action="repairday" data-id="${esc(id)}" data-day="${m.k}"${m.ok && S.savers > 0 ? '' : ' disabled'}>${esc(day(m.k))} · use 1 saver</button>`).join('')}
+      ${back.map(k => `<button class="btn ghost" data-action="returnsaver" data-id="${esc(id)}" data-day="${k}">${esc(day(k))} · take the saver back</button>`).join('')}
+      <button class="btn" data-action="close">Done</button>
+    </div>
+    <p class="hint">Oldest day first. Savers reach ${SAVER_BACK} days back. A saved day keeps the streak alive but does not add to it. A saver can be taken back only on the day you used it.</p>`);
 }
 const todayXp = () => { const tk = dkey(new Date()); return S.habits.reduce((n, h) => n + ((h.xpd && h.xpd[tk]) || 0), 0); };
 
@@ -2163,6 +2311,7 @@ function viewHabits() {
     html += `<section class="panel empty"><div class="tag">Habsys</div><h3>Welcome, ${esc(S.player.name)}</h3><p>You have no habits yet. Add your first one (up to ${MAX_HABITS}) and start your first quest.</p></section>`;
   }
   if (!S.habits.length) html += goalCard();   // 3.0.6: with habits, the goal lives inside the Today card; with none, it shows here
+  if (S.habits.some(h => !h.diff)) html += `<section class="panel banner ratebar"><p><span class="tag">New in 3.3</span><br>Rate your habits. Harder habits pay more XP, and only Hard ones earn streak savers.</p><button class="btn sm" data-action="rate">Rate habits</button></section>`;
   // Arrange button: only useful with two or more habits.
   if (S.habits.length > 1) {
     html += `<div class="arrbar"><button class="btn ghost sm" data-action="arrange">Arrange habits</button></div>`;
@@ -2199,7 +2348,7 @@ function habitCard(h) {
   const cur = currentStreak(h), cl = claimableCount(h), next = TIERS[h.claimed];
   const fxOn = !!(ui.fx && ui.fx.id === h.id);
   const boxBtn = d => {
-    const k = dkey(d), v = h.done[k], done = v === 1, saved = v === 2, future = k > tk, open = (k === tk || k === yk);
+    const k = dkey(d), v = h.done[k], done = v === 1, saved = v === 2, future = k > tk, open = (k === tk || k === yk || canReturnSaver(h, k));
     const lite = done && !!(h.lite && h.lite[k]);
     const cls = ['box'];
     if (done) cls.push('done');
@@ -2242,7 +2391,8 @@ function habitCard(h) {
       <button class="h-more" data-action="extras" data-id="${esc(h.id)}" aria-label="${h.task ? 'Write the task for ' + esc(h.name) : 'Options for ' + esc(h.name) + ': identity, 2-minute habit, note, flexible days'}">${DOTS}</button>
       <div class="streak"><small>STREAK</small><span class="sn">${flameHtml(h, cur, fxOn ? ' ign' : '')}<b${fxOn ? ' class="bump"' : ''}>${cur}</b></span></div>
     </div>
-    ${extrasHtml(h)}${nmt}
+    <div class="h-meta"><button class="dtag d-${h.diff || 'none'}" data-action="diff" data-id="${esc(h.id)}">${h.diff ? DIFF[h.diff].name + ' · ' + DIFF[h.diff].xp + ' XP' : 'Set difficulty'}</button><span>${esc(masteryLine(h))}</span></div>
+    ${extrasHtml(h)}${nmt}${S.savers > 0 && missedRecent(h).some(m => m.ok) ? `<button class="btn ghost sm repair" data-action="repair" data-id="${esc(h.id)}">${SHIELD} Missed a day? Repair streak</button>` : canReturnToday(h) ? `<button class="btn ghost sm repair" data-action="repair" data-id="${esc(h.id)}">${SHIELD} Savers used today</button>` : ''}
     <div class="week${flex ? ' flex' : ''}"${flex ? ` style="grid-template-columns:repeat(${vis.length},minmax(0,1fr))"` : ''}>${boxes}</div>${rest}${yrow}
     <div class="quest">${quest}<div class="pips">${pips}<span>${h.claimed}/${TIERS.length} cleared</span></div></div>
   </section>`;
@@ -2260,14 +2410,14 @@ function badgesSection() {
 function viewVault() {
   let html = badgesSection() + `<h2 class="sec">Streak savers</h2>
   <section class="panel">
-    <div class="sv-row"><div class="sv-n">${S.savers}</div><div><h4>Savers in stock</h4><p>Earned from quests that show a saver bonus below. They work on any habit.</p></div></div>
-    <p class="note" style="margin:14px 0 0">Missed a day? Tap yesterday's box on that habit and choose <b>Use a streak saver</b>. Your streak stays alive, but the saved day does not add a day to it. It works on yesterday only, and only while a streak is running. Tap the shield again before the day ends to get the saver back.</p>
+    <div class="sv-row"><div class="sv-n">${S.savers}</div><div><h4>Savers in stock</h4><p>Earned only from Hard and Very hard habits, by claiming quests that show a saver bonus below. Hold ${SAVER_MAX} at most. They work on any habit.</p></div></div>
+    <p class="note" style="margin:14px 0 0">Missed a day? You can repair it up to ${SAVER_BACK} days back: tap <b>Repair streak</b> on the habit card. A saved day keeps your streak alive but does not add a day to it. A saver quest also needs at least 8 full days in every 10 (2-minute days are the rest).</p>
   </section>
-  <h2 class="sec">Quest ladder</h2><p class="note">Rewards are earned by keeping one habit going for consecutive days. Tap Edit to change a reward into something you really want.</p><div class="ladder">`;
+  <h2 class="sec">Quest ladder</h2><p class="note">Rewards are earned by keeping one habit going for consecutive days. Tap Edit to change a reward into something you really want. XP shown is for Medium: Easy pays half, Hard 1.5 times, Very hard double.</p><div class="ladder">`;
   html += TIERS.map(t => `
     <div class="panel rung">
       <div class="lv">${t.n}</div>
-      <div><h4>${esc(t.title)}</h4><div class="meta">${t.days} days in a row · +${t.xp} XP${saverTxt(t.savers)}</div><p>${esc(rewardTextFor(t))}</p></div>
+      <div><h4>${esc(t.title)}</h4><div class="meta">${t.days} days in a row · +${t.xp} XP${t.savers ? saverTxt(t.savers) + ' (Hard habits)' : ''}</div><p>${esc(rewardTextFor(t))}</p></div>
       <button class="btn ghost sm" data-action="editreward" data-tier="${t.n}">Edit</button>
     </div>`).join('');
   html += `</div><h2 class="sec">Reward log</h2>`;
@@ -2276,7 +2426,7 @@ function viewVault() {
   } else {
     html += '<div class="log">' + S.rewards.map(r => `
       <div class="panel log-item">
-        <div class="row"><h4>${esc(r.title)} · Lv.${r.tier}</h4><span class="tag">+${r.xp} XP${saverTxt((TIERS[r.tier - 1] || {}).savers || 0)}</span></div>
+        <div class="row"><h4>${esc(r.title)} · Lv.${r.tier}</h4><span class="tag">+${r.xp} XP${saverTxt(r.savers !== undefined ? r.savers : (TIERS[r.tier - 1] || {}).savers || 0)}</span></div>
         <div class="meta">${esc(r.habitName)} · ${esc(fmtDate(r.at))}</div>
         <p>${esc(r.text)}</p>
         <button class="btn ${r.enjoyed ? 'ghost' : ''} sm" data-action="enjoy" data-id="${esc(r.id)}">${r.enjoyed ? 'Enjoyed ✓' : 'Mark as enjoyed'}</button>
@@ -3629,6 +3779,7 @@ function openHabitForm(id) {
     ${h ? '' : `<div class="tpick"><button class="tchip on" data-action="ftype" data-t="reg" aria-pressed="true">Regular habit</button><button class="tchip" data-action="ftype" data-t="task" aria-pressed="false">Daily task</button></div>`}
     <label class="field"><span>Habit name</span><input class="input" id="hname" maxlength="30" placeholder="e.g. Read 10 pages" value="${h ? esc(h.name) : ''}" autocomplete="off"></label>
     ${iconPicker(h ? h.icon : '')}
+    <div class="field" id="fdiff"><span>How hard is it for you?</span>${diffPicker(h ? h.diff : '', h ? !canChangeDiff(h) : false)}<p class="hint" style="margin:6px 0 0">${h && !canChangeDiff(h) ? esc(diffLockText(h)) : 'Locked for ' + DIFF_LOCK + ' days after today. Only Hard and Very hard earn streak savers.'}</p></div>
     ${h ? '' : `<div id="f-reg"><label class="field"><span>Who are you becoming? (optional)</span><input class="input" id="hid" maxlength="${MAX_ID}" placeholder="e.g. I am a reader" autocomplete="off"></label>
     <div class="field"><span>Flexible days (optional)</span><div class="dchips" style="margin-bottom:6px">${DAY_SHORT.map((n, i) => `<button class="dchip" data-action="toggleday" data-d="${i}" aria-pressed="false">${n}</button>`).join('')}</div><p class="hint" style="margin:0 0 6px">Leave all days unselected for an every-day habit. You can change this later with the three-dot button.</p></div></div>
     <div id="f-task" style="display:none"><label class="field"><span>Today's task</span><textarea class="input sm" id="htask" maxlength="${MAX_NOTE}" placeholder="e.g. Finish chapter 3"></textarea></label>
@@ -3779,13 +3930,15 @@ function openClaim(id) {
   const h = findHabit(id); if (!h) return;
   const t = TIERS[h.claimed];
   if (!t || longestStreak(h) < t.days) return;
+  if (!h.diff) { openRate(); toast('Set the difficulty first, then claim.'); return; }
+  const xp = questXp(h, t), sv = saverGain(h, t);
   showModal(`
     <div class="wtag"><span class="tag">Habsys</span></div>
     <div class="cel-hero"><div class="cel-ic"><span class="num">${t.n}</span></div></div>
     <div class="cel-lbl">Quest complete</div>
     <h3>${esc(t.title)}</h3>
     <p class="sub">${esc(h.name)} · ${t.days}-day streak</p>
-    <div class="reward"><b>You receive</b>+${t.xp} XP · Title: ${esc(t.title)}${t.savers ? ' · +' + t.savers + ' streak saver' + (t.savers > 1 ? 's' : '') : ''}</div>
+    <div class="reward"><b>You receive</b>+${xp} XP (${diffOf(h).name}) · Title: ${esc(t.title)}${sv.give ? ' · +' + sv.give + ' streak saver' + (sv.give > 1 ? 's' : '') : ''}${sv.why ? '<br><small>' + esc(sv.why) + (diffOf(h).sv && !sv.give ? (S.savers >= SAVER_MAX ? ' Use a saver first (tap Later), or claim without it.' : ' Claim now without it, or tap Later.') : '') + '</small>' : ''}</div>
     <div class="reward"><b>Your reward</b>${esc(rewardTextFor(t))}</div>
     <div class="actions"><button class="btn" data-action="doclaim" data-id="${esc(h.id)}">Claim reward</button><button class="btn ghost" data-action="close">Later</button></div>`, 'cel');
   confetti(34);
@@ -3796,11 +3949,14 @@ function doClaim(id) {
   const h = findHabit(id); if (!h) return;
   const t = TIERS[h.claimed];
   if (!t || longestStreak(h) < t.days) { closeModal(); return; }
+  if (!h.diff) return;
   const oldXp = S.player.xp, oldL = levelOf(oldXp);
+  const xp = questXp(h, t), got = saverGain(h, t).give;
   h.claimed += 1;
-  S.player.xp += t.xp;
-  S.savers += t.savers || 0;
-  S.rewards.unshift({id: uid(), habitId: h.id, habitName: h.name, tier: t.n, title: t.title, xp: t.xp, text: rewardTextFor(t), at: new Date().toISOString(), enjoyed: false});
+  h.diffPrev = null;
+  S.player.xp += xp;
+  S.savers += got;
+  S.rewards.unshift({id: uid(), habitId: h.id, habitName: h.name, tier: t.n, title: t.title, xp: xp, savers: got, text: rewardTextFor(t), at: new Date().toISOString(), enjoyed: false});
   S.bigMoment = true;
   save();
   snapshot('claim');
@@ -3821,13 +3977,13 @@ function doClaim(id) {
       <div class="bar"><i id="celbar" style="width:${pOld}%"></i></div>
       <div class="xpl"><span id="cellv">LV ${oldL}</span><span>${newXp.toLocaleString()} / ${lvlStart(newL + 1).toLocaleString()} XP</span></div></div>
     ${leveled ? `<div class="reward"><b>Level up</b>LV ${oldL} → LV ${newL} · Rank ${rankOf(newL)}${rankUp ? ' · New rank!' : ''}</div>` : ''}
-    ${t.savers ? `<div class="reward"><b>Streak savers</b>+${t.savers} · you now have ${S.savers}</div>` : ''}
+    ${got ? `<div class="reward"><b>Streak savers</b>+${got} · you now have ${S.savers}</div>` : ''}
     <div class="reward"><b>Go enjoy it</b>${esc(S.rewards[0].text)}</div>
     <p style="color:var(--muted);font-size:14px">Mark it as enjoyed in the Vault once you have had it. Then save a backup on the Habits tab to lock in this win.</p>
     <div class="actions"><button class="btn" data-action="afterclaim" data-id="${esc(h.id)}">${more ? 'Next reward' : 'Continue'}</button></div>`, 'cel');
   confetti(leveled ? 30 : 70);
   setTimeout(() => {
-    countUp($('#celxp'), 0, t.xp, 900);
+    countUp($('#celxp'), 0, xp, 900);
     const bar = $('#celbar'); if (!bar) return;
     if (!leveled) { bar.style.width = pNew + '%'; return; }
     bar.style.width = '100%';                       // fill to the top of the old level ...
@@ -3929,7 +4085,7 @@ function confirmBox(title, text, action, label, data) {
 // Shown when tapping an empty box that has more than one possible answer:
 // the habit has a 2-minute version, and/or a streak saver can be used for yesterday.
 function saverOkFor(h, k) {
-  return k === dkey(addDays(new Date(), -1)) && isSchedKey(h, k) && S.savers > 0 && chainBefore(h, k) > 0;
+  return k === dkey(addDays(new Date(), -1)) && !h.done[k] && isSchedKey(h, k) && S.savers > 0 && chainBefore(h, k) > 0;
 }
 function openDayChoice(id, k) {
   const h = findHabit(id); if (!h) return;
@@ -3963,7 +4119,7 @@ function openInfo() {
     <h3>Levels &amp; ranks</h3>
     <p class="sub">How you grow</p>
     <div class="reward"><b>Your status</b>Level ${L} · Rank ${cur}<br>${S.player.xp.toLocaleString()} XP · ${need.toLocaleString()} XP to Level ${L + 1}</div>
-    <p>XP comes from two places. Clearing a quest (keeping one habit going for a streak) gives the big XP. Each daily tick gives a small bit: ${XP_TICK} XP for a full day, ${XP_LITE} XP for the 2-minute version. Un-ticking takes that XP back. The levels still reward real consistency, because the big jumps come from quests.</p>
+    <p>XP comes from two places. Clearing a quest (keeping one habit going for a streak) gives the big XP. Each daily tick gives a small bit by difficulty: Easy ${DIFF.e.xp}, Medium ${DIFF.m.xp}, Hard ${DIFF.h.xp}, Very hard ${DIFF.v.xp} XP for a full day, and ${XP_LITE} XP for the 2-minute version of any habit. Quest XP is half for Easy, 1.5 times for Hard and double for Very hard. Un-ticking takes that XP back. The levels still reward real consistency, because the big jumps come from quests.</p>
     <p>Levels get harder as you climb. Level 1 to 2 takes ${cost(2)} XP, and every level after that needs ${LV_STEP} XP more than the one before. Level 49 to 50 takes ${cost(50)} XP, and Level 364 to 365 takes ${cost(365)} XP. There is no maximum level.</p>
     <div class="mini">Ranks</div><div class="grp">${ranks}</div>
     <div class="mini">XP needed in total</div><div class="grp">${marks}</div>
@@ -4408,6 +4564,8 @@ function markDone(id, k, lite, quiet) {
   });
   if (lite) toast('2-minute version done. +' + gain + ' XP. Streak kept alive.');
   const got = awardBadges();
+  const ma = MASTERY.find(m => m.n === doneDays(h)), maKey = ma ? 'ma:' + h.id + ':' + ma.n : '';
+  if (ma && !S.cel[maKey]) { S.cel[maKey] = 1; save({noCount:true}); toast(ma.ic + ' ' + ma.name + ' mastery: ' + h.name + ', ' + ma.n + ' days done.'); }
   celebrate(id, k, bounced, lv, got);
   // Ask for the next task, unless a celebration or reward sheet is already on screen (the card then shows "Write tomorrow's task").
   if (askNext) setTimeout(() => {
@@ -4418,22 +4576,30 @@ function markDone(id, k, lite, quiet) {
 }
 function useSaver(id, k) {
   const h = findHabit(id); if (!h) return;
-  const yk = dkey(addDays(new Date(), -1));
-  if (k !== yk || h.done[k] || S.savers < 1 || !isSchedKey(h, k) || chainBefore(h, k) < 1) return;
+  if (!saverDayOk(k) || k < h.created || h.done[k] || S.savers < 1 || !isSchedKey(h, k) || chainBefore(h, k) < 1) return;
   const before = claimableCount(h);
   h.done[k] = 2;
+  if (!h.svd) h.svd = {};
+  h.svd[k] = dkey(new Date());
   S.savers -= 1;
   afterChange(id, before);
   toast('Streak saver used. Your streak is protected.');
   setTimeout(() => badgeToast(awardBadges()), 2700);
 }
+function returnSaver(id, k) {
+  const h = findHabit(id); if (!h || !canReturnSaver(h, k)) return;
+  delete h.done[k];
+  if (h.svd) delete h.svd[k];
+  S.savers += 1; save(); render(); toast('Streak saver returned.');
+}
 function toggleDay(id, k) {
   const h = findHabit(id); if (!h) return;
   const tk = dkey(new Date()), yk = dkey(addDays(new Date(), -1));
-  if (k !== tk && k !== yk) return;
-  if (h.done[k] === 2) { // protected day: tapping again returns the saver
-    delete h.done[k]; S.savers += 1; save(); render(); toast('Streak saver returned.'); return;
+  if (h.done[k] === 2) { // protected day: tapping again returns the saver (only on the day it was used)
+    if (canReturnSaver(h, k)) returnSaver(id, k);
+    return;
   }
+  if (k !== tk && k !== yk) return;
   if (h.done[k]) { // done day (full or 2-minute): tapping again unmarks it
     const before = claimableCount(h), oldL = levelOf(S.player.xp);
     delete h.done[k];
@@ -4545,6 +4711,14 @@ const actions = {
   markdone: el => { closeModal(); markDone(el.dataset.id, el.dataset.day, false); },
   marklite: el => { closeModal(); markDone(el.dataset.id, el.dataset.day, true); },
   usesaver: el => { closeModal(); useSaver(el.dataset.id, el.dataset.day); },
+  // 3.3.0
+  pickdiff: el => { for (const b of el.parentNode.children) { b.classList.toggle('on', b === el); b.setAttribute('aria-pressed', b === el); } },
+  rate: () => openRate(),
+  diff: el => { const h = findHabit(el.dataset.id); if (h) openHabitForm(h.id); },
+  ratediff: el => { const h = findHabit(el.dataset.id); if (h && setDiff(h, el.dataset.d)) { save(); render(); openRate(); } },
+  repair: el => openRepair(el.dataset.id),
+  repairday: el => { const id = el.dataset.id, k = el.dataset.day; closeModal(); useSaver(id, k); if (!$('#overlay').classList.contains('show')) openRepair(id); },
+  returnsaver: el => { returnSaver(el.dataset.id, el.dataset.day); openRepair(el.dataset.id); },
   add: () => { if (S.habits.length >= MAX_HABITS) return; openHabitForm(null); },
   edit: el => openHabitForm(el.dataset.id),
   // 2.4: the type buttons in the New habit pop-up switch between the Regular habit fields and the Daily task field.
@@ -4599,9 +4773,11 @@ const actions = {
     if (!name) { toast('Give your habit a name.'); return; }
     const id = el.dataset.id;
     const ipk = document.querySelector('#ipick .ipk.on'), icon = ipk && ICONS.indexOf(ipk.dataset.i) >= 0 ? ipk.dataset.i : '';   // 2.7: chosen icon
-    if (id) { const h = findHabit(id); if (h) { h.name = name; h.icon = icon; } }
+    const dp = document.querySelector('#fdiff .dopt.on'), diff = dp ? dp.dataset.d : '';   // 3.3.0
+    if (id) { const h = findHabit(id); if (h) { h.name = name; h.icon = icon; if (diff) setDiff(h, diff); } }
     else {
       if (S.habits.length >= MAX_HABITS) return;
+      if (!DIFF[diff]) { toast('Choose how hard this habit is.'); return; }
       const isTask = !!document.querySelector('#overlay .tchip.on[data-t="task"]');
       if (isTask) {
         const te = $('#htask'), task = te ? (te.value || '').trim().slice(0, MAX_NOTE) : '';
@@ -4612,6 +4788,7 @@ const actions = {
         const idEl = $('#hid'), identity = idEl ? (idEl.value || '').trim().slice(0, MAX_ID) : '';
         S.habits.push({id: uid(), name, created: dkey(new Date()), done: {}, lite: {}, mini: '', note: '', identity: identity, days: picked.length === 7 ? [] : picked, claimed: 0, icon: icon, xpd: {}});
       }
+      setDiff(S.habits[S.habits.length - 1], diff);
       S.bigMoment = true; askPersist();
     }
     save(); closeModal(); render();
